@@ -6,7 +6,7 @@ Wildventures represents a campervan rental business. The web based booking appli
 
 This diagram shows how the users and staff users interact with the database.
 
-![Entity relationship Diagram](static/media/ERD Wildventures Django Project.webp)
+![Entity relationship Diagram](static/media/ERD.png)
 
 ## Development
 
@@ -14,5 +14,5 @@ This diagram shows how the users and staff users interact with the database.
 
 This project was developed using the Agile methodology. All epics and user stories implementation progress was tracked through Github projects Kanban Board which can be found [here](https://github.com/users/Maxcode0101/projects/5).
 
-![KanabanBoard](static/media/KanbanPP4.webp)
+![KanbanBoard](static/media/KanbanPP4.webp)
 
