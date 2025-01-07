@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+import dj_database_url
+if os.path.exists("env.py"):
+    import env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,17 +24,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-46^hupa!*o(ww^yzw*kwv$ygd4s#z(gf(2e3e=19o+txl4-m%_'
+SECRET_KEY = os.environ.get("SECRET_KEY")
+DEBUG = os.environ.get("DEBUG", False)
+USE_X_FORWARDED_HOST = True
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '8000-maxcode0101-campervanre-r2ow68syrr7.ws.codeinstitute-ide.net',
-    '.herokuapp.com'
-    ]
+ALLOWED_HOSTS = []
+CSRF_TRUSTED_ORIGINS = []
+host = os.environ.get("HOST")
+if host:
+    ALLOWED_HOSTS.append(host)
+    CSRF_TRUSTED_ORIGINS.append(f"https://{host}")
 
 
 # Application definition
@@ -48,6 +51,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -81,24 +85,18 @@ WSGI_APPLICATION = 'campervan_rental.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 # Default database: SQLite (for development or troubleshooting purposes)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
-# PostgreSQL configuration (commented out for now)
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'your_database_name',
-#         'USER': 'your_database_user',
-#         'PASSWORD': 'your_database_password',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
+if "DATABASE_URL" in os.environ:
+    DATABASES = {
+        "default": dj_database_url.parse(os.environ.get("DATABASE_URL"))
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+        }
+    }
 
 
 # Password validation
