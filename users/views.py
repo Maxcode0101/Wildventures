@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, ListView
@@ -29,3 +30,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     """Dashboard page for authenticated users."""
     template_name = 'users/dashboard.html'
 
+def custom_logout_view(request):
+    logout(request)
+    return render(request, 'users/logout.html')

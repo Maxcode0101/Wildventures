@@ -1,2 +1,6 @@
-<h2>Logged Out</h2>
-<a href="{% url 'login' %}">Login again</a>
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Logged out</h1>
+<a href="{% url 'login' %}">Log in again</a>
+{% endblock %}
