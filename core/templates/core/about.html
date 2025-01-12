@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>About Campervan Rentals</h1>
+    <p>Welcome to Campervan Rentals! We specialize in connecting adventure seekers with the perfect campervan for their next trip. Whether you're planning a weekend getaway or a cross-country journey, we've got you covered.</p>
+    <h2>Our Mission</h2>
+    <p>We aim to make campervan rentals easy, affordable, and accessible to everyone. Adventure awaits—let's get on the road together!</p>
+    <h2>Contact Us</h2>
+    <p>If you have any questions, feel free to reach out via our <a href="{% url 'contact' %}">Contact page</a>.</p>
+</div>
+{% endblock %}
