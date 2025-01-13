@@ -13,7 +13,7 @@ def contact(request):
     return render(request, 'core/contact.html')
 
 def campervan_list(request):
-    query = request.GET.get('q')  # Get the search query from the request
+    query = request.GET.get('q', '').strip()  # Get the search query from the request
     if query:
         campervans = Campervan.objects.filter(
             name__icontains=query  # Filter by name (case-insensitive)

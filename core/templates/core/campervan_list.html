@@ -9,10 +9,21 @@
     <h1>Campervan Listings</h1>
 
     <!-- Search Form -->
-    <form method="get" action="{% url 'campervan_list' %}">
+    <form method="get" action="{% url 'campervan_list' %}" onsubmit="return validateSearch()">
         <input type="text" name="q" placeholder="Search campervans..." value="{{ query|default_if_none:'' }}">
         <button type="submit">Search</button>
     </form>
+    <script>
+        function validateSearch() {
+            const query = document.querySelector('[name="q"]').value.trim();
+            if (!query) {
+                alert("Please enter a search term.");
+                return false;
+            }
+            return true;
+        }
+    </script>
+    
 
     <hr>
 
