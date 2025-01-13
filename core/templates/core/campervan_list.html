@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campervans</title>
+</head>
+<body>
+    <h1>Campervan Listings</h1>
+
+    {% for campervan in campervans %}
+        <div style="border: 1px solid #ddd; padding: 16px; margin-bottom: 16px;">
+            <h2>{{ campervan.name }}</h2>
+            <p><strong>Description:</strong> {{ campervan.description }}</p>
+            <p><strong>Price per Day:</strong> ${{ campervan.price_per_day }}</p>
+            <p><strong>Capacity:</strong> {{ campervan.capacity }} people</p>
+            <p><strong>Availability:</strong> {{ campervan.availability_status|yesno:"Available,Not Available" }}</p>
+            {% if campervan.image %}
+                <img src="{{ campervan.image.url }}" alt="{{ campervan.name }}" style="width: 300px; height: auto;">
+            {% endif %}
+        </div>
+    {% endfor %}
+</body>
+</html>
