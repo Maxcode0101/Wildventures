@@ -18,18 +18,18 @@
 
     <!-- Campervan Listings -->
     {% for campervan in campervans %}
-        <div style="border: 1px solid #ddd; padding: 16px; margin-bottom: 16px;">
-            <h2>{{ campervan.name }}</h2>
-            <p><strong>Description:</strong> {{ campervan.description }}</p>
-            <p><strong>Price per Day:</strong> ${{ campervan.price_per_day }}</p>
-            <p><strong>Capacity:</strong> {{ campervan.capacity }} people</p>
-            <p><strong>Availability:</strong> {{ campervan.availability_status|yesno:"Available,Not Available" }}</p>
-            {% if campervan.image %}
-                <img src="{{ campervan.image.url }}" alt="{{ campervan.name }}" style="width: 300px; height: auto;">
-            {% endif %}
-        </div>
-    {% empty %}
-        <p>No campervans found.</p>
-    {% endfor %}
+    <div style="border: 1px solid #ddd; padding: 16px; margin-bottom: 16px;">
+        <h2>{{ campervan.name }}</h2>
+        <p><strong>Description:</strong> {{ campervan.description }}</p>
+        <p><strong>Price per Day:</strong> ${{ campervan.price_per_day }}</p>
+        <p><strong>Capacity:</strong> {{ campervan.capacity }} people</p>
+        <p><strong>Availability:</strong> {{ campervan.availability_status|yesno:"Available,Not Available" }}</p>
+        {% if campervan.image %}
+            <img src="{{ campervan.image.url }}" alt="{{ campervan.name }}" style="width: 300px; height: auto;">
+        {% endif %}
+    </div>
+{% empty %}
+    <p>No campervans match your search criteria. Try adjusting your search.</p>
+{% endfor %}
 </body>
 </html>
