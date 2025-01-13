@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount.providers.google',
+    'search',
 ]
 
 SITE_ID = 1
@@ -158,6 +159,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Cloudinary settings
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get("duic11fi8"),  
+    'API_KEY': os.environ.get("567967341613927"),        
+    'API_SECRET': os.environ.get("8GHuRldNkqid_pxMK6a1lu8OEP8"), 
+}
 
 
 # Default primary key field type
