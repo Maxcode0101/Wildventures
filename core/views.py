@@ -13,5 +13,14 @@ def contact(request):
     return render(request, 'core/contact.html')
 
 def campervan_list(request):
-    campervans = Campervan.objects.all()  # Fetch all campervans
-    return render(request, 'core/campervan_list.html', {'campervans': campervans})
+    query = request.GET.get('q')  # Get the search query from the request
+    if query:
+        campervans = Campervan.objects.filter(
+            name__icontains=query  # Filter by name (case-insensitive)
+        ) | Campervan.objects.filter(
+            description__icontains=query  # Or filter by description (case-insensitive)
+        )
+    else:
+        campervans = Campervan.objects.all()  # Show all campervans if no query
+
+    return render(request, 'core/campervan_list.html', {'campervans': campervans, 'query': query})
