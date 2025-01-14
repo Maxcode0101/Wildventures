@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
 from .models import Campervan
 
@@ -22,5 +23,16 @@ def campervan_list(request):
         )
     else:
         campervans = Campervan.objects.all()  # Show all campervans if no query
+
+    # Pagination logic
+    paginator = Paginator(campervans, 5)  # Show 5 campervans per page
+    page = request.GET.get('page', 1)
+
+    try:
+        campervans = paginator.page(page)
+    except PageNotAnInteger:
+        campervans = paginator.page(1)
+    except EmptyPage:
+        campervans = paginator.page(paginator.num_pages)
 
     return render(request, 'core/campervan_list.html', {'campervans': campervans, 'query': query})

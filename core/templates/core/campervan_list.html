@@ -42,5 +42,20 @@
 {% empty %}
     <p>No campervans match your search criteria. Try adjusting your search.</p>
 {% endfor %}
+
+    <!-- Pagination Controls -->
+    <div class="pagination">
+        {% if campervans.has_previous %}
+            <a href="?q={{ query }}&page=1">First</a>
+            <a href="?q={{ query }}&page={{ campervans.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        <span>Page {{ campervans.number }} of {{ campervans.paginator.num_pages }}</span>
+
+        {% if campervans.has_next %}
+            <a href="?q={{ query }}&page={{ campervans.next_page_number }}">Next</a>
+            <a href="?q={{ query }}&page={{ campervans.paginator.num_pages }}">Last</a>
+        {% endif %}
+    </div>
 </body>
 </html>
