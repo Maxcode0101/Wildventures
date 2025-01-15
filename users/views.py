@@ -30,6 +30,17 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     """Dashboard page for authenticated users."""
     template_name = 'users/dashboard.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add user data to context
+        context['user'] = self.request.user
+
+        # Add placeholders for bookings (to be implemented later)
+        context['past_bookings'] = []  # Replace with actual query for past bookings
+        context['upcoming_bookings'] = []  # Replace with actual query for upcoming bookings
+
+        return context
+
 def custom_logout_view(request):
     logout(request)
     return render(request, 'users/logout.html')
