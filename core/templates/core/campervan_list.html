@@ -17,7 +17,7 @@
             >
             
             <!-- Brand Filter -->
-            <select name="brand" style="padding: 8px;" onchange="this.form.submit()">
+            <select name="brand" style="padding: 8px;">
                 <option value="">All Brands</option>
                 {% for brand in brands %}
                     <option value="{{ brand }}" {% if selected_brand == brand %}selected{% endif %}>
@@ -27,7 +27,7 @@
             </select>
 
             <!-- Model Filter -->
-            <select name="model" style="padding: 8px;" onchange="this.form.submit()">
+            <select name="model" style="padding: 8px;">
                 <option value="">All Models</option>
                 {% for model in models %}
                     <option value="{{ model }}" {% if selected_model == model %}selected{% endif %}>
@@ -37,14 +37,23 @@
             </select>
 
             <!-- Capacity Filter -->
-            <select name="capacity" style="padding: 8px;" onchange="this.form.submit()">
-                <option value="">All Capacities</option>
-                {% for capacity in capacities %}
-                    <option value="{{ capacity }}" {% if selected_capacity == capacity|stringformat:"d" %}selected{% endif %}>
+            <select name="capacity" style="padding: 8px;">
+                <option value="">Any Capacity</option>
+                {% for capacity in capacity_range %}
+                <option value="{{ capacity }}" {% if selected_capacity == capacity|stringformat:"s" %}selected{% endif %}>
                         {{ capacity }} people
                     </option>
                 {% endfor %}
             </select>
+
+            <!-- Maximum Price Filter -->
+            <input 
+                type="number" 
+                name="max_price" 
+                placeholder="Max Price" 
+                value="{{ max_price|default_if_none:'' }}" 
+                style="padding: 8px; width: 120px;"
+            >
 
             <!-- Submit Button -->
             <button type="submit" style="padding: 8px;">Filter</button>
@@ -74,15 +83,15 @@
     <!-- Pagination Controls -->
     <div class="pagination">
         {% if campervans.has_previous %}
-            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&capacity={{ selected_capacity }}&page=1">First</a>
-            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&capacity={{ selected_capacity }}&page={{ campervans.previous_page_number }}">Previous</a>
+            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&capacity={{ selected_capacity }}&max_price={{ max_price }}&page=1">First</a>
+            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&capacity={{ selected_capacity }}&max_price={{ max_price }}&page={{ campervans.previous_page_number }}">Previous</a>
         {% endif %}
 
         <span>Page {{ campervans.number }} of {{ campervans.paginator.num_pages }}</span>
 
         {% if campervans.has_next %}
-            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&capacity={{ selected_capacity }}&page={{ campervans.next_page_number }}">Next</a>
-            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&capacity={{ selected_capacity }}&page={{ campervans.paginator.num_pages }}">Last</a>
+            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&capacity={{ selected_capacity }}&max_price={{ max_price }}&page={{ campervans.next_page_number }}">Next</a>
+            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&capacity={{ selected_capacity }}&max_price={{ max_price }}&page={{ campervans.paginator.num_pages }}">Last</a>
         {% endif %}
     </div>
 

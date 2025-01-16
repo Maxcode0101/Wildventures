@@ -15,39 +15,46 @@ def contact(request):
     return render(request, 'core/contact.html')
 
 def campervan_list(request):
-    query = request.GET.get('q', '').strip()  # Search query
+    query = request.GET.get('q', '').strip() # Search query
     selected_brand = request.GET.get('brand', '')
     selected_model = request.GET.get('model', '')
     selected_capacity = request.GET.get('capacity', '')
+    max_price = request.GET.get('max_price', '')
 
-    # Filter campervans (brand, model, capacity and search)
     campervans = Campervan.objects.all()
 
+    # Filter by search query
     if query:
         campervans = campervans.filter(
-            Q(name__icontains=query) | Q(description__icontains=query)
+            name__icontains=query
+        ) | campervans.filter(
+            description__icontains=query
         )
+
+    # Filter by brand
     if selected_brand:
         campervans = campervans.filter(brand=selected_brand)
+
+    # Filter by model
     if selected_model:
         campervans = campervans.filter(model=selected_model)
-    if selected_capacity:
-        campervans = campervans.filter(capacity__gte=selected_capacity)  # Filter by capacity greater than or equal
 
-    # Populate dropdown data
+    # Filter by capacity
+    if selected_capacity.isdigit():
+        campervans = campervans.filter(capacity__gte=int(selected_capacity))
+
+    # Filter by maximum price
+    if max_price.isdigit():
+        campervans = campervans.filter(price_per_day__lte=int(max_price))
+
+    # Get distinct brands and models for the filters
     brands = Campervan.objects.values_list('brand', flat=True).distinct().order_by('brand')
-    models = (
-        Campervan.objects.filter(brand=selected_brand)
-        .values_list('model', flat=True)
-        .distinct()
-        .order_by('model')
-        if selected_brand
-        else Campervan.objects.values_list('model', flat=True).distinct().order_by('model')
-    )
-    capacities = Campervan.objects.values_list('capacity', flat=True).distinct().order_by('capacity')
+    models = Campervan.objects.filter(brand=selected_brand).values_list('model', flat=True).distinct().order_by('model') if selected_brand else Campervan.objects.values_list('model', flat=True).distinct().order_by('model')
 
-    # Pagination logic
-    paginator = Paginator(campervans, 5)  # Show 5 campervans per page
+    capacity_range = range(1, 11)
+
+    # Pagination
+    paginator = Paginator(campervans, 5)
     page = request.GET.get('page', 1)
 
     try:
@@ -62,8 +69,9 @@ def campervan_list(request):
         'query': query,
         'brands': brands,
         'models': models,
-        'capacities': capacities,
         'selected_brand': selected_brand,
         'selected_model': selected_model,
         'selected_capacity': selected_capacity,
+        'max_price': max_price,
+        'capacity_range': capacity_range,
     })
