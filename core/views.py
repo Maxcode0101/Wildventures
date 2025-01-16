@@ -14,31 +14,36 @@ def contact(request):
     return render(request, 'core/contact.html')
 
 def campervan_list(request):
-    query = request.GET.get('q', '').strip()  # Get the search query from the request
-    brand_filter = request.GET.get('brand', '').strip()  # Filter by brand
-    model_filter = request.GET.get('model', '').strip()  # Filter by model
+    query = request.GET.get('q', '').strip()  # Get the search query
+    selected_brand = request.GET.get('brand', '').strip()  # Get selected brand
+    selected_model = request.GET.get('model', '').strip()  # Get selected model
 
-    campervans = Campervan.objects.all()  # Start with all campervans
+    # Filter campervans based on search, brand, and model
+    campervans = Campervan.objects.all()
 
-    # Apply search filter (if query exists)
     if query:
         campervans = campervans.filter(
-            models.Q(name__icontains=query) |
-            models.Q(description__icontains=query)
+            name__icontains=query
+        ) | campervans.filter(
+            description__icontains=query
         )
+    if selected_brand:
+        campervans = campervans.filter(brand=selected_brand)
+    if selected_model:
+        campervans = campervans.filter(model=selected_model)
 
-    # Apply brand filter (if selected)
-    if brand_filter:
-        campervans = campervans.filter(brand__iexact=brand_filter)
+    # Extract unique brands and models
+    brands = Campervan.objects.values_list('brand', flat=True).distinct().order_by('brand')
 
-    # Apply model filter (if selected)
-    if model_filter:
-        campervans = campervans.filter(model__iexact=model_filter)
+    # Filter models based on selected brand
+    if selected_brand:
+        models = Campervan.objects.filter(brand=selected_brand).values_list('model', flat=True).distinct().order_by('model')
+    else:
+        models = Campervan.objects.values_list('model', flat=True).distinct().order_by('model')
 
     # Pagination logic
-    paginator = Paginator(campervans, 5)  # Show 5 campervans per page
+    paginator = Paginator(campervans, 5)
     page = request.GET.get('page', 1)
-
     try:
         campervans = paginator.page(page)
     except PageNotAnInteger:
@@ -46,16 +51,11 @@ def campervan_list(request):
     except EmptyPage:
         campervans = paginator.page(paginator.num_pages)
 
-    # Get distinct brand and model options for the dropdown filters
-    brands = Campervan.objects.values_list('brand', flat=True).distinct()
-    models = Campervan.objects.values_list('model', flat=True).distinct()
-
-    # Pass all necessary context to the template
     return render(request, 'core/campervan_list.html', {
         'campervans': campervans,
         'query': query,
         'brands': brands,
         'models': models,
-        'selected_brand': brand_filter,
-        'selected_model': model_filter,
+        'selected_brand': selected_brand,
+        'selected_model': selected_model,
     })

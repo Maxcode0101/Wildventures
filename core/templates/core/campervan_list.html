@@ -17,7 +17,7 @@
             >
             
             <!-- Brand Filter -->
-            <select name="brand" style="padding: 8px;">
+            <select name="brand" style="padding: 8px;" onchange="this.form.submit()">
                 <option value="">All Brands</option>
                 {% for brand in brands %}
                     <option value="{{ brand }}" {% if selected_brand == brand %}selected{% endif %}>
