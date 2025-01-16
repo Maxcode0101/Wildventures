@@ -29,7 +29,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = os.environ.get("DEBUG", False)
 USE_X_FORWARDED_HOST = True
 
-ALLOWED_HOSTS = ["https://campervan-rental-923a0b226ad3.herokuapp.com"]
+ALLOWED_HOSTS = []
 CSRF_TRUSTED_ORIGINS = []
 host = os.environ.get("HOST")
 if host:
@@ -45,23 +45,24 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'core',
-    'users',
     'cloudinary_storage',
     'django.contrib.staticfiles',
     'cloudinary',
     'django.contrib.sites',
     'allauth',
     'allauth.account',
-    'allauth.socialaccount.providers.google',
+    'core',
+    'users',
     'search',
 ]
 
 SITE_ID = 1
 LOGIN_REDIRECT_URL = '/users/dashboard/' # After login, redirect to the dashboard
-LOGOUT_REDIRECT_URL = '/users/login/' # If not authenticated, redirect to login page
 
 ACCOUNT_SIGNUP_REDIRECT_URL = '/users/dashboard/'  # After signup, send users to the dashboard
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
 
 
 MIDDLEWARE = [
@@ -132,8 +133,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 
 # Internationalization

@@ -15,14 +15,25 @@ def contact(request):
 
 def campervan_list(request):
     query = request.GET.get('q', '').strip()  # Get the search query from the request
+    brand_filter = request.GET.get('brand', '').strip()  # Filter by brand
+    model_filter = request.GET.get('model', '').strip()  # Filter by model
+
+    campervans = Campervan.objects.all()  # Start with all campervans
+
+    # Apply search filter (if query exists)
     if query:
-        campervans = Campervan.objects.filter(
-            name__icontains=query  # Filter by name (case-insensitive)
-        ) | Campervan.objects.filter(
-            description__icontains=query  # Or filter by description (case-insensitive)
+        campervans = campervans.filter(
+            models.Q(name__icontains=query) |
+            models.Q(description__icontains=query)
         )
-    else:
-        campervans = Campervan.objects.all()  # Show all campervans if no query
+
+    # Apply brand filter (if selected)
+    if brand_filter:
+        campervans = campervans.filter(brand__iexact=brand_filter)
+
+    # Apply model filter (if selected)
+    if model_filter:
+        campervans = campervans.filter(model__iexact=model_filter)
 
     # Pagination logic
     paginator = Paginator(campervans, 5)  # Show 5 campervans per page
@@ -35,4 +46,16 @@ def campervan_list(request):
     except EmptyPage:
         campervans = paginator.page(paginator.num_pages)
 
-    return render(request, 'core/campervan_list.html', {'campervans': campervans, 'query': query})
+    # Get distinct brand and model options for the dropdown filters
+    brands = Campervan.objects.values_list('brand', flat=True).distinct()
+    models = Campervan.objects.values_list('model', flat=True).distinct()
+
+    # Pass all necessary context to the template
+    return render(request, 'core/campervan_list.html', {
+        'campervans': campervans,
+        'query': query,
+        'brands': brands,
+        'models': models,
+        'selected_brand': brand_filter,
+        'selected_model': model_filter,
+    })

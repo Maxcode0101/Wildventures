@@ -1,61 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Campervans</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
     <h1>Campervan Listings</h1>
 
-    <!-- Search Form -->
-    <form method="get" action="{% url 'campervan_list' %}" onsubmit="return validateSearch()">
-        <input type="text" name="q" placeholder="Search campervans..." value="{{ query|default_if_none:'' }}">
-        <button type="submit">Search</button>
+    <!-- Filter Form -->
+    <form method="get" action="{% url 'campervan_list' %}">
+        <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px;">
+            
+            <!-- Search Input -->
+            <input 
+                type="text" 
+                name="q" 
+                placeholder="Search campervans..." 
+                value="{{ query|default_if_none:'' }}" 
+                style="padding: 8px; flex: 1;"
+            >
+            
+            <!-- Brand Filter -->
+            <select name="brand" style="padding: 8px;">
+                <option value="">All Brands</option>
+                {% for brand in brands %}
+                    <option value="{{ brand }}" {% if selected_brand == brand %}selected{% endif %}>
+                        {{ brand }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <!-- Model Filter -->
+            <select name="model" style="padding: 8px;">
+                <option value="">All Models</option>
+                {% for model in models %}
+                    <option value="{{ model }}" {% if selected_model == model %}selected{% endif %}>
+                        {{ model }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <!-- Submit Button -->
+            <button type="submit" style="padding: 8px;">Filter</button>
+        </div>
     </form>
-    <script>
-        function validateSearch() {
-            const query = document.querySelector('[name="q"]').value.trim();
-            if (!query) {
-                alert("Please enter a search term.");
-                return false;
-            }
-            return true;
-        }
-    </script>
-    
 
     <hr>
 
     <!-- Campervan Listings -->
     {% for campervan in campervans %}
-    <div style="border: 1px solid #ddd; padding: 16px; margin-bottom: 16px;">
-        <h2>{{ campervan.name }}</h2>
-        <p><strong>Description:</strong> {{ campervan.description }}</p>
-        <p><strong>Price per Day:</strong> ${{ campervan.price_per_day }}</p>
-        <p><strong>Capacity:</strong> {{ campervan.capacity }} people</p>
-        <p><strong>Availability:</strong> {{ campervan.availability_status|yesno:"Available,Not Available" }}</p>
-        {% if campervan.image %}
-            <img src="{{ campervan.image.url }}" alt="{{ campervan.name }}" style="width: 300px; height: auto;">
-        {% endif %}
-    </div>
-{% empty %}
-    <p>No campervans match your search criteria. Try adjusting your search.</p>
-{% endfor %}
+        <div style="border: 1px solid #ddd; padding: 16px; margin-bottom: 16px;">
+            <h2>{{ campervan.name }}</h2>
+            <p><strong>Brand:</strong> {{ campervan.brand }}</p>
+            <p><strong>Model:</strong> {{ campervan.model }}</p>
+            <p><strong>Description:</strong> {{ campervan.description }}</p>
+            <p><strong>Price per Day:</strong> ${{ campervan.price_per_day }}</p>
+            <p><strong>Capacity:</strong> {{ campervan.capacity }} people</p>
+            <p><strong>Availability:</strong> {{ campervan.availability_status|yesno:"Available,Not Available" }}</p>
+            {% if campervan.image %}
+                <img src="{{ campervan.image.url }}" alt="{{ campervan.name }}" class="img-fluid" width="300">
+            {% endif %}
+        </div>
+    {% empty %}
+        <p>No campervans match your search criteria. Try adjusting your search or filters.</p>
+    {% endfor %}
 
     <!-- Pagination Controls -->
     <div class="pagination">
         {% if campervans.has_previous %}
-            <a href="?q={{ query }}&page=1">First</a>
-            <a href="?q={{ query }}&page={{ campervans.previous_page_number }}">Previous</a>
+            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&page=1">First</a>
+            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&page={{ campervans.previous_page_number }}">Previous</a>
         {% endif %}
 
         <span>Page {{ campervans.number }} of {{ campervans.paginator.num_pages }}</span>
 
         {% if campervans.has_next %}
-            <a href="?q={{ query }}&page={{ campervans.next_page_number }}">Next</a>
-            <a href="?q={{ query }}&page={{ campervans.paginator.num_pages }}">Last</a>
+            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&page={{ campervans.next_page_number }}">Next</a>
+            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&page={{ campervans.paginator.num_pages }}">Last</a>
         {% endif %}
     </div>
-</body>
-</html>
+
+{% endblock %}

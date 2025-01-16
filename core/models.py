@@ -10,6 +10,8 @@ class Campervan(models.Model):
     location = models.CharField(max_length=100)
     availability_status = models.BooleanField(default=True)  # True = Available
     capacity = models.IntegerField()  # Max number of people
+    brand = models.CharField(max_length=50, blank=True, null=True) # Vehicle brand
+    model = models.CharField(max_length=50, blank=True, null=True) # Vehicle model
 
     def __str__(self):
         return self.name
