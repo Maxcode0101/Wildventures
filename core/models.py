@@ -15,3 +15,10 @@ class Campervan(models.Model):
 
     def __str__(self):
         return self.name
+
+    def is_available(self, start_date, end_date):
+        """Check if campervan is available for the given date range."""
+        overlapping_bookings = self.booking_set.filter(
+            models.Q(start_date__lte=end_date) & models.Q(end_date__gte=start_date)
+        )
+        return not overlapping_bookings.exists()
