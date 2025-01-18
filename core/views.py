@@ -1,6 +1,7 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
-from .models import Campervan
+from django.http import JsonResponse
+from .models import Campervan, Booking  # Import the Booking model
 from django.db.models import Q
 
 
@@ -15,7 +16,7 @@ def contact(request):
     return render(request, 'core/contact.html')
 
 def campervan_list(request):
-    query = request.GET.get('q', '').strip() # Search query
+    query = request.GET.get('q', '').strip()  # Search query
     selected_brand = request.GET.get('brand', '')
     selected_model = request.GET.get('model', '')
     selected_capacity = request.GET.get('capacity', '')
@@ -75,3 +76,25 @@ def campervan_list(request):
         'max_price': max_price,
         'capacity_range': capacity_range,
     })
+
+
+def check_availability(request):
+    """View to check campervan availability for selected dates."""
+    campervan_id = request.GET.get('campervan_id')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Validate input
+    if not (campervan_id and start_date and end_date):
+        return JsonResponse({'error': 'Invalid input'}, status=400)
+
+    # Check for overlapping bookings
+    overlapping_bookings = Booking.objects.filter(
+        campervan_id=campervan_id,
+        start_date__lt=end_date,
+        end_date__gt=start_date,
+    )
+
+    is_available = not overlapping_bookings.exists()
+
+    return JsonResponse({'is_available': is_available})
