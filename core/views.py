@@ -1,9 +1,9 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Campervan, Booking  # Import the Booking model
 from django.db.models import Q
-
+from .models import Campervan  # Import Campervan
+from booking.models import Booking  # Import Booking
 
 # Create your views here.
 
@@ -21,15 +21,15 @@ def campervan_list(request):
     selected_model = request.GET.get('model', '')
     selected_capacity = request.GET.get('capacity', '')
     max_price = request.GET.get('max_price', '')
+    start_date = request.GET.get('start_date', '')
+    end_date = request.GET.get('end_date', '')
 
     campervans = Campervan.objects.all()
 
     # Filter by search query
     if query:
         campervans = campervans.filter(
-            name__icontains=query
-        ) | campervans.filter(
-            description__icontains=query
+            Q(name__icontains=query) | Q(description__icontains=query)
         )
 
     # Filter by brand
@@ -48,9 +48,22 @@ def campervan_list(request):
     if max_price.isdigit():
         campervans = campervans.filter(price_per_day__lte=int(max_price))
 
+    # Global availability filter
+    if start_date and end_date:
+        unavailable_ids = Booking.objects.filter(
+            start_date__lt=end_date,
+            end_date__gt=start_date
+        ).values_list('campervan_id', flat=True)
+        campervans = campervans.exclude(id__in=unavailable_ids)
+
     # Get distinct brands and models for the filters
     brands = Campervan.objects.values_list('brand', flat=True).distinct().order_by('brand')
-    models = Campervan.objects.filter(brand=selected_brand).values_list('model', flat=True).distinct().order_by('model') if selected_brand else Campervan.objects.values_list('model', flat=True).distinct().order_by('model')
+    models = (
+        Campervan.objects.filter(brand=selected_brand)
+        .values_list('model', flat=True)
+        .distinct()
+        .order_by('model') if selected_brand else Campervan.objects.values_list('model', flat=True).distinct().order_by('model')
+    )
 
     capacity_range = range(1, 11)
 
@@ -75,8 +88,9 @@ def campervan_list(request):
         'selected_capacity': selected_capacity,
         'max_price': max_price,
         'capacity_range': capacity_range,
+        'start_date': start_date,
+        'end_date': end_date,
     })
-
 
 def check_availability(request):
     """View to check campervan availability for selected dates."""
@@ -88,13 +102,16 @@ def check_availability(request):
     if not (campervan_id and start_date and end_date):
         return JsonResponse({'error': 'Invalid input'}, status=400)
 
-    # Check for overlapping bookings
-    overlapping_bookings = Booking.objects.filter(
-        campervan_id=campervan_id,
-        start_date__lt=end_date,
-        end_date__gt=start_date,
-    )
+    try:
+        # Check for overlapping bookings
+        overlapping_bookings = Booking.objects.filter(
+            campervan_id=campervan_id,
+            start_date__lt=end_date,
+            end_date__gt=start_date,
+        )
 
-    is_available = not overlapping_bookings.exists()
-
-    return JsonResponse({'is_available': is_available})
+        is_available = not overlapping_bookings.exists()
+        return JsonResponse({'is_available': is_available})
+    except Exception as e:
+        # Handle unexpected errors
+        return JsonResponse({'error': str(e)}, status=500)

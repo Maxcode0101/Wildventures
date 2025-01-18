@@ -3,6 +3,79 @@
 {% block content %}
     <h1>Campervan Listings</h1>
 
+    <!-- Search and Filters -->
+    <form method="get" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+        
+        <!-- Search Bar -->
+        <div style="flex: 1;">
+            <input 
+                type="text" 
+                name="q" 
+                placeholder="Search by name or description" 
+                value="{{ query }}" 
+                style="padding: 10px; width: 100%;"
+            >
+        </div>
+
+        <!-- Brand Filter -->
+        <div>
+            <label for="brand">Brand:</label>
+            <select name="brand" id="brand">
+                <option value="">All Brands</option>
+                {% for b in brands %}
+                    <option value="{{ b }}" {% if b == selected_brand %}selected{% endif %}>{{ b }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Model Filter -->
+        <div>
+            <label for="model">Model:</label>
+            <select name="model" id="model">
+                <option value="">All Models</option>
+                {% for m in models %}
+                    <option value="{{ m }}" {% if m == selected_model %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Capacity Filter -->
+        <div>
+            <label for="capacity">Capacity:</label>
+            <select name="capacity" id="capacity">
+                <option value="">All Capacities</option>
+                {% for c in capacity_range %}
+                    <option value="{{ c }}" {% if c == selected_capacity %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Max Price Filter -->
+        <div>
+            <label for="max_price">Max Price:</label>
+            <input 
+                type="number" 
+                name="max_price" 
+                placeholder="Max Price" 
+                value="{{ max_price }}" 
+                style="padding: 5px;"
+            >
+        </div>
+
+        <!-- Global Availability Filter -->
+        <div>
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+        </div>
+
+        <div>
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+        </div>
+
+        <button type="submit" style="padding: 10px 20px;">Filter</button>
+    </form>
+
     <!-- Campervan Listings -->
     {% for campervan in campervans %}
         <div style="border: 1px solid #ddd; padding: 16px; margin-bottom: 16px;">
@@ -12,13 +85,12 @@
             <p><strong>Description:</strong> {{ campervan.description }}</p>
             <p><strong>Price per Day:</strong> ${{ campervan.price_per_day }}</p>
             <p><strong>Capacity:</strong> {{ campervan.capacity }} people</p>
-            <p><strong>Availability:</strong> {{ campervan.availability_status|yesno:"Available,Not Available" }}</p>
             
             {% if campervan.image %}
                 <img src="{{ campervan.image.url }}" alt="{{ campervan.name }}" class="img-fluid" width="300">
             {% endif %}
 
-            <!-- Date Selection for Availability -->
+            <!-- Date Selection for Individual Campervan Availability -->
             <div style="margin-top: 20px;">
                 <label for="start-date-{{ campervan.id }}">Start Date:</label>
                 <input 
@@ -72,6 +144,21 @@
     <!-- Initialize Flatpickr and Handle Availability Check -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Flatpickr for global date inputs
+            flatpickr('#start_date', {
+                altInput: true,
+                altFormat: "F j, Y",
+                dateFormat: "Y-m-d",
+                minDate: "today"
+            });
+
+            flatpickr('#end_date', {
+                altInput: true,
+                altFormat: "F j, Y",
+                dateFormat: "Y-m-d",
+                minDate: "today"
+            });
+
             // Initialize Flatpickr for each campervan
             document.querySelectorAll('.start-date').forEach(function (startInput) {
                 flatpickr(startInput, {
