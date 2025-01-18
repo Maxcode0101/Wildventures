@@ -3,65 +3,6 @@
 {% block content %}
     <h1>Campervan Listings</h1>
 
-    <!-- Filter Form -->
-    <form method="get" action="{% url 'campervan_list' %}">
-        <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 20px;">
-            
-            <!-- Search Input -->
-            <input 
-                type="text" 
-                name="q" 
-                placeholder="Search campervans..." 
-                value="{{ query|default_if_none:'' }}" 
-                style="padding: 8px; flex: 1;"
-            >
-            
-            <!-- Brand Filter -->
-            <select name="brand" style="padding: 8px;">
-                <option value="">All Brands</option>
-                {% for brand in brands %}
-                    <option value="{{ brand }}" {% if selected_brand == brand %}selected{% endif %}>
-                        {{ brand }}
-                    </option>
-                {% endfor %}
-            </select>
-
-            <!-- Model Filter -->
-            <select name="model" style="padding: 8px;">
-                <option value="">All Models</option>
-                {% for model in models %}
-                    <option value="{{ model }}" {% if selected_model == model %}selected{% endif %}>
-                        {{ model }}
-                    </option>
-                {% endfor %}
-            </select>
-
-            <!-- Capacity Filter -->
-            <select name="capacity" style="padding: 8px;">
-                <option value="">Any Capacity</option>
-                {% for capacity in capacity_range %}
-                <option value="{{ capacity }}" {% if selected_capacity == capacity|stringformat:"s" %}selected{% endif %}>
-                        {{ capacity }} people
-                    </option>
-                {% endfor %}
-            </select>
-
-            <!-- Maximum Price Filter -->
-            <input 
-                type="number" 
-                name="max_price" 
-                placeholder="Max Price" 
-                value="{{ max_price|default_if_none:'' }}" 
-                style="padding: 8px; width: 120px;"
-            >
-
-            <!-- Submit Button -->
-            <button type="submit" style="padding: 8px;">Filter</button>
-        </div>
-    </form>
-
-    <hr>
-
     <!-- Campervan Listings -->
     {% for campervan in campervans %}
         <div style="border: 1px solid #ddd; padding: 16px; margin-bottom: 16px;">
@@ -72,9 +13,42 @@
             <p><strong>Price per Day:</strong> ${{ campervan.price_per_day }}</p>
             <p><strong>Capacity:</strong> {{ campervan.capacity }} people</p>
             <p><strong>Availability:</strong> {{ campervan.availability_status|yesno:"Available,Not Available" }}</p>
+            
             {% if campervan.image %}
                 <img src="{{ campervan.image.url }}" alt="{{ campervan.name }}" class="img-fluid" width="300">
             {% endif %}
+
+            <!-- Date Selection for Availability -->
+            <div style="margin-top: 20px;">
+                <label for="start-date-{{ campervan.id }}">Start Date:</label>
+                <input 
+                    type="text" 
+                    id="start-date-{{ campervan.id }}" 
+                    class="start-date" 
+                    placeholder="Start Date" 
+                    style="padding: 8px;"
+                >
+
+                <label for="end-date-{{ campervan.id }}">End Date:</label>
+                <input 
+                    type="text" 
+                    id="end-date-{{ campervan.id }}" 
+                    class="end-date" 
+                    placeholder="End Date" 
+                    style="padding: 8px;"
+                >
+
+                <button 
+                    class="check-availability" 
+                    data-campervan-id="{{ campervan.id }}" 
+                    style="padding: 8px; margin-top: 10px;"
+                >
+                    Check Availability
+                </button>
+            </div>
+
+            <!-- Availability Response -->
+            <div id="availability-response-{{ campervan.id }}" style="margin-top: 10px; color: green;"></div>
         </div>
     {% empty %}
         <p>No campervans match your search criteria. Try adjusting your search or filters.</p>
@@ -83,16 +57,78 @@
     <!-- Pagination Controls -->
     <div class="pagination">
         {% if campervans.has_previous %}
-            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&capacity={{ selected_capacity }}&max_price={{ max_price }}&page=1">First</a>
-            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&capacity={{ selected_capacity }}&max_price={{ max_price }}&page={{ campervans.previous_page_number }}">Previous</a>
+            <a href="?page=1">First</a>
+            <a href="?page={{ campervans.previous_page_number }}">Previous</a>
         {% endif %}
 
         <span>Page {{ campervans.number }} of {{ campervans.paginator.num_pages }}</span>
 
         {% if campervans.has_next %}
-            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&capacity={{ selected_capacity }}&max_price={{ max_price }}&page={{ campervans.next_page_number }}">Next</a>
-            <a href="?q={{ query }}&brand={{ selected_brand }}&model={{ selected_model }}&capacity={{ selected_capacity }}&max_price={{ max_price }}&page={{ campervans.paginator.num_pages }}">Last</a>
+            <a href="?page={{ campervans.next_page_number }}">Next</a>
+            <a href="?page={{ campervans.paginator.num_pages }}">Last</a>
         {% endif %}
     </div>
+
+    <!-- Initialize Flatpickr and Handle Availability Check -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Flatpickr for each campervan
+            document.querySelectorAll('.start-date').forEach(function (startInput) {
+                flatpickr(startInput, {
+                    altInput: true,
+                    altFormat: "F j, Y",
+                    dateFormat: "Y-m-d",
+                    minDate: "today"
+                });
+            });
+
+            document.querySelectorAll('.end-date').forEach(function (endInput) {
+                flatpickr(endInput, {
+                    altInput: true,
+                    altFormat: "F j, Y",
+                    dateFormat: "Y-m-d",
+                    minDate: "today"
+                });
+            });
+
+            // Handle "Check Availability" button clicks
+            document.querySelectorAll('.check-availability').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const campervanId = this.getAttribute('data-campervan-id');
+                    const startDate = document.getElementById(`start-date-${campervanId}`).value;
+                    const endDate = document.getElementById(`end-date-${campervanId}`).value;
+                    const responseDiv = document.getElementById(`availability-response-${campervanId}`);
+
+                    // Clear previous response
+                    responseDiv.textContent = '';
+
+                    // Ensure both dates are selected
+                    if (!startDate || !endDate) {
+                        responseDiv.style.color = 'red';
+                        responseDiv.textContent = 'Please select both start and end dates.';
+                        return;
+                    }
+
+                    // Make an AJAX request to check availability
+                    fetch(`{% url 'check_availability' %}?campervan_id=${campervanId}&start_date=${startDate}&end_date=${endDate}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.is_available) {
+                                responseDiv.style.color = 'green';
+                                responseDiv.textContent = 'This campervan is available for the selected dates!';
+                            } else {
+                                responseDiv.style.color = 'red';
+                                responseDiv.textContent = 'Sorry, this campervan is not available for the selected dates.';
+                            }
+                        })
+                        .catch(error => {
+                            responseDiv.style.color = 'red';
+                            responseDiv.textContent = 'An error occurred. Please try again.';
+                            console.error('Error checking availability:', error);
+                        });
+                });
+            });
+        });
+    </script>
 
 {% endblock %}
