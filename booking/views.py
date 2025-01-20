@@ -59,3 +59,12 @@ def book_campervan(request, campervan_id):
         "end_date": request.GET.get("end_date", ""),
         "total_price": None,  # Calculate on POST
     })
+
+
+@login_required
+def booking_confirmation(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    return render(request, "booking/booking_confirmation.html", {
+        "booking": booking,
+        "user": request.user,
+    })
