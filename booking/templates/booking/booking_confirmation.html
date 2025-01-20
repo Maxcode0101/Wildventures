@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Booking Confirmation</h1>
+
+    <p>Thank you, {{ user.username }}! Your booking has been successfully completed.</p>
+
+    <div style="border: 1px solid #ddd; padding: 16px; margin-top: 20px;">
+        <h2>Booking Details</h2>
+        <p><strong>Campervan:</strong> {{ booking.campervan.name }}</p>
+        <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
+        <p><strong>End Date:</strong> {{ booking.end_date }}</p>
+        <p><strong>Total Price:</strong> ${{ booking.total_price }}</p>
+        <p><strong>Status:</strong> {{ booking.status }}</p>
+    </div>
+
+    <a href="{% url 'campervan_list' %}" style="display: block; margin-top: 20px;">Back to Listings</a>
+{% endblock %}
