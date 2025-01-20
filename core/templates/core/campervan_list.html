@@ -121,6 +121,15 @@
 
             <!-- Availability Response -->
             <div id="availability-response-{{ campervan.id }}" style="margin-top: 10px; color: green;"></div>
+
+            <!-- "Book Now" Button -->
+            <a 
+                href="{% url 'book_campervan' campervan.id %}" 
+                class="btn btn-primary" 
+                style="display: inline-block; margin-top: 15px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none;"
+            >
+                Book Now
+            </a>
         </div>
     {% empty %}
         <p>No campervans match your search criteria. Try adjusting your search or filters.</p>
