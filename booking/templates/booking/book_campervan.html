@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Book {{ campervan.name }}</h1>
+
+    <div style="border: 1px solid #ddd; padding: 16px; margin-bottom: 20px;">
+        <h2>{{ campervan.name }}</h2>
+        <p><strong>Brand:</strong> {{ campervan.brand }}</p>
+        <p><strong>Model:</strong> {{ campervan.model }}</p>
+        <p><strong>Description:</strong> {{ campervan.description }}</p>
+        <p><strong>Price per Day:</strong> ${{ campervan.price_per_day }}</p>
+        <p><strong>Capacity:</strong> {{ campervan.capacity }} people</p>
+
+        {% if campervan.image %}
+            <img src="{{ campervan.image.url }}" alt="{{ campervan.name }}" class="img-fluid" width="300">
+        {% endif %}
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div>
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" value="{{ start_date }}" required>
+        </div>
+        <div>
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date" value="{{ end_date }}" required>
+        </div>
+        <div>
+            <p><strong>Total Price:</strong> ${{ total_price }}</p>
+        </div>
+        <button type="submit" style="padding: 10px 20px;">Confirm Booking</button>
+    </form>
+
+    <a href="{% url 'campervan_list' %}" style="display: block; margin-top: 20px;">Back to Listings</a>
+{% endblock %}
