@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>My Bookings</h1>
+
+    {% if bookings %}
+        <div style="margin-top: 20px;">
+            {% for booking in bookings %}
+                <div style="border: 1px solid #ddd; padding: 16px; margin-bottom: 20px;">
+                    <h2>{{ booking.campervan.name }}</h2>
+                    <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
+                    <p><strong>End Date:</strong> {{ booking.end_date }}</p>
+                    <p><strong>Total Price:</strong> ${{ booking.total_price }}</p>
+                    <p><strong>Status:</strong> {{ booking.status }}</p>
+
+                    <a href="{% url 'booking_details' booking.id %}" style="padding: 10px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px;">View Details</a>
+                    {% if booking.status == 'Pending' %}
+                        <a href="#" style="padding: 10px; background-color: #FF0000; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px;">Cancel Booking</a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>You have no bookings yet. <a href="{% url 'campervan_list' %}">Browse campervans</a> to get started!</p>
+    {% endif %}
+{% endblock %}
