@@ -20,6 +20,7 @@
 
                 {% if user.is_authenticated %}
     <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li><a href="{% url 'my_bookings' %}">My Bookings</a></li>
     <li><a href="{% url 'profile' %}">{{ request.user }} Profile</a></li>
     <li><a href="{% url 'account_logout' %}">Logout</a></li>
 {% else %}
