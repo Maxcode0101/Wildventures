@@ -68,3 +68,10 @@ def booking_confirmation(request, booking_id):
         "booking": booking,
         "user": request.user,
     })
+
+
+@login_required
+def my_bookings(request):
+    """View to display user's bookings."""
+    bookings = Booking.objects.filter(user=request.user).order_by('-start_date')
+    return render(request, 'booking/my_bookings.html', {'bookings': bookings})
