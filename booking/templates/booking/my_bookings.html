@@ -2,6 +2,16 @@
 
 {% block content %}
     <h1>My Bookings</h1>
+    
+    {% if messages %}
+    <div style="margin-bottom: 20px;">
+        {% for message in messages %}
+            <p class="{% if 'error' in message.tags %}error-message{% else %}success-message{% endif %}">
+                {{ message }}
+            </p>
+        {% endfor %}
+    </div>
+{% endif %}
 
     {% if bookings %}
         <div style="margin-top: 20px;">
@@ -15,7 +25,7 @@
 
                     <a href="{% url 'booking_details' booking.id %}" style="padding: 10px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px;">View Details</a>
                     {% if booking.status == 'Pending' %}
-                        <a href="{% url 'cancel_booking' booking.id %}" style="padding: 10px; background-color: #FF0000; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px;">Cancel Booking</a>
+                    <a href="{% url 'cancel_booking' booking.id %}" onclick="return confirm('Are you sure you want to cancel this booking?')" style="padding: 10px; background-color: #FF0000; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px;"> Cancel Booking </a>
                     {% endif %}
                 </div>
             {% endfor %}

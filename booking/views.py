@@ -90,7 +90,12 @@ def cancel_booking(request, booking_id):
     
     # Check if the booking is already canceled
     if booking.status == "Canceled":
-        messages.error(request, "This booking has already been canceled.")
+        messages.error(request, "This booking has already been canceled.", extra_tags="my_bookings")
+
+    else:
+        booking.status = "Cancelled"
+        booking.save()
+        messages.success(request, "Your booking has been successfully canceled.", extra_tags="my_bookings")
         return redirect("my_bookings")
     
     # Update status to "Canceled"
