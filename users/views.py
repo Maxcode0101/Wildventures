@@ -3,23 +3,31 @@ from django.utils.timezone import now
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from booking.models import Booking 
+from datetime import date
 
-# from bookings.models import Booking
-
-# User Profile View (Authenticated Access Only)
+# User Profile View - Only for Logged-in Users
 @login_required
 def profile(request):
-    """View to display the user's profile."""
+    """Show the user's profile"""
     return render(request, 'users/profile.html')
 
 @login_required
 def dashboard(request):
-    # past_bookings = Booking.objects.filter(end_date__lt=now().date(), renter=request.user)
-    # upcoming_bookings = Booking.objects.filter(start_date__gte=now().date(), renter=request.user)
+    """Show the user's dashboard with their bookings"""
+    # Get all bookings for the current user
+    user_bookings = Booking.objects.filter(user=request.user)
+
+    # Split bookings into upcoming and past
+    upcoming_bookings = user_bookings.filter(start_date__gte=date.today()).order_by("start_date")
+    past_bookings = user_bookings.filter(end_date__lt=date.today()).order_by("-end_date")
+
+    # Set up data for the template
     template = 'users/dashboard.html'
     context = {
-        # "past_bookings": past_bookings,
-        # "upcoming_bookings": upcoming_bookings,
+    "upcoming_bookings": upcoming_bookings,
+    "past_bookings": past_bookings,
     }
 
-    return render(request, template, context)
+    return render(request, "users/dashboard.html", context)
+    
