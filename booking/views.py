@@ -77,12 +77,27 @@ def my_bookings(request):
     return render(request, 'booking/my_bookings.html', {'bookings': bookings})
 
 
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Booking
-
 @login_required
 def booking_details(request, booking_id):
     """View to display details of a specific booking."""
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)  # Ensure user owns the booking
     return render(request, 'booking/booking_details.html', {'booking': booking})
+
+@login_required
+def cancel_booking(request, booking_id):
+    # Fetch the booking object
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    
+    # Check if the booking is already canceled
+    if booking.status == "Canceled":
+        messages.error(request, "This booking has already been canceled.")
+        return redirect("my_bookings")
+    
+    # Update status to "Canceled"
+    booking.status = "Canceled"
+    booking.save()
+    
+    # Add a success message
+    messages.success(request, "Your booking has been successfully canceled.")
+    return redirect("my_bookings")
+

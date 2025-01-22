@@ -2,7 +2,7 @@ from django import forms
 from .models import Booking
 
 class BookingForm(forms.ModelForm):
-    """Form for campervan bookings."""
+    """Form for booking a campervan."""
     class Meta:
         model = Booking
         fields = ['start_date', 'end_date']
