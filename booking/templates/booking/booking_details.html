@@ -11,6 +11,10 @@
         <p><strong>Status:</strong> {{ booking.status }}</p>
         <p><strong>Booking ID:</strong> {{ booking.id }}</p>
         <p><strong>Booked On:</strong> {{ booking.created_at }}</p>
+        
+        {% if booking.status == 'Cancelled' %} <p style="color: red; font-weight: bold;">
+            This booking has been canceled.</p> 
+        {% endif %}
 
         <a href="{% url 'my_bookings' %}" style="padding: 10px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px;">Back to My Bookings</a>
     </div>

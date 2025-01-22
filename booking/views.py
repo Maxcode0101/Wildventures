@@ -24,7 +24,7 @@ def book_campervan(request, campervan_id):
             messages.error(request, "Invalid date format.")
             return redirect("book_campervan", campervan_id=campervan_id)
 
-        # Check availability
+        # Check for availability and overlapping bookings
         overlapping_bookings = Booking.objects.filter(
             campervan=campervan,
             start_date__lt=end_date,
@@ -35,11 +35,11 @@ def book_campervan(request, campervan_id):
             messages.error(request, "The campervan is not available for the selected dates.")
             return redirect("book_campervan", campervan_id=campervan_id)
 
-        # Calculate total price
+        # Shows the total booking costs
         days = (end_date - start_date).days
         total_price = days * campervan.price_per_day
 
-        # Create booking
+        # Creates a booking
         booking = Booking.objects.create(
             user=request.user,
             campervan=campervan,
@@ -92,6 +92,11 @@ def cancel_booking(request, booking_id):
     if booking.status == "Canceled":
         messages.error(request, "This booking has already been canceled.", extra_tags="my_bookings")
 
+    # Prevent cancelations of past bookings
+    if booking.end_date < date.today():
+        messages.error(request, "You cannot cancel a booking that has already ended.", extra_tags="my_bookings")
+        return redirect("my_bookings")
+
     else:
         booking.status = "Cancelled"
         booking.save()
@@ -102,7 +107,7 @@ def cancel_booking(request, booking_id):
     booking.status = "Canceled"
     booking.save()
     
-    # Add a success message
-    messages.success(request, "Your booking has been successfully canceled.")
+    # Provides feedback to the user when canceling a booking
+    messages.success(request, "Your booking has been successfully canceled.", extra_tags="my_bookings")
     return redirect("my_bookings")
 
