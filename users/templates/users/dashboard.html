@@ -12,13 +12,16 @@
         <ul>
             {% for booking in upcoming_bookings %}
                 <li>
-                    <strong>{{ booking.campervan_name }}</strong> 
-                    on {{ booking.date }} for ${{ booking.price }}
+                    <strong>{{ booking.campervan.name }}</strong> 
+                    from {{ booking.start_date }} to {{ booking.end_date }}
+                    for ${{ booking.total_price }}
                 </li>
             {% endfor %}
         </ul>
+        <p><a href="{% url 'my_bookings' %}" style="color: #007BFF; text-decoration: underline;">Manage Your Bookings</a></p>
     {% else %}
-        <p>No upcoming bookings found.</p>
+        <p>No upcoming bookings found. <a href="{% url 'campervan_list' %}" style="color: #007BFF; text-decoration: underline;">Book Now</a></p>
+
     {% endif %}
 
     <hr>
@@ -30,7 +33,8 @@
             {% for booking in past_bookings %}
                 <li>
                     <strong>{{ booking.campervan_name }}</strong> 
-                    on {{ booking.date }} for ${{ booking.price }}
+                    from {{ booking.start_date }} to {{ booking.end_date }}
+                    for ${{ booking.total_price }}
                 </li>
             {% endfor %}
         </ul>
