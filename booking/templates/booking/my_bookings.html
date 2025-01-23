@@ -6,9 +6,11 @@
     {% if messages %}
     <div style="margin-bottom: 20px;">
         {% for message in messages %}
-            <p class="{% if 'error' in message.tags %}error-message{% else %}success-message{% endif %}">
-                {{ message }}
-            </p>
+            {% if 'my_bookings' in message.tags %}
+                <p class="{% if 'error' in message.tags %}error-message{% else %}success-message{% endif %}">
+                    {{ message }}
+                </p>
+            {% endif %}
         {% endfor %}
     </div>
 {% endif %}

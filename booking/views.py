@@ -3,7 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from core.models import Campervan
 from booking.models import Booking
-from datetime import datetime, timedelta
+from django.core.mail import send_mail
+from django.conf import settings
+from datetime import datetime, timedelta, date
 
 @login_required
 def book_campervan(request, campervan_id):
@@ -91,23 +93,45 @@ def cancel_booking(request, booking_id):
     # Check if the booking is already canceled
     if booking.status == "Canceled":
         messages.error(request, "This booking has already been canceled.", extra_tags="my_bookings")
+        return redirect("my_bookings")
 
     # Prevent cancelations of past bookings
     if booking.end_date < date.today():
         messages.error(request, "You cannot cancel a booking that has already ended.", extra_tags="my_bookings")
         return redirect("my_bookings")
 
-    else:
-        booking.status = "Cancelled"
-        booking.save()
-        messages.success(request, "Your booking has been successfully canceled.", extra_tags="my_bookings")
-        return redirect("my_bookings")
-    
     # Update status to "Canceled"
     booking.status = "Canceled"
     booking.save()
-    
-    # Provides feedback to the user when canceling a booking
-    messages.success(request, "Your booking has been successfully canceled.", extra_tags="my_bookings")
-    return redirect("my_bookings")
 
+    # Provides feedback to the user when canceling a booking
+    messages.success(request, "Your booking has been successfully canceled, a confirmation email has been sent!", extra_tags="my_bookings")
+
+    # Email notifications for admin and user on cancelations
+    admin_email = settings.DEFAULT_ADMIN_EMAIL
+    user_email = request.user.email
+    subject = f"Booking Canceled: {booking.campervan.name}"
+    message = f"""
+    Dear {request.user.username},
+
+    Your booking for {booking.campervan.name} from {booking.start_date} to {booking.end_date} has been canceled.
+
+    Thank you for your visit, we hope to see you soon again.
+
+    Best Regards,
+    Your Campervan Rental Team
+    """
+
+    try:
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [admin_email, user_email],  # Sends email to admin and user
+            fail_silently=False,  # Raise errors if sending fails
+        )
+        messages.success(request, "A confirmation email has been sent.")
+    except Exception as e:
+        messages.error(request, f"Your booking has been sucessfully canceled, but an error occurred when sending the confirmation email: {str(e)}", extra_tags="my_bookings")
+
+    return redirect("my_bookings")
