@@ -123,13 +123,19 @@
             <div id="availability-response-{{ campervan.id }}" style="margin-top: 10px; color: green;"></div>
 
             <!-- "Book Now" Button -->
+        {% if campervan.id %}
             <a 
-                href="{% url 'book_campervan' campervan.id %}" 
-                class="btn btn-primary" 
+                href="{% url 'book_campervan' campervan.id %}"
+                class="btn btn-primary book-now" 
+                data-campervan-id="{{ campervan.id }}"
+
                 style="display: inline-block; margin-top: 15px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none;"
             >
                 Book Now
-            </a>
+            </a>    
+        {% else %}
+            <p style="color: red;">Invalid campervan ID. Unable to book.</p>
+        {% endif %}
         </div>
     {% empty %}
         <p>No campervans match your search criteria. Try adjusting your search or filters.</p>
@@ -212,6 +218,10 @@
                             if (data.is_available) {
                                 responseDiv.style.color = 'green';
                                 responseDiv.textContent = 'This campervan is available for the selected dates!';
+                                // Enable the "Book Now" button
+                                const bookNowButton = document.querySelector(`a.book-now[data-campervan-id="${campervanId}"]`);
+                                bookNowButton.href = `{% url 'book_campervan' 0 %}`.replace('0', campervanId) + `?start_date=${startDate}&end_date=${endDate}`;
+                                bookNowButton.style.display = 'inline-block';
                             } else {
                                 responseDiv.style.color = 'red';
                                 responseDiv.textContent = 'Sorry, this campervan is not available for the selected dates.';
@@ -222,6 +232,19 @@
                             responseDiv.textContent = 'An error occurred. Please try again.';
                             console.error('Error checking availability:', error);
                         });
+                });
+            });
+            document.querySelectorAll('.book-now').forEach(function (button) {
+                button.addEventListener('click', function (event) {
+                    const campervanId = this.getAttribute('data-campervan-id');
+                    const startDate = document.getElementById(`start-date-${campervanId}`).value;
+                    const endDate = document.getElementById(`end-date-${campervanId}`).value;
+                    if (!startDate || !endDate) {
+                        event.preventDefault();
+                        alert('Please select both start and end dates before booking.');
+                    } else {
+                        this.href += `?start_date=${startDate}&end_date=${endDate}`;
+                    }
                 });
             });
         });

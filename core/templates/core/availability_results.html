@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Available Campervans</h2>
+
+<div id="availability-results">
+    {% if campervans %}
+        {% for campervan in campervans %}
+        <div class="campervan">
+            <h3>{{ campervan.name }}</h3>
+            <p>Description: {{ campervan.description }}</p>
+            <p>Capacity: {{ campervan.capacity }}</p>
+            <p>Price: ${{ campervan.price_per_day }} per day</p>
+            <p>Location: {{ campervan.location }}</p>
+            <button 
+                class="book-now" 
+                data-start-date="{{ request.GET.start_date }}" 
+                data-end-date="{{ request.GET.end_date }}" 
+                data-campervan-id="{{ campervan.id }}"
+            >
+                Book Now
+            </button>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No campervans available for the selected dates.</p>
+    {% endif %}
+</div>
+
+<script>
+    // Pass dates via "Book Now" button clicks over to booking process
+    document.querySelectorAll('.book-now').forEach(button => {
+        button.addEventListener('click', () => {
+            const startDate = button.dataset.startDate;
+            const endDate = button.dataset.endDate;
+            const campervanId = button.dataset.campervanId;
+
+            // Redirect to the booking page with pre-filled data
+            window.location.href = `/booking/create?campervan=${campervanId}&start_date=${startDate}&end_date=${endDate}`;
+        });
+    });
+</script>
+{% endblock %}
