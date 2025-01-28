@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.core.mail import send_mail
@@ -120,20 +121,27 @@ def check_booking_status(request, booking_id):
 @login_required
 def cancel_booking(request, booking_id):
     """
-    Function to cancel bookings
+    Cancel booking with confirmation on the site or redirection to my bookings page.
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
-    if booking.status == 'canceled':
-        return JsonResponse({'error': 'Booking is already canceled.'}, status=400)
+    if booking.status == 'Cancelled':
+        messages.error(request, "This booking is already canceled.", extra_tags="my_bookings")
+        return redirect('my_bookings')
 
-    booking.status = 'canceled'
+    # Update booking status
+    booking.status = 'Cancelled'
     booking.save()
 
-    # Provides feedback to the user when canceling a booking
+    # Send cancellation email
     send_cancellation_email(booking)
 
-    return JsonResponse({'success': 'Booking successfully canceled.'})
+    # Cancelation confirmation
+    messages.success(request, "Your booking has been canceled successfully!", extra_tags="my_bookings")
+
+    # Redirect user to my bookings page
+    return redirect('my_bookings')
+
 
 
 def send_booking_confirmation_email(booking):
@@ -150,7 +158,7 @@ def send_booking_confirmation_email(booking):
         f"Thank you for choosing our service!"
     )
     recipient_list = [booking.user.email]
-    send_mail(subject, message, 'no-reply@campervanrental.com', recipient_list)
+    send_mail(subject, message, 'no-reply@campervanrental.com', recipient_list, fail_silently=True)
 
 
 def send_cancellation_email(booking):
@@ -164,7 +172,7 @@ def send_cancellation_email(booking):
         f"Thank you for your visit, we hope to see you soon again."
     )
     recipient_list = [booking.user.email]
-    send_mail(subject, message, 'no-reply@campervanrental.com', recipient_list)
+    send_mail(subject, message, 'no-reply@campervanrental.com', recipient_list, fail_silently=True)
 
 
 @login_required
