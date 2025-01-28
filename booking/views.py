@@ -62,7 +62,7 @@ def book_campervan(request, campervan_id):
 
         # Send confirmation email and redirect to campervans
         send_booking_confirmation_email(booking)
-        return redirect('campervan_list')
+        return redirect('booking_confirmation', booking_id=booking.id)
 
     # GET request: show form with initial data
     return render(request, 'booking/book_campervan.html', {
