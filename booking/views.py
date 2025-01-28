@@ -150,15 +150,17 @@ def send_booking_confirmation_email(booking):
     """
     subject = 'Booking Confirmation'
     message = (
-        f"Hello {booking.user.username},\n\n"
+        f"Dear {booking.user.username},\n\n"
         f"Your booking for {booking.campervan.name} is confirmed.\n"
         f"Start Date: {booking.start_date}\n"
         f"End Date: {booking.end_date}\n"
         f"Total Price: ${booking.total_price:.2f}\n\n"
-        f"Thank you for choosing our service!"
+        f"Thank you for choosing Us!\n\n"
+        f"Best regards\n\n"
+        f"Your Wildventures Team"
     )
     recipient_list = [booking.user.email]
-    send_mail(subject, message, 'no-reply@campervanrental.com', recipient_list, fail_silently=True)
+    send_mail(subject, message, 'no-reply@wildventures.com', recipient_list, fail_silently=True)
 
 
 def send_cancellation_email(booking):
@@ -168,11 +170,13 @@ def send_cancellation_email(booking):
     subject = 'Booking Cancellation'
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"Your booking for {booking.campervan.name} has been canceled.\n"
-        f"Thank you for your visit, we hope to see you soon again."
+        f"Your booking for {booking.campervan.name} from {booking.start_date} to {booking.end_date} for ${booking.total_price:.2f} has been canceled.\n"
+        f"Thank you for your visit, we hope to see you soon again.\n\n"
+        f"Best regards\n\n"
+        f"Your Wildventures Team"
     )
     recipient_list = [booking.user.email]
-    send_mail(subject, message, 'no-reply@campervanrental.com', recipient_list, fail_silently=True)
+    send_mail(subject, message, 'no-reply@wildventures.com', recipient_list, fail_silently=True)
 
 
 @login_required
