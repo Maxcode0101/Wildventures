@@ -98,20 +98,23 @@ def check_availability(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
-    # Validate input
-    if not (campervan_id and start_date and end_date):
-        return JsonResponse({'error': 'Invalid input'}, status=400)
-
     try:
-        # Check for overlapping bookings
-        overlapping_bookings = Booking.objects.filter(
-            campervan_id=campervan_id,
-            start_date__lt=end_date,
-            end_date__gt=start_date,
-        )
+        # Check if start_date < end_date
+            campervan = Campervan.objects.get(id=campervan_id)
+            start_date_dt = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date_dt = datetime.strptime(end_date, '%Y-%m-%d').date()
 
-        is_available = not overlapping_bookings.exists()
-        return JsonResponse({'is_available': is_available})
-    except Exception as e:
+            if end_date_dt <= start_date_dt:
+                return JsonResponse({ 'Invalid input' : 'End date must be after start date'}, status=400)
+
+            overlapping_bookings = Booking.objects.filter(
+                campervan=campervan,
+                start_date__lt=end_date_dt,
+                end_date__gt=start_date_dt
+            )
+            is_available = not overlapping_bookings.exists()
+            return JsonResponse({'is_available': is_available})
+
+    except (Campervan.DoesNotExist, ValueError):
         # Handle unexpected errors
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'error': 'An unexcepted error occured'}, status=400)

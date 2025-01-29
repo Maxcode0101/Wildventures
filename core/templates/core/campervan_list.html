@@ -211,6 +211,12 @@
                         return;
                     }
 
+                    if (new Date(endDate) <= new Date(startDate)) {
+                        responseDiv.style.color = 'red'; 
+                        responseDiv.textContent = 'Invalid input. End date must be after start date.';
+                        return;
+                    }
+
                     // Make an AJAX request to check availability
                     fetch(`{% url 'check_availability' %}?campervan_id=${campervanId}&start_date=${startDate}&end_date=${endDate}`)
                         .then(response => response.json())
