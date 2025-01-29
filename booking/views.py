@@ -15,26 +15,28 @@ def book_campervan(request, campervan_id):
     Overrides GET-data with POST-data.
     """
     campervan = get_object_or_404(Campervan, id=campervan_id)
-
-    # Prioritize POST over GET data
-    if request.method == 'POST':
-        start_date = request.POST.get('start_date', '')
-        end_date = request.POST.get('end_date', '')
-    else:
-        start_date = request.GET.get('start_date', '')
-        end_date = request.GET.get('end_date', '')
+    start_date_str = request.GET.get('start_date', '') or request.POST.get('start_date', '')
+    end_date_str = request.GET.get('end_date', '') or request.POST.get('end_date', '')
 
     if request.method == 'POST':
         try:
-            # Validate dates
-            start_date_dt = datetime.strptime(start_date, '%Y-%m-%d').date()
-            end_date_dt = datetime.strptime(end_date, '%Y-%m-%d').date()
+            start_date_dt = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            end_date_dt = datetime.strptime(end_date_str, '%Y-%m-%d').date()
         except ValueError:
             return render(request, 'booking/book_campervan.html', {
                 'campervan': campervan,
                 'error': 'Invalid date format.',
-                'start_date': start_date,
-                'end_date': end_date,
+                'start_date': start_date_str,
+                'end_date': end_date_str,
+            })
+
+        # Ensure end_date < start_date
+        if end_date_dt <= start_date_dt:
+            return render(request, 'booking/book_campervan.html', {
+                'campervan': campervan,
+                'error': 'End date must be after the start date.',
+                'start_date': start_date_str,
+                'end_date': end_date_str,
             })
 
         # Check for overlapping bookings
@@ -47,11 +49,11 @@ def book_campervan(request, campervan_id):
             return render(request, 'booking/book_campervan.html', {
                 'campervan': campervan,
                 'error': 'The campervan is not available for the selected dates.',
-                'start_date': start_date,
-                'end_date': end_date,
+                'start_date': start_date_str,
+                'end_date': end_date_str,
             })
 
-        # Creates a booking
+        # Creates booking
         booking = Booking.objects.create(
             campervan=campervan,
             user=request.user,
@@ -62,13 +64,13 @@ def book_campervan(request, campervan_id):
 
         # Send confirmation email and redirect to campervans
         send_booking_confirmation_email(booking)
-        return redirect('booking_confirmation', booking_id=booking.id)
+        return redirect('campervan_list')
 
-    # GET request: show form with initial data
+    # GET request: Show form
     return render(request, 'booking/book_campervan.html', {
         'campervan': campervan,
-        'start_date': start_date,
-        'end_date': end_date,
+        'start_date': start_date_str,
+        'end_date': end_date_str,
     })
 
 
