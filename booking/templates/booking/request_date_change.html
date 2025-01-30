@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Request a Date Change (Confirmed Booking)</h2>
+<form method="POST">
+    {% csrf_token %}
+    <div>
+        <label for="start_date">New Start Date:</label>
+        <input type="date" name="start_date" required>
+    </div>
+    <div>
+        <label for="end_date">New End Date:</label>
+        <input type="date" name="end_date" required>
+    </div>
+    <button type="submit">Submit Request</button>
+</form>
+{% endblock %}
