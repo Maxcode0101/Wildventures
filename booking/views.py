@@ -250,3 +250,45 @@ def edit_booking(request, booking_id):
     return render(request, 'booking/edit_booking.html', {
         'booking': booking,
     })
+
+
+@login_required
+def request_date_change(request, booking_id):
+    """
+    User can suggest date change for confirmed booking. 
+    Needs admin aproval
+    """
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    if booking.status != 'Confirmed':
+        messages.error(request, "Date change requests are only available for confirmed bookings - use self service for pending bookings instead.")
+        return redirect('my_bookings')
+
+    if request.method == "POST":
+        new_start = request.POST.get("start_date")
+        new_end = request.POST.get("end_date")
+
+        try:
+            new_start_dt = datetime.strptime(new_start, "%Y-%m-%d").date()
+            new_end_dt = datetime.strptime(new_end, "%Y-%m-%d").date()
+        except ValueError:
+            messages.error(request, "Invalid date format.")
+            return redirect('request_date_change', booking_id=booking_id)
+
+        if new_end_dt <= new_start_dt:
+            messages.error(request, "End date must be after start date.")
+            return redirect('request_date_change', booking_id=booking_id)
+
+        bcr = BookingChangeRequest.objects.create(
+            booking=booking,
+            requested_start_date=new_start_dt,
+            requested_end_date=new_end_dt,
+        )
+
+        messages.success(request, "Your request has been submitted to our team for approval")
+        return redirect('my_bookings')
+
+    # GET request
+    return render(request, 'booking/request_date_change.html', {
+        'booking': booking,
+    })
