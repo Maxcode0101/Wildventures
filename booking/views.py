@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
-from .models import Campervan, Booking
+from .models import Campervan, Booking, BookingChangeRequest
 from datetime import datetime
 
 
@@ -200,3 +200,53 @@ def booking_details(request, booking_id):
         'booking': booking,
     })
 
+@login_required
+def edit_booking(request, booking_id):
+    """
+    Date change self service for pending bookings.
+    """
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    if booking.status != 'Pending':
+        messages.error(request, "Self service is only available for pending bookings, please contact the customer service.")
+        return redirect('my_bookings')
+
+    if request.method == "POST":
+        new_start = request.POST.get("start_date")
+        new_end = request.POST.get("end_date")
+
+        try:
+            new_start_dt = datetime.strptime(new_start, "%Y-%m-%d").date()
+            new_end_dt = datetime.strptime(new_end, "%Y-%m-%d").date()
+        except ValueError:
+            messages.error(request, "Invalid date format.")
+            return redirect('edit_booking', booking_id=booking_id)
+
+        # Validation of new dates
+        if new_end_dt <= new_start_dt:
+            messages.error(request, "Invalid input. End date must be after start date.")
+            return redirect('edit_booking', booking_id=booking_id)
+
+        # Prevent overlapping booking
+        overlapping = Booking.objects.filter(
+            campervan=booking.campervan,
+            start_date__lt=new_end_dt,
+            end_date__gt=new_start_dt
+        ).exclude(id=booking.id)
+        if overlapping.exists():
+            messages.error(request, "This campervan is not available for the requested dates")
+            return redirect('edit_booking', booking_id=booking_id)
+
+        # Update the booking
+        booking.start_date = new_start_dt
+        booking.end_date = new_end_dt
+        booking.total_price = (new_end_dt - new_start_dt).days * booking.campervan.price_per_day
+        booking.save()
+
+        messages.success(request, "We sucessfully changed your booking!")
+        return redirect('my_bookings')
+
+    # Get request: Display new booking details
+    return render(request, 'booking/edit_booking.html', {
+        'booking': booking,
+    })
