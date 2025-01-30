@@ -292,3 +292,58 @@ def request_date_change(request, booking_id):
     return render(request, 'booking/request_date_change.html', {
         'booking': booking,
     })
+
+
+@login_required
+def view_change_requests(request):
+    if not request.user.is_staff:
+        return redirect('my_bookings')
+
+    requests_qs = BookingChangeRequest.objects.filter(status='Pending')
+    return render(request, 'booking/change_requests.html', {
+        'change_requests': requests_qs
+    })
+
+@login_required
+def approve_change_request(request, request_id):
+    if not request.user.is_staff:
+        return redirect('my_bookings')
+
+    bcr = get_object_or_404(BookingChangeRequest, id=request_id, status='Pending')
+    booking = bcr.booking
+
+    # Prevent overlapping booking
+    overlapping = Booking.objects.filter(
+        campervan=booking.campervan,
+        start_date__lt=bcr.requested_end_date,
+        end_date__gt=bcr.requested_start_date
+    ).exclude(id=booking.id)
+    if overlapping.exists():
+        messages.error(request, "Date change not possible. The select dates are not available")
+        return redirect('view_change_requests')
+
+    # Update booking
+    booking.start_date = bcr.requested_start_date
+    booking.end_date = bcr.requested_end_date
+
+    # # For later feature of different pricing - Price recalculation
+    # booking.total_price = (bcr.requested_end_date - bcr.requested_start_date).days * booking.campervan.price_per_day
+    # booking.save()
+
+    bcr.status = 'Approved'
+    bcr.save()
+
+    messages.success(request, "Date change request approved.")
+    return redirect('view_change_requests')
+
+@login_required
+def reject_change_request(request, request_id):
+    if not request.user.is_staff:
+        return redirect('my_bookings')
+
+    bcr = get_object_or_404(BookingChangeRequest, id=request_id, status='Pending')
+    bcr.status = 'Rejected'
+    bcr.save()
+
+    messages.info(request, "Unfortunately we can't approve your request - the requested dates are not available.")
+    return redirect('view_change_requests')
