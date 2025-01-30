@@ -28,6 +28,9 @@
                     <a href="{% url 'booking_details' booking.id %}" style="padding: 10px; background-color: #007BFF; color: white; text-decoration: none; border-radius: 5px;">View Details</a>
                     {% if booking.status == 'Pending' %}
                     <a href="{% url 'cancel_booking' booking.id %}" onclick="return confirm('Are you sure you want to cancel this booking?')" style="padding: 10px; background-color: #FF0000; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px;"> Cancel Booking </a>
+                    <a href="{% url 'edit_booking' booking.id %}" style="padding: 10px; background-color: #FF0000; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px;">Edit Booking</a>
+                    {% elif booking.status == 'Confirmed' %}
+                    <a href="{% url 'request_date_change' booking.id %}" style="padding: 10px; background-color: #FF0000; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px;">Request Date Change</a>
                     {% endif %}
                 </div>
             {% endfor %}
