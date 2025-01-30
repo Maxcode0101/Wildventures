@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Pending Date Change Requests</h1>
+<table>
+    <tr>
+        <th>Booking ID</th>
+        <th>User</th>
+        <th>Requested Start</th>
+        <th>Requested End</th>
+        <th>Actions</th>
+    </tr>
+    {% for cr in change_requests %}
+    <tr>
+        <td>{{ cr.booking.id }}</td>
+        <td>{{ cr.booking.user.username }}</td>
+        <td>{{ cr.requested_start_date }}</td>
+        <td>{{ cr.requested_end_date }}</td>
+        <td>
+            <a href="{% url 'approve_change_request' cr.id %}">Approve</a> |
+            <a href="{% url 'reject_change_request' cr.id %}">Reject</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
