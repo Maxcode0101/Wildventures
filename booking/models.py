@@ -23,3 +23,20 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking by {self.user} for {self.campervan} from {self.start_date} to {self.end_date}"
+
+
+class BookingChangeRequest(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
+
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name="change_requests")
+    requested_start_date = models.DateField()
+    requested_end_date = models.DateField()
+    status = models.CharField(max_length=8, choices=STATUS_CHOICES, default='Pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+def __str__(self):
+        return f"Change Request for Booking {self.booking.id} ({self.status})"
