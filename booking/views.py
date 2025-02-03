@@ -439,5 +439,50 @@ def send_change_rejection_email(booking, bcr):
         f"For further assistance, please contact us."
     )
     recipient_list = [booking.user.email]
-    send_mail(subject, message, 'no-reply@campervanrental.com', recipient_list, fail_silently=False)
+    send_mail(subject, message, 'no-reply@wildventures.com', recipient_list, fail_silently=False)
 
+
+def send_change_approval_email(booking, bcr):
+    """
+    Email confirmation to user when booking change request is approved
+    """
+    subject: 'We approved your booking change request'
+    message: (
+        f"Dear {booking.user.username},\n\n"
+        f"Good news! Your date change request for Booking #{booking.id} has been approved.\n"
+        f"New Start Date: {booking.start_date}\n"
+        f"New End Date: {booking.end_date}\n"
+        f"New Total Price: ${booking.total_price:.2f}\n\n"
+        f"Thanks for booking with us, enjoy the ride!"
+        f"Best regards, \nYour Wildventures Teaam"
+    )
+
+    send_mail(
+        subject,
+        message,
+        no-reply@wildventures.com
+        [booking.user.email],
+        fail_silently=False,
+    )
+
+
+def send_change_rejection_email(booking, bcr):
+    """
+    Email confirmation to user when booking change request is rejected
+    """
+    subject: 'We rejected your booking change request'
+    message: (
+        f"Dear {booking.user.username},\n\n"
+        f"we are sorry! Your date change request for Booking #{booking.id} has been rejected as the selected campervan is unavailable.\n"
+        f"Please try with alternative dates or another campervan."
+        f"Feel free to reach out to our service team for any questions."
+        f"Best regards, \nYour Wildventures Teaam"
+    )
+
+    send_mail(
+        subject,
+        message,
+        no-reply@wildventures.com
+        [booking.user.email],
+        fail_silently=False,
+    )
