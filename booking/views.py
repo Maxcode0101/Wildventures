@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from datetime import datetime
+from django.conf import settings
 
 from .models import Campervan, Booking, BookingChangeRequest
 
@@ -91,6 +92,15 @@ def booking_confirmation(request, booking_id):
     })
 
 
+@login_required
+def booking_details(request, booking_id):
+    """
+    Display more detailed info about a specific booking
+    """
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    return render(request, 'booking/booking_details.html', {'booking': booking})
+
+
 def check_availability(request):
     """
     Responsible for availability checks
@@ -98,6 +108,9 @@ def check_availability(request):
     campervan_id = request.GET.get('campervan_id')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+
+    if not (campervan_id and start_date and end_date):
+        return JsonResponse({'error': 'Invalid input'}, status=400)
 
     try:
         campervan = Campervan.objects.get(id=campervan_id)
@@ -132,7 +145,8 @@ def check_booking_status(request, booking_id):
 @login_required
 def cancel_booking(request, booking_id):
     """
-    Cancel booking with confirmation on the site or redirection to my bookings page.
+    Cancel "pending" bookings with confirmation on the site or redirection to my bookings page.
+    Cancelations of "confirmed" bookings needs to be approved by staff.
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
@@ -140,7 +154,11 @@ def cancel_booking(request, booking_id):
         messages.error(request, "This booking is already canceled.", extra_tags="my_bookings")
         return redirect('my_bookings')
 
-    # Update booking status
+    # Prohibit self service cancelations if booking status = "Confirmed"
+    if booking.status == 'Confirmed':
+        messages.error(request, "Cancelation request was sent to admin for approval")
+        return redirect('my_bookings')
+
     booking.status = 'Cancelled'
     booking.save()
 
@@ -155,28 +173,9 @@ def cancel_booking(request, booking_id):
 
 
 @login_required
-def my_bookings(request):
-    """
-    View to display all bookings for the logged-in user.
-    """
-    bookings = Booking.objects.filter(user=request.user).order_by('-start_date')
-    return render(request, 'booking/my_bookings.html', {'bookings': bookings})
-
-
-@login_required
-def booking_details(request, booking_id):
-    """
-    Displays detailed info about a single booking.
-    """
-    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
-    return render(request, 'booking/booking_details.html', {
-        'booking': booking,
-    })
-
-@login_required
 def edit_booking(request, booking_id):
     """
-    Date change self service for pending bookings.
+    Allows user to change bookings with status "Pending".
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
@@ -218,6 +217,8 @@ def edit_booking(request, booking_id):
 
         booking.save()
 
+        # Inform user about the changed booking via email
+        send_booking_changed_email(booking)
         messages.success(request, "We sucessfully changed your booking!", extra_tags="my_bookings")
         return redirect('my_bookings')
 
@@ -247,7 +248,7 @@ def request_date_change(request, booking_id):
             new_start_dt = datetime.strptime(new_start, "%Y-%m-%d").date()
             new_end_dt = datetime.strptime(new_end, "%Y-%m-%d").date()
         except ValueError:
-            messages.error(request, "Invalid date format.")
+            messages.error(request, "Invalid date format.", extra_tags="my_bookings")
             return redirect('request_date_change', booking_id=booking_id)
 
         if new_end_dt <= new_start_dt:
@@ -262,10 +263,11 @@ def request_date_change(request, booking_id):
 
         messages.success(request, "Your request has been submitted to our team for approval", extra_tags="my_bookings")
         send_date_change_request_received_email(booking, bcr)
+        send_date_change_request_notification_to_admin(booking, bcr)
         return redirect('my_bookings')
 
     # GET request
-    return render(request, 'booking/request_date_change.html', {'booking': booking,})
+    return render(request, 'booking/request_date_change.html', {'booking': booking})
 
 
 # Admin / Staff
@@ -322,7 +324,9 @@ def reject_change_request(request, request_id):
     messages.info(request, f"Booking change request #{bcr.id} has been rejected.")
     return redirect('view_change_requests')
 
-
+#
+# Email confirmations
+#
 
 def send_booking_confirmation_email(booking):
     """
@@ -359,8 +363,27 @@ def send_cancellation_email(booking):
     send_mail(subject, message, 'no-reply@wildventures.com', recipient_list, fail_silently=False)
 
 
+def send_booking_changed_email(booking):
+    """
+    Email confirmation after user changed booking via self service
+    """
+    subject = 'Your booking has been sucessfully updated'
+    message = (
+        f"Dear {booking.user.username},\n\n"
+        f"Your booking for {booking.campervan.name} from {booking.start_date} to {booking.end_date} for ${booking.total_price:.2f} has been updated.\n"
+        f"Thank you for your visit, we hope to see you soon again.\n\n"
+        f"Best regards\n\n"
+        f"Your Wildventures Team"
+    )
+    recipient_list = [booking.user.email]
+    send_mail(subject, message, 'no-reply@wildventures.com', recipient_list, fail_silently=False)
+
+
 def send_date_change_request_received_email(booking, bcr):
-    subject = "Date Change Request Received"
+    """
+    Inform user that date change request needs admin approval
+    """
+    subject = "Date change request received"
     message = (
         f"Dear {booking.user.username},\n\n"
         f"We have received your date-change request for Booking #{booking.id}.\n"
@@ -369,6 +392,26 @@ def send_date_change_request_received_email(booking, bcr):
         f"Our team will review your request and notify you once it's approved or rejected."
     )
     recipient_list = [booking.user.email]
+    send_mail(subject, message, 'no-reply@wildventures.com', recipient_list, fail_silently=False)
+
+
+def send_date_change_request_notification_to_admin(booking, bcr):
+    """
+    Notification for admin about pending date change request
+    """
+    admin_email = getattr(settings, 'DEFAULT_ADMIN_EMAIL', None)
+    if not admin_email:
+        return
+
+    subject = f"New date change request is awaiting approval (Booking #{booking.id})"
+    message = (
+        f"Hello Admin, \n\n"
+        f"User {booking.user.username} is requesting a date change for Booking #{booking.id}.\n"
+        f"Requested Start: {bcr.requested_start_date}\n"
+        f"Requested End: {bcr.requested_end_date}\n\n"
+        f"Please review this request in the admin panel."
+    )
+    recipient_list = [admin_email]
     send_mail(subject, message, 'no-reply@wildventures.com', recipient_list, fail_silently=False)
 
 

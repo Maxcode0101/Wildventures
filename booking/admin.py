@@ -11,6 +11,6 @@ class BookingAdmin(admin.ModelAdmin):
 
 @admin.register(BookingChangeRequest)
 class BookingChangeRequestAdmin(admin.ModelAdmin):
-    list_display = ('id', 'booking', 'requested_start_date', 'requested_end_date', 'status')
+    list_display = ('id', 'booking', 'requested_start_date', 'requested_end_date', 'status' ,'created_at')
     list_filter = ('status', 'created_at')
     search_fields = ('booking__id', 'booking__user__username')
