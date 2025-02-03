@@ -1,10 +1,12 @@
-from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
-from .models import Campervan, Booking, BookingChangeRequest
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib import messages
 from datetime import datetime
+
+from .models import Campervan, Booking, BookingChangeRequest
 
 
 @login_required
@@ -12,11 +14,11 @@ def book_campervan(request, campervan_id):
     """
     Responsible for campervan bookings. 
     Populates booking dates passed from the availability check.
-    Overrides GET-data with POST-data.
+    Decide if GET-data or POST-data.
     """
     campervan = get_object_or_404(Campervan, id=campervan_id)
-    start_date_str = request.GET.get('start_date', '') or request.POST.get('start_date', '')
-    end_date_str = request.GET.get('end_date', '') or request.POST.get('end_date', '')
+    start_date_str = request.POST.get('start_date') or request.GET.get('start_date', '')
+    end_date_str = request.POST.get('end_date') or request.GET.get('end_date', '')
 
     if request.method == 'POST':
         try:
@@ -30,7 +32,7 @@ def book_campervan(request, campervan_id):
                 'end_date': end_date_str,
             })
 
-        # Ensure end_date < start_date
+        # Ensure end_date > start_date
         if end_date_dt <= start_date_dt:
             return render(request, 'booking/book_campervan.html', {
                 'campervan': campervan,
@@ -40,12 +42,12 @@ def book_campervan(request, campervan_id):
             })
 
         # Check for overlapping bookings
-        overlapping_bookings = Booking.objects.filter(
+        overlapping = Booking.objects.filter(
             campervan=campervan,
             start_date__lt=end_date_dt,
             end_date__gt=start_date_dt
         )
-        if overlapping_bookings.exists():
+        if overlapping.exists():
             return render(request, 'booking/book_campervan.html', {
                 'campervan': campervan,
                 'error': 'The campervan is not available for the selected dates.',
@@ -54,18 +56,21 @@ def book_campervan(request, campervan_id):
             })
 
         # Creates booking
+        days = (end_date_dt - start_date_dt).days
+        total_price = days * campervan.price_per_day
+
         booking = Booking.objects.create(
             campervan=campervan,
             user=request.user,
             start_date=start_date_dt,
             end_date=end_date_dt,
-            total_price=(end_date_dt - start_date_dt).days * campervan.price_per_day
+            total_price=total_price
         )
 
         # Send confirmation email and redirect to campervans
         send_booking_confirmation_email(booking)
-        return redirect('campervan_list')
-
+        return redirect('booking_confirmation', booking_id=booking.id)
+        
     # GET request: Show form
     return render(request, 'booking/book_campervan.html', {
         'campervan': campervan,
@@ -96,19 +101,23 @@ def check_availability(request):
 
     try:
         campervan = Campervan.objects.get(id=campervan_id)
-        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        start_date_dt = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date_dt = datetime.strptime(end_date, '%Y-%m-%d').date()
 
-        overlapping_bookings = Booking.objects.filter(
+        # Ensure end_date > start_date
+        if end_date_dt <= start_date_dt:
+            return JsonResponse({'error': 'End date must be after start date.'}, status=400)
+
+        overlapping = Booking.objects.filter(
             campervan=campervan,
-            start_date__lt=end_date,
-            end_date__gt=start_date
+            start_date__lt=end_date_dt,
+            end_date__gt=start_date_dt
         )
-        is_available = not overlapping_bookings.exists()
+        is_available = not overlapping.exists()
         return JsonResponse({'is_available': is_available})
 
-    except (Campervan.DoesNotExist, ValueError):
-        return JsonResponse({'error': 'Invalid data provided.'}, status=400)
+    except (Campervan.DoesNotExist, ValueError) as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
 
 @login_required
@@ -145,42 +154,6 @@ def cancel_booking(request, booking_id):
     return redirect('my_bookings')
 
 
-
-def send_booking_confirmation_email(booking):
-    """
-    Sends confirmation email on sucessfull bookings
-    """
-    subject = 'Booking Confirmation'
-    message = (
-        f"Dear {booking.user.username},\n\n"
-        f"Your booking for {booking.campervan.name} is confirmed.\n"
-        f"Start Date: {booking.start_date}\n"
-        f"End Date: {booking.end_date}\n"
-        f"Total Price: ${booking.total_price:.2f}\n\n"
-        f"Thank you for choosing Us!\n\n"
-        f"Best regards\n\n"
-        f"Your Wildventures Team"
-    )
-    recipient_list = [booking.user.email]
-    send_mail(subject, message, 'no-reply@wildventures.com', recipient_list, fail_silently=True)
-
-
-def send_cancellation_email(booking):
-    """
-    Sends confirmation email on canceled bookings
-    """
-    subject = 'Booking Cancellation'
-    message = (
-        f"Dear {booking.user.username},\n\n"
-        f"Your booking for {booking.campervan.name} from {booking.start_date} to {booking.end_date} for ${booking.total_price:.2f} has been canceled.\n"
-        f"Thank you for your visit, we hope to see you soon again.\n\n"
-        f"Best regards\n\n"
-        f"Your Wildventures Team"
-    )
-    recipient_list = [booking.user.email]
-    send_mail(subject, message, 'no-reply@wildventures.com', recipient_list, fail_silently=True)
-
-
 @login_required
 def my_bookings(request):
     """
@@ -208,7 +181,7 @@ def edit_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
     if booking.status != 'Pending':
-        messages.error(request, "Self service is only available for pending bookings, please contact the customer service.")
+        messages.error(request, "Self service is only available for pending bookings, please contact the customer service.", extra_tags="my_bookings")
         return redirect('my_bookings')
 
     if request.method == "POST":
@@ -219,12 +192,12 @@ def edit_booking(request, booking_id):
             new_start_dt = datetime.strptime(new_start, "%Y-%m-%d").date()
             new_end_dt = datetime.strptime(new_end, "%Y-%m-%d").date()
         except ValueError:
-            messages.error(request, "Invalid date format.")
+            messages.error(request, "Invalid date format.", extra_tags="my_bookings")
             return redirect('edit_booking', booking_id=booking_id)
 
         # Validation of new dates
         if new_end_dt <= new_start_dt:
-            messages.error(request, "Invalid input. End date must be after start date.")
+            messages.error(request, "Invalid input. End date must be after start date.", extra_tags="my_bookings")
             return redirect('edit_booking', booking_id=booking_id)
 
         # Prevent overlapping booking
@@ -234,16 +207,18 @@ def edit_booking(request, booking_id):
             end_date__gt=new_start_dt
         ).exclude(id=booking.id)
         if overlapping.exists():
-            messages.error(request, "This campervan is not available for the requested dates")
+            messages.error(request, "This campervan is not available for the requested dates.", extra_tags="my_bookings")
             return redirect('edit_booking', booking_id=booking_id)
 
         # Update the booking
+        day_count = (new_end_dt - new_start_dt).days
         booking.start_date = new_start_dt
         booking.end_date = new_end_dt
-        booking.total_price = (new_end_dt - new_start_dt).days * booking.campervan.price_per_day
+        booking.total_price = day_count * booking.campervan.price_per_day
+
         booking.save()
 
-        messages.success(request, "We sucessfully changed your booking!")
+        messages.success(request, "We sucessfully changed your booking!", extra_tags="my_bookings")
         return redirect('my_bookings')
 
     # Get request: Display new booking details
@@ -256,12 +231,12 @@ def edit_booking(request, booking_id):
 def request_date_change(request, booking_id):
     """
     User can suggest date change for confirmed booking. 
-    Needs admin aproval
+    Needs admin aproval.
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
     if booking.status != 'Confirmed':
-        messages.error(request, "Date change requests are only available for confirmed bookings - use self service for pending bookings instead.")
+        messages.error(request, "Date change requests are only available for confirmed bookings - use self service for pending bookings instead.", extra_tags="my_bookings")
         return redirect('my_bookings')
 
     if request.method == "POST":
@@ -276,74 +251,150 @@ def request_date_change(request, booking_id):
             return redirect('request_date_change', booking_id=booking_id)
 
         if new_end_dt <= new_start_dt:
-            messages.error(request, "End date must be after start date.")
+            messages.error(request, "End date must be after start date.", extra_tags="my_bookings")
             return redirect('request_date_change', booking_id=booking_id)
 
         bcr = BookingChangeRequest.objects.create(
             booking=booking,
             requested_start_date=new_start_dt,
-            requested_end_date=new_end_dt,
+            requested_end_date=new_end_dt
         )
 
-        messages.success(request, "Your request has been submitted to our team for approval")
+        messages.success(request, "Your request has been submitted to our team for approval", extra_tags="my_bookings")
+        send_date_change_request_received_email(booking, bcr)
         return redirect('my_bookings')
 
     # GET request
-    return render(request, 'booking/request_date_change.html', {
-        'booking': booking,
-    })
+    return render(request, 'booking/request_date_change.html', {'booking': booking,})
 
 
-@login_required
+# Admin / Staff
+@staff_member_required
 def view_change_requests(request):
-    if not request.user.is_staff:
-        return redirect('my_bookings')
-
-    requests_qs = BookingChangeRequest.objects.filter(status='Pending')
+    pending_requests = BookingChangeRequest.objects.filter(status='Pending')
+    for req in pending_requests:
+        day_count = (req.requested_end_date - req.requested_start_date).days
+        req.new_total_price = day_count * req.booking.campervan.price_per_day
     return render(request, 'booking/change_requests.html', {
-        'change_requests': requests_qs
+        'change_requests': pending_requests
     })
 
-@login_required
+@staff_member_required
 def approve_change_request(request, request_id):
-    if not request.user.is_staff:
-        return redirect('my_bookings')
-
     bcr = get_object_or_404(BookingChangeRequest, id=request_id, status='Pending')
     booking = bcr.booking
 
-    # Prevent overlapping booking
+    # Prevent overlapping for requested dates
     overlapping = Booking.objects.filter(
         campervan=booking.campervan,
         start_date__lt=bcr.requested_end_date,
         end_date__gt=bcr.requested_start_date
     ).exclude(id=booking.id)
     if overlapping.exists():
-        messages.error(request, "Date change not possible. The select dates are not available")
+        messages.error(request, "We're sorry. The requested dates are unavailable.")
         return redirect('view_change_requests')
 
-    # Update booking
+    # Approve change request if not overlapping
+    day_count = (bcr.requested_end_date - bcr.requested_start_date).days
     booking.start_date = bcr.requested_start_date
     booking.end_date = bcr.requested_end_date
 
-    # # For later feature of different pricing - Price recalculation
-    # booking.total_price = (bcr.requested_end_date - bcr.requested_start_date).days * booking.campervan.price_per_day
-    # booking.save()
+    # Recalculate price
+    booking.total_price = day_count * booking.campervan.price_per_day
+    booking.save()
 
+    # Change booking status : Approved
     bcr.status = 'Approved'
     bcr.save()
 
-    messages.success(request, "Date change request approved.")
+    send_change_approval_email(booking, bcr)
+    messages.success(request, f"Booking change request #{bcr.id} approved!")
     return redirect('view_change_requests')
 
-@login_required
+# Change booking status : Rejected
+@staff_member_required
 def reject_change_request(request, request_id):
-    if not request.user.is_staff:
-        return redirect('my_bookings')
-
     bcr = get_object_or_404(BookingChangeRequest, id=request_id, status='Pending')
     bcr.status = 'Rejected'
     bcr.save()
 
-    messages.info(request, "Unfortunately we can't approve your request - the requested dates are not available.")
+    send_change_rejection_email(bcr.booking, bcr)
+    messages.info(request, f"Booking change request #{bcr.id} has been rejected.")
     return redirect('view_change_requests')
+
+
+
+def send_booking_confirmation_email(booking):
+    """
+    Sends confirmation email on sucessfull bookings
+    """
+    subject = 'Booking Confirmation'
+    message = (
+        f"Dear {booking.user.username},\n\n"
+        f"Your booking for {booking.campervan.name} is confirmed.\n"
+        f"Start Date: {booking.start_date}\n"
+        f"End Date: {booking.end_date}\n"
+        f"Total Price: ${booking.total_price:.2f}\n\n"
+        f"Thank you for choosing Us!\n\n"
+        f"Best regards\n\n"
+        f"Your Wildventures Team"
+    )
+    recipient_list = [booking.user.email]
+    send_mail(subject, message, 'no-reply@wildventures.com', recipient_list, fail_silently=False)
+
+
+def send_cancellation_email(booking):
+    """
+    Sends confirmation email on canceled bookings
+    """
+    subject = 'Booking Cancellation'
+    message = (
+        f"Dear {booking.user.username},\n\n"
+        f"Your booking for {booking.campervan.name} from {booking.start_date} to {booking.end_date} for ${booking.total_price:.2f} has been canceled.\n"
+        f"Thank you for your visit, we hope to see you soon again.\n\n"
+        f"Best regards\n\n"
+        f"Your Wildventures Team"
+    )
+    recipient_list = [booking.user.email]
+    send_mail(subject, message, 'no-reply@wildventures.com', recipient_list, fail_silently=False)
+
+
+def send_date_change_request_received_email(booking, bcr):
+    subject = "Date Change Request Received"
+    message = (
+        f"Dear {booking.user.username},\n\n"
+        f"We have received your date-change request for Booking #{booking.id}.\n"
+        f"Requested Start: {bcr.requested_start_date}\n"
+        f"Requested End: {bcr.requested_end_date}\n\n"
+        f"Our team will review your request and notify you once it's approved or rejected."
+    )
+    recipient_list = [booking.user.email]
+    send_mail(subject, message, 'no-reply@wildventures.com', recipient_list, fail_silently=False)
+
+
+def send_change_approval_email(booking, bcr):
+    subject = "Your Date Change Request Was Approved"
+    message = (
+        f"Dear {booking.user.username},\n\n"
+        f"Your date change request for Booking #{booking.id} has been approved.\n"
+        f"New Start Date: {booking.start_date}\n"
+        f"New End Date: {booking.end_date}\n"
+        f"New Total Price: ${booking.total_price:.2f}\n\n"
+        f"Thank you for booking with us!"
+    )
+    recipient_list = [booking.user.email]
+    send_mail(subject, message, 'no-reply@wildventures.com', recipient_list, fail_silently=False)
+
+
+def send_change_rejection_email(booking, bcr):
+    subject = "Your Date Change Request Was Rejected"
+    message = (
+        f"Dear {booking.user.username},\n\n"
+        f"Your date change request for Booking #{booking.id} has been rejected.\n"
+        f"Current Start Date: {booking.start_date}\n"
+        f"Current End Date: {booking.end_date}\n\n"
+        f"For further assistance, please contact us."
+    )
+    recipient_list = [booking.user.email]
+    send_mail(subject, message, 'no-reply@campervanrental.com', recipient_list, fail_silently=False)
+
