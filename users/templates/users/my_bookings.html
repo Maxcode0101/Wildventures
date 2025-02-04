@@ -13,7 +13,7 @@
             {% endif %}
         {% endfor %}
     </div>
-{% endif %}
+    {% endif %}
 
     {% if bookings %}
         <div style="margin-top: 20px;">
@@ -26,23 +26,29 @@
                     <p><strong>Status:</strong> {{ booking.status }}</p>
 
                     {% if booking.status == "Pending" %}
-                    <a href="{% url 'edit_booking' booking.id %}" 
-                       style="padding: 6px; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px;">
-                       Change Dates
-                    </a>
+                        <a href="{% url 'edit_booking' booking.id %}" 
+                           style="padding: 6px; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px;">
+                           Change Dates
+                        </a>
                     {% elif booking.status == "Confirmed" %}
-                    <a href="{% url 'request_date_change' booking.id %}" 
-                       style="padding: 6px; background-color: #007bff; color: white; text-decoration: none; border-radius: 3px;">
-                       Request Date Change
-                    </a>
+                        <a href="{% url 'request_date_change' booking.id %}" 
+                           style="padding: 6px; background-color: #007bff; color: white; text-decoration: none; border-radius: 3px;">
+                           Request Date Change
+                        </a>
                     {% endif %}
 
-                    {% if booking.status in "Pending" or booking.status == "Confirmed" %}
-                    <a href="{% url 'cancel_booking' booking.id %}" 
-                       onclick="return confirm('Are you sure you want to cancel this booking?')"
-                       style="padding: 6px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px; margin-left: 8px;">
-                       Cancel Booking
-                    </a>
+                    {% if booking.status == "Pending" %}
+                        <a href="{% url 'cancel_booking' booking.id %}" 
+                           onclick="return confirm('Are you sure you want to cancel this booking?')"
+                           style="padding: 6px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px; margin-left: 8px;">
+                           Cancel Booking
+                        </a>
+                    {% elif booking.status == "Confirmed" and not booking.hide_cancel_request %}
+                        <a href="{% url 'request_cancellation' booking.id %}" 
+                           onclick="return confirm('Are you sure you want to request cancellation for this booking?')"
+                           style="padding: 6px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px; margin-left: 8px;">
+                           Request Cancellation
+                        </a>
                     {% endif %}
 
                     <br><br>
@@ -54,6 +60,17 @@
                             <li>
                                 Requested: {{ req.requested_start_date }} → {{ req.requested_end_date }} 
                                 ({{ req.status }})
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    
+                    {% if booking.cancellation_requests.all %}
+                    <h4>Cancellation Requests</h4>
+                    <ul>
+                        {% for cancel_req in booking.cancellation_requests.all %}
+                            <li>
+                                Requested Cancellation – Status: {{ cancel_req.status }} – Submitted on: {{ cancel_req.created_at|date:"Y-m-d" }}
                             </li>
                         {% endfor %}
                     </ul>
@@ -73,4 +90,4 @@
            <a href="{% url 'campervan_list' %}" style="color: #007bff; text-decoration: underline;">Browse campervans</a> to get started!
         </p>
     {% endif %}
-    {% endblock %}
+{% endblock %}

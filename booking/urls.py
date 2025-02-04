@@ -14,4 +14,5 @@ urlpatterns = [
     path('change_requests/', views.view_change_requests, name='view_change_requests'),  # Admin route
     path('change_requests/<int:request_id>/approve/', views.approve_change_request, name='approve_change_request'),
     path('change_requests/<int:request_id>/reject/', views.reject_change_request, name='reject_change_request'),
+    path('request_cancellation/<int:booking_id>/', views.request_cancellation, name='request_cancellation'),
 ]
