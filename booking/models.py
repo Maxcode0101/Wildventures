@@ -25,6 +25,7 @@ class Booking(models.Model):
         return f"Booking by {self.user} for {self.campervan} from {self.start_date} to {self.end_date}"
 
 
+# User requests changes related to a booking
 class BookingChangeRequest(models.Model):
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
@@ -40,3 +41,18 @@ class BookingChangeRequest(models.Model):
 
 def __str__(self):
         return f"Change Request for Booking {self.booking.id} ({self.status})"
+
+
+# User requests cancelation of a booking
+class BookingCancellationRequest(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    ]
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name="cancellation_requests")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Cancellation Request for Booking {self.booking.id} ({self.status})"
