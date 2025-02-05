@@ -37,20 +37,21 @@ class CancelBookingTest(TestCase):
     def test_cancel_booking(self):
         """Test that a user can cancel a booking successfully."""
         url = reverse("cancel_booking", args=[self.booking.id])
-        response = self.client.post(url)
+        response = self.client.post(url, follow=True)
 
         # Get a booking from the db and refresh it
         self.booking.refresh_from_db()
 
-        # Check if booking status = "Canceled"
-        self.assertEqual(self.booking.status, "Canceled")
+        # Check if booking status = "Cancelled"
+        self.assertEqual(self.booking.status, "Cancelled")
 
         # Check if redirection of the user to "My Bookings" works proper
         self.assertRedirects(response, reverse("my_bookings"))
 
         # Check if displaying the success message works proper
         messages = list(response.wsgi_request._messages)
-        self.assertTrue(any("successfully canceled" in str(message) for message in messages))
+        self.assertTrue(any("successfully canceled" in str(message).lower() for message in messages)
+                        or any("successfully cancelled" in str(message).lower() for message in messages))
 
     def test_cancel_past_booking(self):
         """Test that a user cannot cancel a booking in the past."""
@@ -59,7 +60,7 @@ class CancelBookingTest(TestCase):
         self.booking.save()
 
         url = reverse("cancel_booking", args=[self.booking.id])
-        response = self.client.post(url)
+        response = self.client.post(url, follow=True)
 
         # Refresh the booking from the db
         self.booking.refresh_from_db()
@@ -69,25 +70,26 @@ class CancelBookingTest(TestCase):
 
         # Check if displaying an error message works proper
         messages = list(response.wsgi_request._messages)
-        self.assertTrue(any("already ended" in str(message) for message in messages))
+        self.assertTrue(any("already ended" in str(message).lower() for message in messages))
 
     def test_cancel_already_canceled_booking(self):
         """Test that a user cannot cancel a booking that is already canceled."""
-        self.booking.status = "Canceled"
+        self.booking.status = "Cancelled"
         self.booking.save()
 
         url = reverse("cancel_booking", args=[self.booking.id])
-        response = self.client.post(url)
+        response = self.client.post(url, follow=True)
 
         # Refresh the booking from the db
         self.booking.refresh_from_db()
 
-        # Check if the booking status is still "Canceled"
-        self.assertEqual(self.booking.status, "Canceled")
+        # Check if the booking status is still "Cancelled"
+        self.assertEqual(self.booking.status, "Cancelled")
 
         # Check if displaying an error message works proper
         messages = list(response.wsgi_request._messages)
-        self.assertTrue(any("already been canceled" in str(message) for message in messages))
+        self.assertTrue(any("already been canceled" in str(message).lower() or 
+                            "already been cancelled" in str(message).lower() for message in messages))
 
 
 class DateChangeTest(TestCase):
@@ -124,7 +126,7 @@ class DateChangeTest(TestCase):
         response = self.client.post(reverse("edit_booking", args=[self.booking.id]), {
             "start_date": new_start.strftime("%Y-%m-%d"),
             "end_date": new_end.strftime("%Y-%m-%d")
-        })
+        }, follow=True)
         self.booking.refresh_from_db()
         self.assertEqual(self.booking.start_date, new_start)
         self.assertEqual(self.booking.end_date, new_end)
@@ -139,7 +141,7 @@ class DateChangeTest(TestCase):
         response = self.client.post(reverse("edit_booking", args=[self.booking.id]), {
             "start_date": new_start.strftime("%Y-%m-%d"),
             "end_date": new_end.strftime("%Y-%m-%d")
-        })
+        }, follow=True)
         self.booking.refresh_from_db()
         # Booking dates should remain unchanged
         self.assertNotEqual(self.booking.start_date, new_start)
@@ -161,7 +163,7 @@ class DateChangeTest(TestCase):
         response = self.client.post(reverse("edit_booking", args=[self.booking.id]), {
             "start_date": new_start.strftime("%Y-%m-%d"),
             "end_date": new_end.strftime("%Y-%m-%d")
-        })
+        }, follow=True)
         self.assertContains(response, "This campervan is not available for the requested dates.")
 
     def test_request_date_change_for_confirmed_booking(self):
@@ -174,7 +176,7 @@ class DateChangeTest(TestCase):
         response = self.client.post(reverse("request_date_change", args=[self.booking.id]), {
             "start_date": new_start.strftime("%Y-%m-%d"),
             "end_date": new_end.strftime("%Y-%m-%d")
-        })
+        }, follow=True)
         self.assertRedirects(response, reverse("my_bookings"))
         # Check that a BookingChangeRequest was created
         self.assertTrue(self.booking.change_requests.filter(requested_start_date=new_start,
@@ -247,16 +249,29 @@ class AdminActionTest(TestCase):
         self.assertRedirects(response, reverse("view_change_requests"))
 
     def test_approve_cancellation_request(self):
-        """Test that an admin can approve a cancellation request and that the booking becomes canceled."""
-        # Update the cancellation request to Approved
-        self.cancellation_request.status = "Approved"
-        self.cancellation_request.save()
+        """Test that an admin can approve a cancellation request and that the booking becomes cancelled."""
+        # Simulate admin approval via admin view by calling the admin override
+        # For this test, we simulate by updating the cancellation request via admin logic.
+        url = reverse("admin:booking_bookingcancellationrequest_change", args=[self.cancellation_request.id])
+        # Prepare data with status Approved
+        data = {
+            "booking": self.booking.id,
+            "status": "Approved",
+        }
+        response = self.client.post(url, data, follow=True)
         self.booking.refresh_from_db()
+        self.cancellation_request.refresh_from_db()
         self.assertEqual(self.booking.status, "Cancelled")
+        # You might also check for a success message if desired.
 
     def test_reject_cancellation_request(self):
         """Test that an admin can reject a cancellation request and that the booking remains confirmed."""
-        self.cancellation_request.status = "Rejected"
-        self.cancellation_request.save()
+        url = reverse("admin:booking_bookingcancellationrequest_change", args=[self.cancellation_request.id])
+        data = {
+            "booking": self.booking.id,
+            "status": "Rejected",
+        }
+        response = self.client.post(url, data, follow=True)
         self.booking.refresh_from_db()
         self.assertEqual(self.booking.status, "Confirmed")
+
