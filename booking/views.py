@@ -4,7 +4,7 @@ from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
-from datetime import datetime
+from datetime import datetime, date
 from django.conf import settings
 
 from .models import Campervan, Booking, BookingChangeRequest, BookingCancellationRequest
@@ -156,6 +156,11 @@ def cancel_booking(request, booking_id):
 
     if booking.status == 'Cancelled':
         messages.error(request, "This booking is already canceled.", extra_tags="my_bookings")
+        return redirect('my_bookings')
+
+    # Prohibit cancellations of bookings from the past
+    if booking.end_date < date.today():
+        messages.error(request, "This booking has already ended and cannot be canceled.", extra_tags="my_bookings")
         return redirect('my_bookings')
 
     # Prohibit self service cancelations if booking status = "Confirmed"
