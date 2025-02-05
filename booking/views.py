@@ -51,7 +51,7 @@ def book_campervan(request, campervan_id):
             campervan=campervan,
             start_date__lt=end_date_dt,
             end_date__gt=start_date_dt
-        )
+        ).exclude(status='Cancelled')
         if overlapping.exists():
             return render(request, 'booking/book_campervan.html', {
                 'campervan': campervan,
@@ -129,7 +129,7 @@ def check_availability(request):
             campervan=campervan,
             start_date__lt=end_date_dt,
             end_date__gt=start_date_dt
-        )
+        ).exclude(status='Cancelled')
         is_available = not overlapping.exists()
         return JsonResponse({'is_available': is_available})
 
@@ -235,7 +235,7 @@ def edit_booking(request, booking_id):
             campervan=booking.campervan,
             start_date__lt=new_end_dt,
             end_date__gt=new_start_dt
-        ).exclude(id=booking.id)
+        ).exclude(id=booking.id).exclude(status='Cancelled')
         if overlapping.exists():
             messages.error(request, "This campervan is not available for the requested dates.", extra_tags="my_bookings")
             return redirect('edit_booking', booking_id=booking_id)
