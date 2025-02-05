@@ -39,9 +39,9 @@ def my_bookings(request):
     """
     bookings = Booking.objects.filter(user=request.user).order_by('-start_date')
 
-    # Flag to hide cancellation request button if status = "Rejected"
+    # Flag to hide cancellation request button if status of booking = "Rejected" or "Pending"
     for booking in bookings:
-        booking.hide_cancel_request = booking.cancellation_requests.filter(status='Rejected').exists()
+        booking.pending_cancel = booking.cancellation_requests.filter(status="Pending").exists()
 
     return render(request, 'users/my_bookings.html', {'bookings': bookings})
     
