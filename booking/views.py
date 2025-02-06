@@ -155,17 +155,17 @@ def cancel_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
     if booking.status == 'Cancelled':
-        messages.error(request, "This booking is already canceled.", extra_tags="my_bookings")
+        messages.error(request, "This booking is already cancelled.", extra_tags="my_bookings")
         return redirect('my_bookings')
 
     # Prohibit cancellations of bookings from the past
     if booking.end_date < date.today():
-        messages.error(request, "This booking has already ended and cannot be canceled.", extra_tags="my_bookings")
+        messages.error(request, "This booking has already ended and cannot be cancelled.", extra_tags="my_bookings")
         return redirect('my_bookings')
 
     # Prohibit self service cancelations if booking status = "Confirmed"
     if booking.status == 'Confirmed':
-        messages.error(request, "Cancelation request was sent to admin for approval")
+        messages.error(request, "Cancellation request was sent to admin for approval")
         return redirect('my_bookings')
 
     booking.status = 'Cancelled'
@@ -175,7 +175,7 @@ def cancel_booking(request, booking_id):
     send_cancellation_email(booking)
 
     # Cancelation confirmation
-    messages.success(request, "Your booking has been canceled successfully!", extra_tags="my_bookings")
+    messages.success(request, "Your booking has been cancelled successfully!", extra_tags="my_bookings")
 
     # Redirect user to my bookings page
     return redirect('my_bookings')
@@ -388,12 +388,12 @@ def send_booking_confirmation_email(booking):
 
 def send_cancellation_email(booking):
     """
-    Sends confirmation email on canceled bookings
+    Sends confirmation email on cancelled bookings
     """
     subject = 'Booking Cancellation'
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"Your booking for {booking.campervan.name} from {booking.start_date} to {booking.end_date} for ${booking.total_price:.2f} has been canceled.\n"
+        f"Your booking for {booking.campervan.name} from {booking.start_date} to {booking.end_date} for ${booking.total_price:.2f} has been cancelled.\n"
         f"Thank you for your visit, we hope to see you soon again.\n\n"
         f"Best regards\n\n"
         f"Your Wildventures Team"

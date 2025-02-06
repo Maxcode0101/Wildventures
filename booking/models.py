@@ -1,9 +1,9 @@
-from django.db import models
-
 # Handles details about bookings
 from django.db import models
 from django.contrib.auth.models import User
 from core.models import Campervan
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 class Booking(models.Model):
     STATUS_CHOICES = [
@@ -50,9 +50,32 @@ class BookingCancellationRequest(models.Model):
         ('Approved', 'Approved'),
         ('Rejected', 'Rejected'),
     ]
-    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name="cancellation_requests")
+    booking = models.ForeignKey('Booking', on_delete=models.CASCADE, related_name="cancellation_requests")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Cancellation Request for Booking {self.booking.id} ({self.status})"
+
+    # Ensures that status updates beeing saved
+    def save(self, *args, **kwargs):
+        if self.pk:
+            previous = BookingCancellationRequest.objects.get(pk=self.pk)
+            if previous.status != self.status:
+                if self.status == "Approved":
+                    self.booking.status = "Cancelled"
+                    self.booking.save()
+        super().save(*args, **kwargs)
+
+
+@receiver(pre_save, sender=BookingCancellationRequest)
+def update_booking_status_on_cancellation(sender, instance, **kwargs):
+    """
+    Check if status has changed and update from "Approved" to "Cancelled" if necessary
+    """
+    if instance.pk:
+        # Load the initial status from DB
+        previous = BookingCancellationRequest.objects.get(pk=instance.pk)
+        if previous.status != instance.status and instance.status == "Approved":
+            instance.booking.status = "Cancelled"
+            instance.booking.save()

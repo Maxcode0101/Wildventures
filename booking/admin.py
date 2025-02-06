@@ -50,17 +50,12 @@ class BookingCancellationRequestAdmin(admin.ModelAdmin):
     search_fields = ('booking__id', 'booking__user__username')
 
     def save_model(self, request, obj, form, change):
-        # Just for updates on existing requests
-        if change:
-            # Go back to initial state
-            prev_obj = BookingCancellationRequest.objects.get(pk=obj.pk)
-            if prev_obj.status != obj.status:
-                booking = obj.booking
-                if obj.status == 'Approved':
-                    # Update status to "Cancelled"
-                    booking.status = 'Cancelled'
-                    booking.save()
-                    send_cancellation_approval_email(booking, obj)
-                elif obj.status == 'Rejected':
-                    send_cancellation_rejection_email(booking, obj)
+        booking = obj.booking
+        # Update the booking if the cancellation request is approved.
+        if obj.status == "Approved":
+            booking.status = "Cancelled"
+            booking.save()
+            send_cancellation_approval_email(booking, obj)
+        elif obj.status == "Rejected":
+            send_cancellation_rejection_email(booking, obj)
         super().save_model(request, obj, form, change)
