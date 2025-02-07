@@ -2,269 +2,255 @@
 {% load static %}
 
 {% block content %}
-    <h1>Campervan Listings</h1>
+<h1>Campervan Listings</h1>
 
-    <!-- Search and Filters -->
-    <form method="get" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
-        <!-- Search Bar -->
-        <div style="flex: 1;">
-            <input 
-                type="text" 
-                name="q" 
-                placeholder="Search by name or description" 
-                value="{{ query }}" 
-                style="padding: 10px; width: 100%;"
-            >
-        </div>
+<!-- Search and Filters -->
+<form method="get" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+    <!-- Search Bar -->
+    <div style="flex: 1;">
+        <input type="text" name="q" placeholder="Search by name or description" value="{{ query }}" style="padding: 10px; width: 100%;">
+    </div>
+    <!-- Brand Filter -->
+    <div>
+        <label for="brand">Brand:</label>
+        <select name="brand" id="brand">
+            <option value="">All Brands</option>
+            {% for b in brands %}
+                <option value="{{ b }}" {% if b == selected_brand %}selected{% endif %}>{{ b }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <!-- Model Filter -->
+    <div>
+        <label for="model">Model:</label>
+        <select name="model" id="model">
+            <option value="">All Models</option>
+            {% for m in models %}
+                <option value="{{ m }}" {% if m == selected_model %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <!-- Capacity Filter -->
+    <div>
+        <label for="capacity">Capacity:</label>
+        <select name="capacity" id="capacity">
+            <option value="">All Capacities</option>
+            {% for c in capacity_range %}
+                <option value="{{ c }}" {% if c|stringformat:"s" == selected_capacity %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <!-- Max Price Filter -->
+    <div>
+        <label for="max_price">Max Price:</label>
+        <input type="number" name="max_price" placeholder="Max Price" value="{{ max_price }}" style="padding: 5px;">
+    </div>
+    <!-- Global Availability Filter -->
+    <div>
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+    </div>
+    <div>
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+    </div>
+    <button type="submit" style="padding: 10px 20px;">Filter</button>
+</form>
 
-        <!-- Brand Filter -->
-        <div>
-            <label for="brand">Brand:</label>
-            <select name="brand" id="brand">
-                <option value="">All Brands</option>
-                {% for b in brands %}
-                    <option value="{{ b }}" {% if b == selected_brand %}selected{% endif %}>{{ b }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <!-- Model Filter -->
-        <div>
-            <label for="model">Model:</label>
-            <select name="model" id="model">
-                <option value="">All Models</option>
-                {% for m in models %}
-                    <option value="{{ m }}" {% if m == selected_model %}selected{% endif %}>{{ m }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <!-- Capacity Filter -->
-        <div>
-            <label for="capacity">Capacity:</label>
-            <select name="capacity" id="capacity">
-                <option value="">All Capacities</option>
-                {% for c in capacity_range %}
-                    <option value="{{ c }}" {% if c|stringformat:"s" == selected_capacity %}selected{% endif %}>{{ c }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <!-- Max Price Filter -->
-        <div>
-            <label for="max_price">Max Price:</label>
-            <input 
-                type="number" 
-                name="max_price" 
-                placeholder="Max Price" 
-                value="{{ max_price }}" 
-                style="padding: 5px;"
-            >
-        </div>
-
-        <!-- Global Availability Filter -->
-        <div>
-            <label for="start_date">Start Date:</label>
-            <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
-        </div>
-
-        <div>
-            <label for="end_date">End Date:</label>
-            <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
-        </div>
-
-        <button type="submit" style="padding: 10px 20px;">Filter</button>
-    </form>
-
-    <!-- Campervan Listings -->
-    {% for campervan in campervans %}
-        <div style="border: 1px solid #ddd; padding: 16px; margin-bottom: 16px;">
-            <h2>{{ campervan.name }}</h2>
-            <p><strong>Brand:</strong> {{ campervan.brand }}</p>
-            <p><strong>Model:</strong> {{ campervan.model }}</p>
-            <p><strong>Description:</strong> {{ campervan.description }}</p>
-            <p><strong>Price per Day:</strong> ${{ campervan.price_per_day }}</p>
-            <p><strong>Capacity:</strong> {{ campervan.capacity }} people</p>
-            
-            {% if campervan.image %}
-                <img src="{{ campervan.image.url }}" alt="{{ campervan.name }}" class="img-fluid" width="300">
-            {% endif %}
-
-            <!-- Date Selection for Individual Campervan Availability -->
-            <div style="margin-top: 20px;">
-                <label for="start-date-{{ campervan.id }}">Start Date:</label>
-                <input 
-                    type="text" 
-                    id="start-date-{{ campervan.id }}" 
-                    class="start-date" 
-                    placeholder="Start Date" 
-                    style="padding: 8px;"
-                >
-
-                <label for="end-date-{{ campervan.id }}">End Date:</label>
-                <input 
-                    type="text" 
-                    id="end-date-{{ campervan.id }}" 
-                    class="end-date" 
-                    placeholder="End Date" 
-                    style="padding: 8px;"
-                >
-
-                <button 
-                    class="check-availability" 
-                    data-campervan-id="{{ campervan.id }}" 
-                    style="padding: 8px; margin-top: 10px;"
-                >
-                    Check Availability
-                </button>
-            </div>
-
-            <!-- Availability Response -->
-            <div id="availability-response-{{ campervan.id }}" style="margin-top: 10px; color: green;"></div>
-
-            <!-- "Book Now" Button -->
-            {% if campervan.id %}
-                <a 
-                    href="{% url 'book_campervan' campervan.id %}"
-                    class="btn btn-primary book-now" 
-                    data-campervan-id="{{ campervan.id }}"
-                    style="display: inline-block; margin-top: 15px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none;"
-                >
-                    Book Now
-                </a>    
-            {% else %}
-                <p style="color: red;">Invalid campervan ID. Unable to book.</p>
-            {% endif %}
-        </div>
-    {% empty %}
-        <p>No campervans match your search criteria. Try adjusting your search or filters.</p>
-    {% endfor %}
-
-    <!-- Pagination Controls -->
-    <div class="pagination">
-        {% if campervans.has_previous %}
-            <a href="?page=1">First</a>
-            <a href="?page={{ campervans.previous_page_number }}">Previous</a>
+<!-- Campervan Listings -->
+{% for campervan in campervans %}
+    <div style="border: 1px solid #ddd; padding: 16px; margin-bottom: 16px;">
+        <h2>{{ campervan.name }}</h2>
+        <p><strong>Brand:</strong> {{ campervan.brand }}</p>
+        <p><strong>Model:</strong> {{ campervan.model }}</p>
+        <p><strong>Description:</strong> {{ campervan.description }}</p>
+        <p><strong>Price per Day:</strong> ${{ campervan.price_per_day }}</p>
+        <p><strong>Capacity:</strong> {{ campervan.capacity }} people</p>
+        {% if campervan.image %}
+            <img src="{{ campervan.image.url }}" alt="{{ campervan.name }}" class="img-fluid" width="300">
         {% endif %}
-
-        <span>Page {{ campervans.number }} of {{ campervans.paginator.num_pages }}</span>
-
-        {% if campervans.has_next %}
-            <a href="?page={{ campervans.next_page_number }}">Next</a>
-            <a href="?page={{ campervans.paginator.num_pages }}">Last</a>
+        <!-- Date Selection for Individual Campervan Availability -->
+        <div style="margin-top: 20px;">
+            <label for="start-date-{{ campervan.id }}">Start Date:</label>
+            <input type="text" id="start-date-{{ campervan.id }}" class="start-date" placeholder="Start Date" style="padding: 8px;">
+            <label for="end-date-{{ campervan.id }}">End Date:</label>
+            <input type="text" id="end-date-{{ campervan.id }}" class="end-date" placeholder="End Date" style="padding: 8px;">
+            <button class="check-availability" data-campervan-id="{{ campervan.id }}" style="padding: 8px; margin-top: 10px;">Check Availability</button>
+        </div>
+        <!-- Availability Response -->
+        <div id="availability-response-{{ campervan.id }}" style="margin-top: 10px; color: green;"></div>
+        <!-- "Book Now" Button -->
+        {% if campervan.id %}
+            <a href="{% url 'book_campervan' campervan.id %}" class="btn btn-primary book-now" data-campervan-id="{{ campervan.id }}" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none;">Book Now</a>
+        {% else %}
+            <p style="color: red;">Invalid campervan ID. Unable to book.</p>
         {% endif %}
     </div>
+{% empty %}
+    <p>No campervans match your search criteria. Try adjusting your search or filters.</p>
+{% endfor %}
 
-    <!-- Dynamic Dropdowns: The view passes the following JSON strings:
-         - brand_models_json, model_brands_json, brands_json, models_json -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Initialize Flatpickr for global date inputs.
-            flatpickr('#start_date', {
-                altInput: true,
-                altFormat: "F j, Y",
-                dateFormat: "Y-m-d",
-                minDate: "today"
-            });
-            flatpickr('#end_date', {
-                altInput: true,
-                altFormat: "F j, Y",
-                dateFormat: "Y-m-d",
-                minDate: "today"
-            });
-            // Initialize Flatpickr for each campervan's date inputs.
-            document.querySelectorAll('.start-date').forEach(function (startInput) {
-                flatpickr(startInput, {
-                    altInput: true,
-                    altFormat: "F j, Y",
-                    dateFormat: "Y-m-d",
-                    minDate: "today"
-                });
-            });
-            document.querySelectorAll('.end-date').forEach(function (endInput) {
-                flatpickr(endInput, {
-                    altInput: true,
-                    altFormat: "F j, Y",
-                    dateFormat: "Y-m-d",
-                    minDate: "today"
-                });
-            });
+<!-- Pagination Controls -->
+<div class="pagination">
+    {% if campervans.has_previous %}
+        <a href="?page=1">First</a>
+        <a href="?page={{ campervans.previous_page_number }}">Previous</a>
+    {% endif %}
+    <span>Page {{ campervans.number }} of {{ campervans.paginator.num_pages }}</span>
+    {% if campervans.has_next %}
+        <a href="?page={{ campervans.next_page_number }}">Next</a>
+        <a href="?page={{ campervans.paginator.num_pages }}">Last</a>
+    {% endif %}
+</div>
 
-            // Parse the JSON mappings passed from the view.
-            var brandModels = JSON.parse('{{ brand_models_json|escapejs }}');
-            var modelBrands = JSON.parse('{{ model_brands_json|escapejs }}');
+<!-- Dynamic Dropdowns Script -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Initialize Flatpickr for global and individual date inputs.
+    flatpickr('#start_date', { altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d", minDate: "today" });
+    flatpickr('#end_date', { altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d", minDate: "today" });
+    document.querySelectorAll('.start-date').forEach(function (el) {
+        flatpickr(el, { altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d", minDate: "today" });
+    });
+    document.querySelectorAll('.end-date').forEach(function (el) {
+        flatpickr(el, { altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d", minDate: "today" });
+    });
 
-            // Parse the full lists from JSON strings passed from the view.
-            var allModels = JSON.parse('{{ models_json|escapejs }}');
-            var allBrands = JSON.parse('{{ brands_json|escapejs }}');
+    // Parse JSON strings from the view.
+    var brandModels = JSON.parse('{{ brand_models_json|escapejs }}');
+    var modelBrands = JSON.parse('{{ model_brands_json|escapejs }}');
+    var allModels = JSON.parse('{{ models_json|escapejs }}');
+    var allBrands = JSON.parse('{{ brands_json|escapejs }}');
+    var allCampers = JSON.parse('{{ campers_data_json|escapejs }}');
 
-            var brandSelect = document.getElementById("brand");
-            var modelSelect = document.getElementById("model");
+    var brandSelect = document.getElementById("brand");
+    var modelSelect = document.getElementById("model");
+    var capacitySelect = document.getElementById("capacity");
 
-            // We'll use a flag to track if the user manually selected a brand.
-            var manualBrandSelection = false;
-            brandSelect.addEventListener("change", function () {
-                if (this.value === "") {
-                    manualBrandSelection = false;
-                } else {
-                    manualBrandSelection = true;
-                }
-            });
-
-            // When brand changes, update the model dropdown (always include "All Models").
-            brandSelect.addEventListener("change", function () {
-                var selectedBrand = this.value;
-                modelSelect.innerHTML = "";
-                var defaultOption = document.createElement("option");
-                defaultOption.value = "";
-                defaultOption.text = "All Models";
-                modelSelect.appendChild(defaultOption);
-                if (selectedBrand && brandModels[selectedBrand]) {
-                    brandModels[selectedBrand].forEach(function (model) {
-                        var opt = document.createElement("option");
-                        opt.value = model;
-                        opt.text = model;
-                        modelSelect.appendChild(opt);
-                    });
-                } else {
-                    allModels.forEach(function (model) {
-                        var opt = document.createElement("option");
-                        opt.value = model;
-                        opt.text = model;
-                        modelSelect.appendChild(opt);
-                    });
-                }
-            });
-
-            // When model changes, update the brand dropdown.
-            // We always filter the brand dropdown by the selected model,
-            // but if the user manually selects a brand, we do not override it.
-            modelSelect.addEventListener("change", function () {
-                var selectedModel = this.value;
-                // Only update the brand dropdown if no manual selection has been made.
-                if (!manualBrandSelection) {
-                    brandSelect.innerHTML = "";
-                    var defaultOption = document.createElement("option");
-                    defaultOption.value = "";
-                    defaultOption.text = "All Brands";
-                    brandSelect.appendChild(defaultOption);
-                    if (selectedModel && modelBrands[selectedModel]) {
-                        modelBrands[selectedModel].forEach(function (brand) {
-                            var opt = document.createElement("option");
-                            opt.value = brand;
-                            opt.text = brand;
-                            brandSelect.appendChild(opt);
-                        });
-                    } else {
-                        allBrands.forEach(function (brand) {
-                            var opt = document.createElement("option");
-                            opt.value = brand;
-                            opt.text = brand;
-                            brandSelect.appendChild(opt);
-                        });
-                    }
-                }
-            });
+    // Helper: update dropdown options without forcing reset.
+    function updateDropdown(dropdown, optionsArray, currentValue, defaultText) {
+        dropdown.innerHTML = "";
+        var defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.text = defaultText;
+        dropdown.appendChild(defaultOption);
+        optionsArray.forEach(function(item) {
+            var opt = document.createElement("option");
+            opt.value = item;
+            opt.text = item;
+            if (item === currentValue) {
+                opt.selected = true;
+            }
+            dropdown.appendChild(opt);
         });
-    </script>
+    }
+
+    // Rebuild full lists based on capacity and current brand/model selections.
+    function rebuildFullLists() {
+        var selectedBrand = brandSelect.value;
+        var selectedModel = modelSelect.value;
+        var capacity = capacitySelect.value ? parseInt(capacitySelect.value) : null;
+        var filteredBrands = [];
+        var filteredModels = [];
+        allCampers.forEach(function(camper) {
+            var brandMatch = selectedBrand ? (camper.brand === selectedBrand) : true;
+            var modelMatch = selectedModel ? (camper.model === selectedModel) : true;
+            var capacityMatch = capacity ? (camper.capacity >= capacity) : true;
+            if (brandMatch && modelMatch && capacityMatch) {
+                if (camper.brand && filteredBrands.indexOf(camper.brand) === -1) {
+                    filteredBrands.push(camper.brand);
+                }
+                if (camper.model && filteredModels.indexOf(camper.model) === -1) {
+                    filteredModels.push(camper.model);
+                }
+            }
+        });
+        filteredBrands.sort();
+        filteredModels.sort();
+        return { fullBrands: filteredBrands, fullModels: filteredModels };
+    }
+
+    // Update capacity dropdown based on current brand/model selections.
+    function rebuildCapacityDropdown() {
+        var selectedBrand = brandSelect.value;
+        var selectedModel = modelSelect.value;
+        var filteredCampers = allCampers.filter(function(camper) {
+            var brandMatch = selectedBrand ? (camper.brand === selectedBrand) : true;
+            var modelMatch = selectedModel ? (camper.model === selectedModel) : true;
+            return brandMatch && modelMatch;
+        });
+        var capacities = [];
+        filteredCampers.forEach(function(camper) {
+            if (capacities.indexOf(camper.capacity) === -1) {
+                capacities.push(camper.capacity);
+            }
+        });
+        capacities.sort(function(a, b) { return a - b; });
+        updateDropdown(capacitySelect, capacities, capacitySelect.value, "All Capacities");
+    }
+
+    // When capacity changes, update the full lists for brand and model.
+    capacitySelect.addEventListener("change", function () {
+        var lists = rebuildFullLists();
+        updateDropdown(brandSelect, lists.fullBrands, brandSelect.value, "All Brands");
+        updateDropdown(modelSelect, lists.fullModels, modelSelect.value, "All Models");
+    });
+
+    // When brand changes, update the model dropdown (do not force reset of the brand selection).
+    brandSelect.addEventListener("change", function () {
+        var currentModel = modelSelect.value;
+        var options = (this.value && brandModels[this.value]) ? brandModels[this.value] : allModels;
+        updateDropdown(modelSelect, options, (options.indexOf(currentModel) !== -1 ? currentModel : currentModel), "All Models");
+        rebuildCapacityDropdown();
+    });
+
+    // When model changes, update the brand dropdown (do not force reset of the model selection).
+    modelSelect.addEventListener("change", function () {
+        var currentBrand = brandSelect.value;
+        var options = (this.value && modelBrands[this.value]) ? modelBrands[this.value] : allBrands;
+        updateDropdown(brandSelect, options, (options.indexOf(currentBrand) !== -1 ? currentBrand : currentBrand), "All Brands");
+        rebuildCapacityDropdown();
+    });
+    
+    // Availability check for each campervan.
+    document.querySelectorAll('.check-availability').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var campervanId = this.getAttribute('data-campervan-id');
+            var startDate = document.getElementById('start-date-' + campervanId).value;
+            var endDate = document.getElementById('end-date-' + campervanId).value;
+            var responseDiv = document.getElementById('availability-response-' + campervanId);
+            responseDiv.textContent = "";
+            if (!startDate || !endDate) {
+                responseDiv.style.color = 'red';
+                responseDiv.textContent = 'Please select both start and end dates.';
+                return;
+            }
+            if (new Date(endDate) <= new Date(startDate)) {
+                responseDiv.style.color = 'red';
+                responseDiv.textContent = 'Invalid input. End date must be after start date.';
+                return;
+            }
+            fetch(`{% url 'check_availability' %}?campervan_id=${campervanId}&start_date=${startDate}&end_date=${endDate}`)
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.is_available) {
+                        responseDiv.style.color = 'green';
+                        responseDiv.textContent = 'This campervan is available for the selected dates!';
+                        var bookNowButton = document.querySelector(`a.book-now[data-campervan-id="${campervanId}"]`);
+                        bookNowButton.href = `{% url 'book_campervan' 0 %}`.replace("0", campervanId) + `?start_date=${startDate}&end_date=${endDate}`;
+                        bookNowButton.style.display = "inline-block";
+                    } else {
+                        responseDiv.style.color = 'red';
+                        responseDiv.textContent = 'Sorry, this campervan is not available for the selected dates.';
+                    }
+                })
+                .catch(function(error) {
+                    responseDiv.style.color = 'red';
+                    responseDiv.textContent = 'An error occurred. Please try again.';
+                    console.error("Error checking availability:", error);
+                });
+        });
+    });
+});
+</script>
 {% endblock %}

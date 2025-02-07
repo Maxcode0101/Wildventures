@@ -18,7 +18,7 @@ def contact(request):
     return render(request, 'core/contact.html')
 
 def campervan_list(request):
-    query = request.GET.get('q', '').strip()  # Search query
+    query = request.GET.get('q', '').strip()
     selected_brand = request.GET.get('brand', '').strip()
     selected_model = request.GET.get('model', '').strip()
     selected_capacity = request.GET.get('capacity', '').strip()
@@ -28,32 +28,19 @@ def campervan_list(request):
 
     campervans = Campervan.objects.all()
 
-    # Filter by search query
+    # Apply filters to the main QuerySet.
     if query:
         campervans = campervans.filter(
             Q(name__icontains=query) | Q(description__icontains=query)
         )
-
-    # Filter by brand (case-insensitive)
     if selected_brand:
         campervans = campervans.filter(brand__iexact=selected_brand)
-
-    # Filter by model (case-insensitive)
     if selected_model:
         campervans = campervans.filter(model__iexact=selected_model)
-
-    # Filter by capacity
     if selected_capacity.isdigit():
-        capacity_val = int(selected_capacity)
-        campervans = campervans.filter(capacity__gte=capacity_val)
-    else:
-        capacity_val = None
-
-    # Filter by maximum price
+        campervans = campervans.filter(capacity__gte=int(selected_capacity))
     if max_price.isdigit():
         campervans = campervans.filter(price_per_day__lte=int(max_price))
-
-    # Global availability filter
     if start_date and end_date:
         unavailable_ids = Booking.objects.filter(
             start_date__lt=end_date,
@@ -61,16 +48,15 @@ def campervan_list(request):
         ).values_list('campervan_id', flat=True)
         campervans = campervans.exclude(id__in=unavailable_ids)
 
-    # Build distinct brands and models for filters.
-    if capacity_val is not None:
-        base_qs = Campervan.objects.filter(capacity__gte=capacity_val)
-    else:
-        base_qs = Campervan.objects.all()
+    # Build full dropdown lists for filtering from the full dataset
+    brands_list = list(
+        Campervan.objects.exclude(brand__isnull=True).values_list('brand', flat=True).distinct().order_by('brand')
+    )
+    models_list = list(
+        Campervan.objects.exclude(model__isnull=True).values_list('model', flat=True).distinct().order_by('model')
+    )
 
-    brands_list = list(base_qs.exclude(brand__isnull=True).values_list('brand', flat=True).distinct().order_by('brand'))
-    models_list = list(base_qs.exclude(model__isnull=True).values_list('model', flat=True).distinct().order_by('model'))
-
-    # Build a mapping: brand -> list of models
+    # Build mappings for dynamic filtering.
     brand_models_mapping = {}
     for brand in Campervan.objects.exclude(brand__isnull=True).values_list('brand', flat=True).distinct():
         brand_models = list(
@@ -79,7 +65,6 @@ def campervan_list(request):
         )
         brand_models_mapping[brand] = brand_models
 
-    # Build a mapping: model -> list of brands
     model_brands_mapping = {}
     for model in Campervan.objects.exclude(model__isnull=True).values_list('model', flat=True).distinct():
         model_brands = list(
@@ -88,11 +73,15 @@ def campervan_list(request):
         )
         model_brands_mapping[model] = model_brands
 
-    # Serialize the mappings and full lists to JSON strings.
+    # Build full dataset for client‑side filtering (for capacity and for rebuilding full lists)
+    campers_data = list(Campervan.objects.all().values('brand', 'model', 'capacity'))
+
+    # Serialize JSON strings.
     brand_models_json = json.dumps(brand_models_mapping)
     model_brands_json = json.dumps(model_brands_mapping)
     brands_json = json.dumps(brands_list)
     models_json = json.dumps(models_list)
+    campers_data_json = json.dumps(campers_data)
 
     capacity_range = range(1, 11)
 
@@ -122,6 +111,7 @@ def campervan_list(request):
         'model_brands_json': model_brands_json,
         'brands_json': brands_json,
         'models_json': models_json,
+        'campers_data_json': campers_data_json,
     })
 
 def check_availability(request):
