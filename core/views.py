@@ -1,3 +1,5 @@
+
+import json
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -17,12 +19,12 @@ def contact(request):
 
 def campervan_list(request):
     query = request.GET.get('q', '').strip()  # Search query
-    selected_brand = request.GET.get('brand', '')
-    selected_model = request.GET.get('model', '')
-    selected_capacity = request.GET.get('capacity', '')
-    max_price = request.GET.get('max_price', '')
-    start_date = request.GET.get('start_date', '')
-    end_date = request.GET.get('end_date', '')
+    selected_brand = request.GET.get('brand', '').strip()
+    selected_model = request.GET.get('model', '').strip()
+    selected_capacity = request.GET.get('capacity', '').strip()
+    max_price = request.GET.get('max_price', '').strip()
+    start_date = request.GET.get('start_date', '').strip()
+    end_date = request.GET.get('end_date', '').strip()
 
     campervans = Campervan.objects.all()
 
@@ -32,17 +34,20 @@ def campervan_list(request):
             Q(name__icontains=query) | Q(description__icontains=query)
         )
 
-    # Filter by brand
+    # Filter by brand (case-insensitive)
     if selected_brand:
-        campervans = campervans.filter(brand=selected_brand)
+        campervans = campervans.filter(brand__iexact=selected_brand)
 
-    # Filter by model
+    # Filter by model (case-insensitive)
     if selected_model:
-        campervans = campervans.filter(model=selected_model)
+        campervans = campervans.filter(model__iexact=selected_model)
 
     # Filter by capacity
     if selected_capacity.isdigit():
-        campervans = campervans.filter(capacity__gte=int(selected_capacity))
+        capacity_val = int(selected_capacity)
+        campervans = campervans.filter(capacity__gte=capacity_val)
+    else:
+        capacity_val = None
 
     # Filter by maximum price
     if max_price.isdigit():
@@ -56,21 +61,44 @@ def campervan_list(request):
         ).values_list('campervan_id', flat=True)
         campervans = campervans.exclude(id__in=unavailable_ids)
 
-    # Get distinct brands and models for the filters
-    brands = Campervan.objects.values_list('brand', flat=True).distinct().order_by('brand')
-    models = (
-        Campervan.objects.filter(brand=selected_brand)
-        .values_list('model', flat=True)
-        .distinct()
-        .order_by('model') if selected_brand else Campervan.objects.values_list('model', flat=True).distinct().order_by('model')
-    )
+    # Build distinct brands and models for filters.
+    if capacity_val is not None:
+        base_qs = Campervan.objects.filter(capacity__gte=capacity_val)
+    else:
+        base_qs = Campervan.objects.all()
+
+    brands_list = list(base_qs.exclude(brand__isnull=True).values_list('brand', flat=True).distinct().order_by('brand'))
+    models_list = list(base_qs.exclude(model__isnull=True).values_list('model', flat=True).distinct().order_by('model'))
+
+    # Build a mapping: brand -> list of models
+    brand_models_mapping = {}
+    for brand in Campervan.objects.exclude(brand__isnull=True).values_list('brand', flat=True).distinct():
+        brand_models = list(
+            Campervan.objects.filter(brand__iexact=brand).exclude(model__isnull=True)
+            .values_list('model', flat=True).distinct().order_by('model')
+        )
+        brand_models_mapping[brand] = brand_models
+
+    # Build a mapping: model -> list of brands
+    model_brands_mapping = {}
+    for model in Campervan.objects.exclude(model__isnull=True).values_list('model', flat=True).distinct():
+        model_brands = list(
+            Campervan.objects.filter(model__iexact=model).exclude(brand__isnull=True)
+            .values_list('brand', flat=True).distinct().order_by('brand')
+        )
+        model_brands_mapping[model] = model_brands
+
+    # Serialize the mappings and full lists to JSON strings.
+    brand_models_json = json.dumps(brand_models_mapping)
+    model_brands_json = json.dumps(model_brands_mapping)
+    brands_json = json.dumps(brands_list)
+    models_json = json.dumps(models_list)
 
     capacity_range = range(1, 11)
 
     # Pagination
     paginator = Paginator(campervans, 5)
     page = request.GET.get('page', 1)
-
     try:
         campervans = paginator.page(page)
     except PageNotAnInteger:
@@ -81,8 +109,8 @@ def campervan_list(request):
     return render(request, 'core/campervan_list.html', {
         'campervans': campervans,
         'query': query,
-        'brands': brands,
-        'models': models,
+        'brands': brands_list,
+        'models': models_list,
         'selected_brand': selected_brand,
         'selected_model': selected_model,
         'selected_capacity': selected_capacity,
@@ -90,6 +118,10 @@ def campervan_list(request):
         'capacity_range': capacity_range,
         'start_date': start_date,
         'end_date': end_date,
+        'brand_models_json': brand_models_json,
+        'model_brands_json': model_brands_json,
+        'brands_json': brands_json,
+        'models_json': models_json,
     })
 
 def check_availability(request):
