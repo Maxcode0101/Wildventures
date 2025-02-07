@@ -540,3 +540,5 @@ def send_cancellation_request_notification_to_admin(booking, cancellation_reques
             "Please review this request in the admin dashboard."
         )
         send_mail(subject, message, 'no-reply@wildventures.com', [admin_email], fail_silently=False)
+
+

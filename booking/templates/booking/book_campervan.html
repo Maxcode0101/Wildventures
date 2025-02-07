@@ -3,6 +3,12 @@
 {% block content %}
     <h1>Book Campervan: {{ campervan.name }}</h1>
 
+    {% if error %}
+        <div class="error" style="color: red; font-weight: bold;">
+        {{ error }}
+        </div>
+    {% endif %}
+
     <form method="post" id="booking-form" style="margin-top: 20px;">
         {% csrf_token %}
         <div>
