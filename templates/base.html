@@ -16,6 +16,7 @@
         <nav>
             <ul>
                 <li><a href="{% url 'about' %}">About Us</a></li>
+                <li><a href="{% url 'faq' %}">FAQ</a></li>
                 <li><a href="{% url 'campervan_list' %}">Our Campervans</a></li>
 
                 {% if user.is_authenticated %}

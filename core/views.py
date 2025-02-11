@@ -17,6 +17,10 @@ def contact(request):
     """Display the Contact page."""
     return render(request, 'core/contact.html')
 
+def faq(request):
+    """Display the FAQ page."""
+    return render(request, 'core/faq.html')
+
 def campervan_list(request):
     query = request.GET.get('q', '').strip()
     selected_brand = request.GET.get('brand', '').strip()
