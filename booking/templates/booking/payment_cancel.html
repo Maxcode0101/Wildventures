@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h1>Payment Canceled</h1>
+    <p>
+        It looks like your payment process was canceled or interrupted. 
+        Your booking is still in <strong>Pending</strong> status.
+    </p>
+    <p>
+        If you changed your mind or encountered a technical issue, 
+        feel free to retry the payment. Otherwise, 
+        <a href="{% url 'contact' %}">contact us</a> if you need any help.
+    </p>
+    <hr>
+    <p>
+        <a href="{% url 'dashboard' %}" style="text-decoration: none; color: #fff; background-color: #007bff; padding: 10px 16px; border-radius: 4px;">
+            Go to My Dashboard
+        </a>
+    </p>
+</div>
+{% endblock %}
