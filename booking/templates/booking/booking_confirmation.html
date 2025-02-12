@@ -18,6 +18,10 @@
     <p><strong>Status:</strong> {{ booking.status }}</p>
 </div>
 
+{% if booking.status == "Pending" %}
+    <a href="{% url 'create_checkout_session' booking.id %}">Pay Now</a>
+{% endif %}
+
 <a href="{% url 'dashboard' %}" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
     Go to My Bookings
 </a>

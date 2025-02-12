@@ -6,6 +6,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from datetime import datetime, date
 from django.conf import settings
+import stripe
+from django.urls import reverse
 
 from .models import Campervan, Booking, BookingChangeRequest, BookingCancellationRequest
 
@@ -180,6 +182,45 @@ def cancel_booking(request, booking_id):
     # Redirect user to my bookings page
     return redirect('my_bookings')
 
+###########################
+# Checkout / Stripe payment
+###########################
+
+@login_required
+def create_checkout_session(request, booking_id):
+    booking = get_object_or_404(Booking, pk=booking_id, user=request.user)
+    
+    # Dissallow payment for bookings if confirmed/cancelled
+    if booking.status != 'Pending':
+        # Redirect or display message: "Payment is not available for this booking"
+        return redirect('booking_details', booking_id=booking.id)
+    
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    # Convert the total price to cents for Stripe
+    amount_in_cents = int(booking.total_price * 100)
+
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price_data': {
+                'currency': 'eur',  # or any currency
+                'product_data': {
+                    'name': f"Booking #{booking.id}",
+                },
+                'unit_amount': amount_in_cents,
+            },
+            'quantity': 1,
+        }],
+        mode='payment',
+        success_url=request.build_absolute_uri(reverse('payment_success')) + '?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url=request.build_absolute_uri(reverse('payment_cancel')),
+        metadata={
+            'booking_id': booking.id
+        }
+    )
+
+    return redirect(session.url, code=303)
 
 @login_required
 def request_cancellation(request, booking_id):
