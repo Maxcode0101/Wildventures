@@ -1,11 +1,17 @@
 
 import json
+from django.conf import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.core.mail import send_mail
+from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q
+import datetime
 from .models import Campervan  # Import Campervan
 from booking.models import Booking  # Import Booking
+from .forms import ContactForm
+
 
 # Create your views here.
 
@@ -14,8 +20,47 @@ def about(request):
     return render(request, 'core/about.html')
 
 def contact(request):
-    """Display the Contact page."""
-    return render(request, 'core/contact.html')
+    """Display the Contact page and handle form."""
+    if request.method == "POST":
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            # Extract form data
+            name = form.cleaned_data["name"]
+            user_email = form.cleaned_data["email"]
+            subject = form.cleaned_data["subject"]
+            message = form.cleaned_data["message"]
+            
+            # Prepare email subject and body
+            email_subject = f"Contact Form: {subject}"
+            email_body = (
+                f"Name: {name}\n"
+                f"Email: {user_email}\n"
+                f"Subject: {subject}\n"
+                f"Message:\n{message}"
+            )
+            
+            # Define the sender email and recipient list
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [settings.DEFAULT_ADMIN_EMAIL]
+            
+            # Send email
+            send_mail(
+                subject=email_subject,
+                message=email_body,
+                from_email=from_email,
+                recipient_list=recipient_list,
+                fail_silently=False,
+            )
+
+            messages.success(request, "The message has been sent. We'll get back at you soon!")
+            return redirect("contact")
+        
+        else:
+            messages.error(request, "Please correct the invalid fields.")
+            
+    else:
+        form = ContactForm()            
+    return render(request, 'core/contact.html', {"form": form})
 
 def faq(request):
     """Display the FAQ page."""
@@ -126,20 +171,20 @@ def check_availability(request):
 
     try:
         # Check if start_date < end_date
-            campervan = Campervan.objects.get(id=campervan_id)
-            start_date_dt = datetime.strptime(start_date, '%Y-%m-%d').date()
-            end_date_dt = datetime.strptime(end_date, '%Y-%m-%d').date()
+        campervan = Campervan.objects.get(id=campervan_id)
+        start_date_dt = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date_dt = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
 
-            if end_date_dt <= start_date_dt:
-                return JsonResponse({ 'Invalid input' : 'End date must be after start date'}, status=400)
+        if end_date_dt <= start_date_dt:
+            return JsonResponse({'Invalid input': 'End date must be after start date'}, status=400)
 
-            overlapping_bookings = Booking.objects.filter(
-                campervan=campervan,
-                start_date__lt=end_date_dt,
-                end_date__gt=start_date_dt
-            )
-            is_available = not overlapping_bookings.exists()
-            return JsonResponse({'is_available': is_available})
+        overlapping_bookings = Booking.objects.filter(
+            campervan=campervan,
+            start_date__lt=end_date_dt,
+            end_date__gt=start_date_dt
+        )
+        is_available = not overlapping_bookings.exists()
+        return JsonResponse({'is_available': is_available})
 
     except (Campervan.DoesNotExist, ValueError):
         # Handle unexpected errors

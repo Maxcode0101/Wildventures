@@ -3,10 +3,65 @@
 {% block title %}Contact Us{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-4" style="max-width: 600px;">
     <h1>Contact Us</h1>
-    <p>If you have any questions or need assistance, please don't hesitate to reach out to us.</p>
-    <p>Email: support@campervanrentals.com</p>
-    <p>Phone: +49 (176) 123-4567</p>
+
+    {% if messages %}
+    <div style="margin-bottom: 20px;">
+        {% for message in messages %}
+            <p class="{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
+                {{ message }}
+            </p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <p>In case you have any kind of questions or you need our assistance, feel free to reach out to our service team.</p>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        
+        <div style="margin-bottom: 10px;">
+            <label for="id_name">Your Name</label><br>
+            {{ form.name }}
+            {% if form.name.errors %}
+                <div class="error">{{ form.name.errors|striptags }}</div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 10px;">
+            <label for="id_email">Your Email</label><br>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <div class="error">{{ form.email.errors|striptags }}</div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 10px;">
+            <label for="id_subject">Subject</label><br>
+            {{ form.subject }}
+            {% if form.subject.errors %}
+                <div class="error">{{ form.subject.errors|striptags }}</div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 10px;">
+            <label for="id_message">Message</label><br>
+            {{ form.message }}
+            {% if form.message.errors %}
+                <div class="error">{{ form.message.errors|striptags }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer;">
+            Send
+        </button>
+    </form>
+
+    <p style="margin-top: 20px;">
+        Or if you prefer, email us directly at <a href="mailto:support@campervanrentals.com">support@campervanrentals.com</a>
+        or call +49 (176) 123-4567.
+    </p>
 </div>
 {% endblock %}
