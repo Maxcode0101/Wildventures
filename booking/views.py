@@ -224,10 +224,10 @@ def create_checkout_session(request, booking_id):
 
 def payment_success(request):
     session_id = request.GET.get('session_id')
-    return render(request, 'booking/payment_success.html'), {'booking_id': booking_id}) 
+    return render(request, 'booking/payment_success.html', {'booking_id': booking_id}) 
 
 def payment_cancel(request):
-    return render(request, 'booking/payment_cancel.html'), {'booking_id': booking_id})
+    return render(request, 'booking/payment_cancel.html', {'booking_id': booking_id})
     
 
 @login_required
