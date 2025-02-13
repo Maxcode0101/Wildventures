@@ -15,4 +15,8 @@ urlpatterns = [
     path('change_requests/<int:request_id>/approve/', views.approve_change_request, name='approve_change_request'),
     path('change_requests/<int:request_id>/reject/', views.reject_change_request, name='reject_change_request'),
     path('request_cancellation/<int:booking_id>/', views.request_cancellation, name='request_cancellation'),
+    path('create-checkout-session/<int:booking_id>/', create_checkout_session, name='create_checkout_session'),
+    path('payment_success/', payment_success, name='payment_success'),
+    path('payment_cancel/', payment_cancel, name='payment_cancel'),
+    path('stripe-webhook/', stripe_webhook, name='stripe_webhook'),
 ]
