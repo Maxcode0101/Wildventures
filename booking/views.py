@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -7,6 +7,7 @@ from django.contrib import messages
 from datetime import datetime, date
 from django.conf import settings
 import stripe
+from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 
 from .models import Campervan, Booking, BookingChangeRequest, BookingCancellationRequest
@@ -229,6 +230,42 @@ def payment_success(request):
 def payment_cancel(request):
     return render(request, 'booking/payment_cancel.html', {'booking_id': booking_id})
     
+
+@csrf_exempt
+def stripe_webhook(request):
+    payload = request.body
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError:
+        # Payload is not valid JSON
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError:
+        # Signature is not valid
+        return HttpResponse(status=400)
+
+    # Eventhandler for checkout.session.completed
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        # Retrieve the booking ID from metadata:
+        booking_id = session.get('metadata', {}).get('booking_id')
+        if booking_id:
+            from .models import Booking  # or import at top
+            try:
+                booking = Booking.objects.get(pk=booking_id)
+                # Change booking status to confirmed
+                if booking.status == 'Pending':
+                    booking.status = 'Confirmed'
+                    booking.save()
+            except Booking.DoesNotExist:
+                pass
+    
+    return HttpResponse(status=200)
+
 
 @login_required
 def request_cancellation(request, booking_id):
