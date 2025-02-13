@@ -55,6 +55,15 @@
                         </a>
                     {% endif %}
 
+                    {# Payment Actions: Only show if booking is pending #}
+                    {% if booking.status == "Pending" %}
+                        <a href="{% url 'create_checkout_session' booking.id %}" 
+                           class="btn btn-success" 
+                           style="padding: 6px; background-color: #20c997; color: white; text-decoration: none; border-radius: 3px; margin-left: 8px;">
+                           Pay Now
+                        </a>
+                    {% endif %}
+
                     <br><br>
 
                     {# Display Date Change Requests only if no pending cancellation exists #}
