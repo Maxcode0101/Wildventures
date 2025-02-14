@@ -18,6 +18,7 @@ import dj_database_url
 if os.path.exists("env.py"):
     import env
     
+os.environ['SSL_CERT_FILE'] = certifi.where()
 ssl._create_default_https_context = ssl.create_default_context(cafile=certifi.where())
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

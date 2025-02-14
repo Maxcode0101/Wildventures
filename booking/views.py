@@ -9,9 +9,11 @@ from django.conf import settings
 import stripe
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
+import logging
 
 from .models import Campervan, Booking, BookingChangeRequest, BookingCancellationRequest
 
+logger = logging.getLogger(__name__)
 
 ###############################################
 # Views responsible for Bookings / Availability 
@@ -183,6 +185,7 @@ def cancel_booking(request, booking_id):
     # Redirect user to my bookings page
     return redirect('my_bookings')
 
+
 ###########################
 # Checkout / Stripe payment
 ###########################
@@ -193,19 +196,17 @@ def create_checkout_session(request, booking_id):
     
     # Dissallow payment for bookings if confirmed/cancelled
     if booking.status != 'Pending':
-        # Redirect or display message: "Payment is not available for this booking"
         return redirect('booking_details', booking_id=booking.id)
     
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    # Convert the total price to cents for Stripe
     amount_in_cents = int(booking.total_price * 100)
 
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
         line_items=[{
             'price_data': {
-                'currency': 'eur',  # or any currency
+                'currency': 'eur',
                 'product_data': {
                     'name': f"Booking #{booking.id}",
                 },
@@ -223,14 +224,18 @@ def create_checkout_session(request, booking_id):
 
     return redirect(session.url, code=303)
 
+
 def payment_success(request):
     return render(request, 'booking/payment_success.html')
+
 
 def payment_cancel(request):
     return render(request, 'booking/payment_cancel.html')
 
+
 @csrf_exempt
 def stripe_webhook(request):
+    logger.info("Stripe webhook called")
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     event = None
@@ -239,28 +244,30 @@ def stripe_webhook(request):
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
-    except ValueError:
-        # Payload is not valid JSON
+    except ValueError as e:
+        logger.error("Invalid payload", exc_info=True)
         return HttpResponse(status=400)
-    except stripe.error.SignatureVerificationError:
-        # Signature is not valid
+    except stripe.error.SignatureVerificationError as e:
+        logger.error("Invalid signature", exc_info=True)
         return HttpResponse(status=400)
 
-    # Eventhandler for checkout.session.completed
+    logger.info(f"Received event: {event['type']}")
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-        # Retrieve the booking ID from metadata:
+        logger.info(f"Session data: {session}")
         booking_id = session.get('metadata', {}).get('booking_id')
+        logger.info(f"Booking ID from metadata: {booking_id}")
         if booking_id:
-            from .models import Booking  # or import at top
             try:
                 booking = Booking.objects.get(pk=booking_id)
-                # Change booking status to confirmed
                 if booking.status == 'Pending':
                     booking.status = 'Confirmed'
                     booking.save()
+                    logger.info(f"Booking {booking_id} status updated to Confirmed.")
+                else:
+                    logger.info(f"Booking {booking_id} status is not Pending; current status: {booking.status}")
             except Booking.DoesNotExist:
-                pass
+                logger.error(f"Booking with id {booking_id} does not exist.")
     
     return HttpResponse(status=200)
 
@@ -269,12 +276,10 @@ def stripe_webhook(request):
 def request_cancellation(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
-    # Allow requests only for bookings with status "Confirmed"
     if booking.status != 'Confirmed':
         messages.error(request, "Cancellation requests can only be made for confirmed bookings.")
         return redirect('my_bookings')
 
-    # Prevent users from submitting mutliple cancelation requests for the same booking
     if booking.cancellation_requests.filter(status='Pending').exists():
         messages.info(request, "Cancelation request for this booking number has already been submitted. Now our team has to review your request. We appreciate your patience.")
         return redirect('my_bookings')
@@ -282,7 +287,6 @@ def request_cancellation(request, booking_id):
     cancellation_request = BookingCancellationRequest.objects.create(booking=booking)
     messages.success(request, "We received your cancelation request, which is now beeing reviewed by our team. We'll contact you once it is approved or rejected. Thanks for your patience.")
 
-    # Notification for admin about pending cancellation request
     send_cancellation_request_notification_to_admin(booking, cancellation_request)
     
     return redirect('my_bookings')
@@ -294,9 +298,6 @@ def request_cancellation(request, booking_id):
 
 @login_required
 def edit_booking(request, booking_id):
-    """
-    Allows user to change bookings with status "Pending".
-    """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
     if booking.status != 'Pending':
@@ -314,12 +315,10 @@ def edit_booking(request, booking_id):
             messages.error(request, "Invalid date format.", extra_tags="my_bookings")
             return redirect('edit_booking', booking_id=booking_id)
 
-        # Validation of new dates
         if new_end_dt <= new_start_dt:
             messages.error(request, "Invalid input. End date must be after start date.", extra_tags="my_bookings")
             return redirect('edit_booking', booking_id=booking_id)
 
-        # Prevent overlapping booking
         overlapping = Booking.objects.filter(
             campervan=booking.campervan,
             start_date__lt=new_end_dt,
@@ -329,7 +328,6 @@ def edit_booking(request, booking_id):
             messages.error(request, "This campervan is not available for the requested dates.", extra_tags="my_bookings")
             return redirect('edit_booking', booking_id=booking_id)
 
-        # Update the booking
         day_count = (new_end_dt - new_start_dt).days
         booking.start_date = new_start_dt
         booking.end_date = new_end_dt
@@ -337,12 +335,10 @@ def edit_booking(request, booking_id):
 
         booking.save()
 
-        # Inform user about the changed booking via email
         send_booking_changed_email(booking)
         messages.success(request, "We sucessfully changed your booking!", extra_tags="my_bookings")
         return redirect('my_bookings')
 
-    # Get request: Display new booking details
     return render(request, 'booking/edit_booking.html', {
         'booking': booking,
     })
@@ -350,10 +346,6 @@ def edit_booking(request, booking_id):
 
 @login_required
 def request_date_change(request, booking_id):
-    """
-    User can suggest date change for confirmed booking. 
-    Needs admin aproval.
-    """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
     if booking.status != 'Confirmed':
@@ -386,9 +378,8 @@ def request_date_change(request, booking_id):
         send_date_change_request_notification_to_admin(booking, bcr)
         return redirect('my_bookings')
 
-    # GET request
     return render(request, 'booking/request_date_change.html', {'booking': booking})
-    
+
 
 ################################################
 # View's responsible for Admin / Staff functions
