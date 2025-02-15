@@ -235,11 +235,12 @@ def payment_cancel(request):
 @csrf_exempt
 def stripe_webhook(request):
     import logging
+    from django.http import HttpResponse
     logger = logging.getLogger(__name__)
-    
+
     payload = request.body
+    logger.info("Raw webhook payload: %s", payload)
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
-    event = None
 
     try:
         event = stripe.Webhook.construct_event(
@@ -253,28 +254,33 @@ def stripe_webhook(request):
         return HttpResponse(status=400)
 
     logger.info("Received event type: %s", event.get('type'))
-    session = event.get('data', {}).get('object', {})
-    metadata = session.get('metadata', {})
-    logger.info("Received metadata: %s", metadata)
 
-    # Handle both checkout.session.completed and payment_intent.succeeded events
-    if event['type'] in ['checkout.session.completed', 'payment_intent.succeeded']:
+    # Process only checkout.session.completed events.
+    if event.get('type') == 'checkout.session.completed':
+        session = event['data']['object']
+        metadata = session.get('metadata', {})
+        logger.info("Session metadata: %s", metadata)
+
         booking_id_str = metadata.get('booking_id')
         if booking_id_str:
             try:
                 booking = Booking.objects.get(pk=int(booking_id_str))
+                # Only update if the booking is still pending.
                 if booking.status == 'Pending':
                     booking.status = 'Confirmed'
                     booking.save()
-                    logger.info("Booking updated to Confirmed for booking id: %s", booking_id_str)
+                    logger.info("Booking (id: %s) updated to Confirmed.", booking_id_str)
                 else:
-                    logger.info("Booking (id: %s) already updated with status: %s", booking_id_str, booking.status)
+                    logger.info("Booking (id: %s) is already updated (status: %s).", booking_id_str, booking.status)
             except Booking.DoesNotExist:
-                logger.error("Booking does not exist for id: %s", booking_id_str)
+                logger.error("Booking with id %s does not exist.", booking_id_str)
         else:
-            logger.error("No booking_id found in metadata.")
-    
+            logger.error("No booking_id found in session metadata.")
+    else:
+        logger.info("Unhandled event type: %s", event.get('type'))
+
     return HttpResponse(status=200)
+
 
 
 @login_required
