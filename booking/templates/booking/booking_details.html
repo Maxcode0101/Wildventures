@@ -1,38 +1,31 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <!-- Page title -->
-    <h1>Booking Details</h1>
+<h1>Booking Details</h1>
 
-    <!-- Booking details container -->
-    <div style="border: 1px solid #ddd; padding: 16px;">
-        <!-- Campervan name -->
-        <h2>{{ booking.campervan.name }}</h2>
-        <!-- Booking start date -->
-        <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
-        <!-- Booking end date -->
-        <p><strong>End Date:</strong> {{ booking.end_date }}</p>
-        <!-- Total price of the booking -->
-        <p><strong>Total Price:</strong> ${{ booking.total_price }}</p>
-        <!-- Booking status -->
-        <p><strong>Status:</strong> {{ booking.status }}</p>
+<div style="border: 1px solid #ddd; padding: 16px;">
+    <h2>{{ booking.campervan.name }}</h2>
+    <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
+    <p><strong>End Date:</strong> {{ booking.end_date }}</p>
+    <p><strong>Total Price:</strong> ${{ booking.total_price }}</p>
+    <p><strong>Status:</strong> {{ booking.status }}</p>
 
-        <!-- If the booking status is "Pending", show the "Pay Now" button -->
-        {% if booking.status == "Pending" %}
-            <a href="{% url 'create_checkout_session' booking.id %}" 
-               class="btn btn-success" 
-               style="padding: 6px; background-color: #20c997; color: white; text-decoration: none; border-radius: 3px;">
-               Pay Now
-            </a>
-        {% endif %}
+    {% if booking.status == "Pending" %}
+        <a href="{% url 'create_checkout_session' booking.id %}" class="btn btn-success" style="padding: 6px; background-color: #ff9900; color: white; text-decoration: none; border-radius: 3px;">
+            Pay Now
+        </a>
+        <a href="{% url 'edit_booking' booking.id %}" class="btn btn-primary" style="padding: 6px; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px; margin-top: 10px;">
+            Change Dates
+        </a>
+        <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-danger" style="padding: 6px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px; margin-top: 10px; margin-left: 10px;">
+            Cancel Reservation
+        </a>
+    {% endif %}
 
-        <!-- Link to go back to the user's bookings -->
-        <p style="margin-top: 10px;">
-            <a href="{% url 'my_bookings' %}" 
-               class="btn btn-secondary" 
-               style="padding: 6px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 3px;">
-               Back to My Bookings
-            </a>
-        </p>
-    </div>
+    <p style="margin-top: 10px;">
+        <a href="{% url 'my_bookings' %}" class="btn btn-secondary" style="padding: 6px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 3px;">
+            Back to My Bookings
+        </a>
+    </p>
+</div>
 {% endblock %}
