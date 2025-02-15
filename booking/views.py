@@ -194,12 +194,11 @@ def cancel_booking(request, booking_id):
 def create_checkout_session(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id, user=request.user)
     
-    # Dissallow payment for bookings if confirmed/cancelled
+    # Disallow payment if the booking isn't pending.
     if booking.status != 'Pending':
         return redirect('booking_details', booking_id=booking.id)
     
     stripe.api_key = settings.STRIPE_SECRET_KEY
-
     amount_in_cents = int(booking.total_price * 100)
 
     session = stripe.checkout.Session.create(
@@ -218,7 +217,7 @@ def create_checkout_session(request, booking_id):
         success_url=request.build_absolute_uri(reverse('payment_success')) + '?session_id={CHECKOUT_SESSION_ID}',
         cancel_url=request.build_absolute_uri(reverse('payment_cancel')),
         metadata={
-            'booking_id': booking.id
+            'booking_id': str(booking.id)
         }
     )
 
@@ -235,7 +234,9 @@ def payment_cancel(request):
 
 @csrf_exempt
 def stripe_webhook(request):
-    logger.info("Stripe webhook called")
+    import logging
+    logger = logging.getLogger(__name__)
+    
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
     event = None
@@ -245,29 +246,33 @@ def stripe_webhook(request):
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
     except ValueError as e:
-        logger.error("Invalid payload", exc_info=True)
+        logger.error("Invalid payload: %s", e)
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError as e:
-        logger.error("Invalid signature", exc_info=True)
+        logger.error("Invalid signature: %s", e)
         return HttpResponse(status=400)
 
-    logger.info(f"Received event: {event['type']}")
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        logger.info(f"Session data: {session}")
-        booking_id = session.get('metadata', {}).get('booking_id')
-        logger.info(f"Booking ID from metadata: {booking_id}")
-        if booking_id:
+    logger.info("Received event type: %s", event.get('type'))
+    session = event.get('data', {}).get('object', {})
+    metadata = session.get('metadata', {})
+    logger.info("Received metadata: %s", metadata)
+
+    # Handle both checkout.session.completed and payment_intent.succeeded events
+    if event['type'] in ['checkout.session.completed', 'payment_intent.succeeded']:
+        booking_id_str = metadata.get('booking_id')
+        if booking_id_str:
             try:
-                booking = Booking.objects.get(pk=booking_id)
+                booking = Booking.objects.get(pk=int(booking_id_str))
                 if booking.status == 'Pending':
                     booking.status = 'Confirmed'
                     booking.save()
-                    logger.info(f"Booking {booking_id} status updated to Confirmed.")
+                    logger.info("Booking updated to Confirmed for booking id: %s", booking_id_str)
                 else:
-                    logger.info(f"Booking {booking_id} status is not Pending; current status: {booking.status}")
+                    logger.info("Booking (id: %s) already updated with status: %s", booking_id_str, booking.status)
             except Booking.DoesNotExist:
-                logger.error(f"Booking with id {booking_id} does not exist.")
+                logger.error("Booking does not exist for id: %s", booking_id_str)
+        else:
+            logger.error("No booking_id found in metadata.")
     
     return HttpResponse(status=200)
 
