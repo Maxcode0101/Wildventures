@@ -65,7 +65,7 @@ def book_campervan(request, campervan_id):
                 'end_date': end_date_str,
             })
 
-        # Creates booking with status Pending (i.e. a reservation)
+        # Creates booking with status Pending (i.e. a reservation awaiting payment)
         days = (end_date_dt - start_date_dt).days
         total_price = days * campervan.price_per_day
 
@@ -78,7 +78,7 @@ def book_campervan(request, campervan_id):
             status='Pending'
         )
 
-        # Send reservation notification email prompting payment within 3 days
+        # Send reservation confirmation email prompting payment within 3 days
         send_reservation_confirmation_email(booking)
         return redirect('booking_confirmation', booking_id=booking.id)
         
@@ -104,7 +104,7 @@ def booking_confirmation(request, booking_id):
 @login_required
 def booking_details(request, booking_id):
     """
-    Display more detailed info about a specific booking
+    Display more detailed info about a specific booking.
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
     return render(request, 'booking/booking_details.html', {'booking': booking})
@@ -112,7 +112,7 @@ def booking_details(request, booking_id):
 
 def check_availability(request):
     """
-    Responsible for availability checks
+    Responsible for availability checks.
     """
     campervan_id = request.GET.get('campervan_id')
     start_date = request.GET.get('start_date')
@@ -145,7 +145,7 @@ def check_availability(request):
 @login_required
 def check_booking_status(request, booking_id):
     """
-    Function to check the booking status (Pending, Confirmed, Cancelled)
+    Function to check the booking status (Pending, Confirmed, Cancelled).
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
     return JsonResponse({'status': booking.status})
@@ -154,8 +154,8 @@ def check_booking_status(request, booking_id):
 @login_required
 def cancel_booking(request, booking_id):
     """
-    Cancel "Pending" bookings (unpaid reservations) with confirmation on the site or redirection to my bookings page.
-    Cancelations of "Confirmed" bookings needs to be approved by staff.
+    Cancel "Pending" bookings (unpaid reservations) with confirmation on the site.
+    Cancellations of "Confirmed" bookings need to be approved by staff.
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
@@ -163,12 +163,12 @@ def cancel_booking(request, booking_id):
         messages.error(request, "This booking is already cancelled.", extra_tags="my_bookings")
         return redirect('my_bookings')
 
-    # Prohibit cancellations of bookings from the past
+    # Prohibit cancellations of bookings from the past.
     if booking.end_date < date.today():
         messages.error(request, "This booking has already ended and cannot be cancelled.", extra_tags="my_bookings")
         return redirect('my_bookings')
 
-    # Prohibit self service cancelations if booking status = "Confirmed"
+    # Prohibit self-service cancellations if booking status is Confirmed.
     if booking.status == 'Confirmed':
         messages.error(request, "Cancellation request was sent to admin for approval")
         return redirect('my_bookings')
@@ -176,7 +176,7 @@ def cancel_booking(request, booking_id):
     booking.status = 'Cancelled'
     booking.save()
 
-    # Send cancellation email
+    # Send cancellation email.
     send_cancellation_email(booking)
     messages.success(request, "Your booking has been cancelled successfully!", extra_tags="my_bookings")
     return redirect('my_bookings')
@@ -190,7 +190,7 @@ def cancel_booking(request, booking_id):
 def create_checkout_session(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id, user=request.user)
     
-    # Disallow payment if the booking isn't pending (i.e. waiting for payment).
+    # Disallow payment if the booking isn't pending (waiting for payment).
     if booking.status != 'Pending':
         return redirect('booking_details', booking_id=booking.id)
     
@@ -253,7 +253,8 @@ def stripe_webhook(request):
         logger.info("Session metadata: %s", metadata)
 
         booking_id_str = metadata.get('booking_id')
-        if booking_id_str:
+        # Check that payment_status is 'paid'
+        if booking_id_str and session.get('payment_status') == 'paid':
             try:
                 booking = Booking.objects.get(pk=int(booking_id_str))
                 # Update booking status only if currently Pending (waiting for payment)
@@ -268,7 +269,7 @@ def stripe_webhook(request):
             except Booking.DoesNotExist:
                 logger.error("Booking with id %s does not exist.", booking_id_str)
         else:
-            logger.error("No booking_id found in session metadata.")
+            logger.error("No booking_id found in session metadata or payment not completed.")
     else:
         logger.info("Unhandled event type: %s", event.get('type'))
 
@@ -284,11 +285,11 @@ def request_cancellation(request, booking_id):
         return redirect('my_bookings')
 
     if booking.cancellation_requests.filter(status='Pending').exists():
-        messages.info(request, "Cancelation request for this booking number has already been submitted. Now our team has to review your request. We appreciate your patience.")
+        messages.info(request, "Cancellation request for this booking has already been submitted. Our team will review your request shortly.")
         return redirect('my_bookings')
 
     cancellation_request = BookingCancellationRequest.objects.create(booking=booking)
-    messages.success(request, "We received your cancelation request, which is now being reviewed by our team. We'll contact you once it is approved or rejected. Thanks for your patience.")
+    messages.success(request, "We have received your cancellation request. Our team will contact you once it is approved or rejected.", extra_tags="my_bookings")
     send_cancellation_request_notification_to_admin(booking, cancellation_request)
     return redirect('my_bookings')
 
@@ -305,7 +306,7 @@ def edit_booking(request, booking_id):
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
     if booking.status != 'Pending':
-        messages.error(request, "Self service is only available for pending bookings, please contact the customer service.", extra_tags="my_bookings")
+        messages.error(request, "Self service is only available for pending bookings, please contact customer service.", extra_tags="my_bookings")
         return redirect('my_bookings')
 
     if request.method == "POST":
@@ -350,7 +351,7 @@ def edit_booking(request, booking_id):
 @login_required
 def request_date_change(request, booking_id):
     """
-    User can suggest date change for confirmed booking. 
+    User can suggest a date change for confirmed booking.
     Needs admin approval.
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
@@ -380,7 +381,7 @@ def request_date_change(request, booking_id):
             requested_end_date=new_end_dt
         )
 
-        messages.success(request, "Your request has been submitted to our team for approval", extra_tags="my_bookings")
+        messages.success(request, "Your date change request has been submitted for approval.", extra_tags="my_bookings")
         send_date_change_request_received_email(booking, bcr)
         send_date_change_request_notification_to_admin(booking, bcr)
         return redirect('my_bookings')
@@ -401,6 +402,7 @@ def view_change_requests(request):
     return render(request, 'booking/change_requests.html', {
         'change_requests': pending_requests
     })
+
 
 @staff_member_required
 def approve_change_request(request, request_id):
@@ -428,6 +430,7 @@ def approve_change_request(request, request_id):
     send_change_approval_email(booking, bcr)
     messages.success(request, f"Booking change request #{bcr.id} approved!")
     return redirect('view_change_requests')
+
 
 @staff_member_required
 def reject_change_request(request, request_id):
