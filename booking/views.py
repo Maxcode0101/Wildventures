@@ -417,7 +417,7 @@ def approve_change_request(request, request_id):
         return redirect('view_change_requests')
 
     day_count = (bcr.requested_end_date - bcr.requested_start_date).days
-    booking.start_date = bcr.requested_end_date  # Note: Adjust as needed if you want to change the start date.
+    booking.start_date = bcr.requested_start_date
     booking.end_date = bcr.requested_end_date
     booking.total_price = day_count * booking.campervan.price_per_day
     booking.save()
