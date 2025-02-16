@@ -7,7 +7,6 @@ from django.dispatch import receiver
 
 class Booking(models.Model):
     STATUS_CHOICES = [
-        ('Reserved', 'Reserved'),
         ('Pending', 'Pending'),
         ('Confirmed', 'Confirmed'),
         ('Cancelled', 'Cancelled'),
@@ -18,7 +17,7 @@ class Booking(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Reserved')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -41,7 +40,7 @@ class BookingChangeRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 def __str__(self):
-        return f"Change Request for Booking {self.booking.id} ({self.status})"
+    return f"Change Request for Booking {self.booking.id} ({self.status})"
 
 
 # User requests cancelation of a booking

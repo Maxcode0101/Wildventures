@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Reservation Received</h1>
+<h1>Reservation Confirmation</h1>
 
 <div style="border: 2px solid #28a745; padding: 20px; margin-bottom: 20px; background-color: #dff0d8; border-radius: 10px;">
     <h2 style="color: #28a745;">
         <span style="font-size: 32px;">&#10004;</span> Thank you, {{ user.username }}! We have received your reservation.
-        Please complete your payment within the next 3 days to confirm your booking.
+        Please complete your payment within the next 3 days by clicking on the "Pay Now" button.
     </h2>
 </div>
 
@@ -20,7 +20,7 @@
 </div>
 
 {% if booking.status == "Pending" %}
-    <a href="{% url 'create_checkout_session' booking.id %}" class="btn btn-warning" style="padding: 6px; background-color: #ff9900; color: white; text-decoration: none; border-radius: 5px;">
+    <a href="{% url 'create_checkout_session' booking.id %}" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #ff9900; color: white; text-decoration: none; border-radius: 5px;">
         Pay Now
     </a>
 {% endif %}

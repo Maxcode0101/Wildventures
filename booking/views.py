@@ -65,7 +65,7 @@ def book_campervan(request, campervan_id):
                 'end_date': end_date_str,
             })
 
-        # Creates booking with status Reserved (i.e. a reservation)
+        # Creates booking with status Pending (i.e. a reservation)
         days = (end_date_dt - start_date_dt).days
         total_price = days * campervan.price_per_day
 
@@ -145,7 +145,7 @@ def check_availability(request):
 @login_required
 def check_booking_status(request, booking_id):
     """
-    Function to check the booking status (Reserved, Pending, Confirmed, Cancelled)
+    Function to check the booking status (Pending, Confirmed, Cancelled)
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
     return JsonResponse({'status': booking.status})
@@ -154,7 +154,7 @@ def check_booking_status(request, booking_id):
 @login_required
 def cancel_booking(request, booking_id):
     """
-    Cancel "Reserved" bookings (pending bookings) with confirmation on the site or redirection to my bookings page.
+    Cancel "Pending" bookings (unpaid reservations) with confirmation on the site or redirection to my bookings page.
     Cancelations of "Confirmed" bookings needs to be approved by staff.
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
@@ -256,7 +256,7 @@ def stripe_webhook(request):
         if booking_id_str:
             try:
                 booking = Booking.objects.get(pk=int(booking_id_str))
-                # Update booking status only if currently Reserved (i.e. pending payment).
+                # Update booking status only if currently Pending (waiting for payment)
                 if booking.status == 'Pending':
                     booking.status = 'Confirmed'
                     booking.save()
