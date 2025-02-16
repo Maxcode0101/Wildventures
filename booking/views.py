@@ -254,7 +254,7 @@ def stripe_webhook(request):
 
         booking_id_str = metadata.get('booking_id')
         # Check that payment_status is 'paid'
-        if booking_id_str and session.get('payment_status') == 'paid':
+        if booking_id_str:
             try:
                 booking = Booking.objects.get(pk=int(booking_id_str))
                 # Update booking status only if currently Pending (waiting for payment)
@@ -269,7 +269,7 @@ def stripe_webhook(request):
             except Booking.DoesNotExist:
                 logger.error("Booking with id %s does not exist.", booking_id_str)
         else:
-            logger.error("No booking_id found in session metadata or payment not completed.")
+            logger.error("No booking_id found in session metadata.")
     else:
         logger.info("Unhandled event type: %s", event.get('type'))
 
