@@ -65,7 +65,7 @@ def book_campervan(request, campervan_id):
                 'end_date': end_date_str,
             })
 
-        # Creates booking with status Pending (i.e. a reservation awaiting payment)
+        # Creates booking with status Pending (i.e. an unpaid reservation)
         days = (end_date_dt - start_date_dt).days
         total_price = days * campervan.price_per_day
 
@@ -78,7 +78,7 @@ def book_campervan(request, campervan_id):
             status='Pending'
         )
 
-        # Send reservation confirmation email prompting payment within 3 days
+        # Send reservation notification email prompting payment within 3 days
         send_reservation_confirmation_email(booking)
         return redirect('booking_confirmation', booking_id=booking.id)
         
@@ -212,6 +212,7 @@ def create_checkout_session(request, booking_id):
         mode='payment',
         success_url=request.build_absolute_uri(reverse('payment_success')) + '?session_id={CHECKOUT_SESSION_ID}',
         cancel_url=request.build_absolute_uri(reverse('payment_cancel')),
+        client_reference_id=str(booking.id),
         metadata={
             'booking_id': str(booking.id)
         }
@@ -251,17 +252,18 @@ def stripe_webhook(request):
         session = event['data']['object']
         metadata = session.get('metadata', {})
         logger.info("Session metadata: %s", metadata)
+        logger.info("Payment status: %s", session.get('payment_status'))
 
-        booking_id_str = metadata.get('booking_id')
-        # Check that payment_status is 'paid'
+        # Try to retrieve the booking ID from metadata, or fallback to client_reference_id.
+        booking_id_str = metadata.get('booking_id') or session.get('client_reference_id')
         if booking_id_str:
             try:
                 booking = Booking.objects.get(pk=int(booking_id_str))
-                # Update booking status only if currently Pending (waiting for payment)
+                # Update booking status only if currently Pending (waiting for payment).
                 if booking.status == 'Pending':
                     booking.status = 'Confirmed'
                     booking.save()
-                    # Send final confirmation email after payment is received
+                    # Send final confirmation email after payment is received.
                     send_booking_confirmation_email(booking)
                     logger.info("Booking (id: %s) updated to Confirmed.", booking_id_str)
                 else:
@@ -351,7 +353,7 @@ def edit_booking(request, booking_id):
 @login_required
 def request_date_change(request, booking_id):
     """
-    User can suggest a date change for confirmed booking.
+    User can suggest a date change for confirmed booking. 
     Needs admin approval.
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
@@ -419,7 +421,7 @@ def approve_change_request(request, request_id):
         return redirect('view_change_requests')
 
     day_count = (bcr.requested_end_date - bcr.requested_start_date).days
-    booking.start_date = bcr.requested_start_date
+    booking.start_date = bcr.requested_end_date - timedelta(days=day_count)  # or simply use bcr.requested_start_date
     booking.end_date = bcr.requested_end_date
     booking.total_price = day_count * booking.campervan.price_per_day
     booking.save()
@@ -536,7 +538,6 @@ def send_date_change_request_notification_to_admin(booking, bcr):
     admin_email = getattr(settings, 'DEFAULT_ADMIN_EMAIL', None)
     if not admin_email:
         return
-
     subject = f"New date change request is awaiting approval (Booking #{booking.id})"
     message = (
         f"Hello Admin, \n\n"
