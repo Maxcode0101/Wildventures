@@ -4,45 +4,47 @@
     <h1>Book Campervan: {{ campervan.name }}</h1>
 
     {% if error %}
-        <div class="error" style="color: red; font-weight: bold;">
-        {{ error }}
+        <div class="alert alert-danger">
+            {{ error }}
         </div>
     {% endif %}
 
-    <form method="post" id="booking-form" style="margin-top: 20px;">
+    <form method="post" id="booking-form" class="mt-3">
         {% csrf_token %}
-        <div>
-            <label for="start_date">Start Date:</label>
+        <div class="mb-3">
+            <label for="start_date" class="form-label">Start Date:</label>
             <input
                 type="date"
                 id="start_date"
                 name="start_date"
                 value="{{ request.GET.start_date }}"
                 required
-                style="padding: 10px; width: 200px;"
+                class="form-control"
+                style="max-width: 250px;"
             >
         </div>
     
-        <div style="margin-top: 10px;">
-            <label for="end_date">End Date:</label>
+        <div class="mb-3">
+            <label for="end_date" class="form-label">End Date:</label>
             <input
                 type="date"
                 id="end_date"
                 name="end_date"
                 value="{{ request.GET.end_date }}"
                 required
-                style="padding: 10px; width: 200px;"
+                class="form-control"
+                style="max-width: 250px;"
             >
         </div>
     
-        <div style="margin-top: 10px;">
+        <div class="mb-3">
             <p><strong>Total Price:</strong> $<span id="total_price">0.00</span></p>
         </div>
     
-        <button type="submit" style="padding: 10px 20px; margin-top: 10px;">Confirm Booking</button>
+        <button type="submit" class="btn btn-primary">Confirm Booking</button>
     </form>
     
-    <a href="{% url 'campervan_list' %}" style="display: block; margin-top: 20px;">Back to Listings</a>
+    <a href="{% url 'campervan_list' %}" class="btn btn-secondary mt-3">Back to Listings</a>
     
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -51,7 +53,7 @@
             const endDateInput = document.getElementById('end_date');
             const totalPriceDisplay = document.getElementById('total_price');
             const pricePerDay = parseFloat('{{ campervan.price_per_day }}');
-    
+            
             // Function to calculate the final booking price
             function calculateTotalPrice() {
                 const startDate = new Date(startDateInput.value);
@@ -67,16 +69,16 @@
                 const totalPrice = days * pricePerDay;
                 totalPriceDisplay.textContent = totalPrice.toFixed(2);
             }
-    
+            
             // Recalculation via event listener
             startDateInput.addEventListener('change', calculateTotalPrice);
             endDateInput.addEventListener('change', calculateTotalPrice);
-    
+            
             // Prefilled dates trigger calculation of date range and price
             if (startDateInput.value && endDateInput.value) {
                 calculateTotalPrice();
             }
-    
+            
             // Prevention of end date =< start date inputs
             form.addEventListener('submit', function (e) {
                 const startDate = new Date(startDateInput.value);
