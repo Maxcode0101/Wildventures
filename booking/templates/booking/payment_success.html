@@ -1,22 +1,20 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <h1>Payment Successful!</h1>
-    <p>Thank you for your payment. Your booking is being confirmed.</p>
-    <p>
-        We’ve received your payment details, and our system will verify them shortly. 
-        You should receive a booking confirmation email soon if you haven’t already.
-    </p>
-    <p>
-        If you have any questions or need further assistance, please feel free to 
-        <a href="{% url 'contact' %}">contact us</a>.
-    </p>
-    <hr>
-    <p>
-        <a href="{% url 'dashboard' %}" style="text-decoration: none; color: #fff; background-color: #28a745; padding: 10px 16px; border-radius: 4px;">
-            Go to My Dashboard
-        </a>
-    </p>
+<div class="container mt-4">
+  <div class="card mx-auto" style="max-width: 600px;">
+    <div class="card-body text-center">
+      <h1 class="card-title text-success">
+        <i class="fas fa-check-circle"></i> Payment Successful!
+      </h1>
+      <p class="card-text">
+        Thank you for your payment. Your booking is now confirmed. We’ve received your payment details, and a booking confirmation email has been sent to you.
+      </p>
+      <hr>
+      <a href="{% url 'dashboard' %}" class="btn btn-success">
+        <i class="fas fa-tachometer-alt"></i> Go to My Dashboard
+      </a>
+    </div>
+  </div>
 </div>
 {% endblock %}
