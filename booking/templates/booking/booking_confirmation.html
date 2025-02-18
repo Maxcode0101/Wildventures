@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% block messages %}{% endblock %}
 
 {% block content %}
 <h1 class="mb-4"><i class="fa-solid fa-file-invoice"></i> Reservation Confirmation</h1>
 
 <div class="p-4 mb-4 rounded" style="border: 2px solid #28a745; background-color: #dff0d8;">
     <h2 class="h4" style="color: #28a745;">
-        <i class="fa-solid fa-check fa-2x"></i> Thank you, {{ user.username }}! We have received your reservation.
+        <i class="fa-solid fa-check fa-2x"></i> Thank you, {{ user.username }}! We have received your reservation.<br>
         Please complete your payment within the next 3 days by clicking on the "Pay Now" button.
     </h2>
 </div>

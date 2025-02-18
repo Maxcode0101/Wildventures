@@ -57,29 +57,31 @@
 
     <!-- Main Content -->
     <main class="container" style="padding-top: 20px;">
-        {% if messages %}
-            <div class="container mt-3">
-                {% for message in messages %}
-                    {% if "error" in message.tags %}
-                        <div class="alert alert-danger" role="alert">
-                            {{ message }}
-                        </div>
-                    {% elif "success" in message.tags %}
-                        <div class="alert alert-success" role="alert">
-                            {{ message }}
-                        </div>
-                    {% elif "warning" in message.tags %}
-                        <div class="alert alert-warning" role="alert">
-                            {{ message }}
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info" role="alert">
-                            {{ message }}
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        {% endif %}
+        {% block messages %}   
+            {% if messages %}
+                <div class="container mt-3">
+                    {% for message in messages %}
+                        {% if "error" in message.tags %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ message }}
+                            </div>
+                        {% elif "success" in message.tags %}
+                            <div class="alert alert-success" role="alert">
+                                {{ message }}
+                            </div>
+                        {% elif "warning" in message.tags %}
+                            <div class="alert alert-warning" role="alert">
+                                {{ message }}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endblock %}
         {% block content %}{% endblock %}
     </main>
 
