@@ -1,16 +1,25 @@
 {% extends "base.html" %}
+
 {% block content %}
-<h2>Request a Date Change (Confirmed Booking)</h2>
-<form method="POST">
-    {% csrf_token %}
-    <div>
-        <label for="start_date">New Start Date:</label>
-        <input type="date" name="start_date" required>
+<div class="container mt-4">
+  <div class="card mx-auto" style="max-width: 600px;">
+    <div class="card-body">
+      <h2 class="card-title mb-4">Request a Date Change (Confirmed Booking)</h2>
+      <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="start_date" class="form-label">New Start Date:</label>
+          <input type="date" name="start_date" id="start_date" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="end_date" class="form-label">New End Date:</label>
+          <input type="date" name="end_date" id="end_date" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-paper-plane"></i> Submit Request
+        </button>
+      </form>
     </div>
-    <div>
-        <label for="end_date">New End Date:</label>
-        <input type="date" name="end_date" required>
-    </div>
-    <button type="submit">Submit Request</button>
-</form>
+  </div>
+</div>
 {% endblock %}
