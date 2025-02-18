@@ -1,31 +1,42 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Booking Details</h1>
+<h1 class="mb-4"><i class="fa-solid fa-file-alt"></i> Booking Details</h1>
 
-<div style="border: 1px solid #ddd; padding: 16px;">
-    <h2>{{ booking.campervan.name }}</h2>
-    <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
-    <p><strong>End Date:</strong> {{ booking.end_date }}</p>
-    <p><strong>Total Price:</strong> ${{ booking.total_price }}</p>
-    <p><strong>Status:</strong> {{ booking.status }}</p>
-
-    {% if booking.status == "Pending" %}
-        <a href="{% url 'create_checkout_session' booking.id %}" class="btn btn-success" style="padding: 6px; background-color: #ff9900; color: white; text-decoration: none; border-radius: 3px;">
-            Pay Now
+<div class="card">
+    <div class="card-body">
+        <h2 class="card-title">{{ booking.campervan.name }}</h2>
+        <p class="card-text"><strong>Start Date:</strong> {{ booking.start_date }}</p>
+        <p class="card-text"><strong>End Date:</strong> {{ booking.end_date }}</p>
+        <p class="card-text"><strong>Total Price:</strong> ${{ booking.total_price }}</p>
+        <p class="card-text"><strong>Status:</strong> {{ booking.status }}</p>
+        
+        {% if booking.status == "Pending" %}
+            <div class="mb-3">
+                <a href="{% url 'create_checkout_session' booking.id %}" class="btn btn-warning">
+                    <i class="fa-solid fa-credit-card"></i> Pay Now
+                </a>
+                <a href="{% url 'edit_booking' booking.id %}" class="btn btn-success">
+                    <i class="fa-solid fa-calendar-edit"></i> Change Dates
+                </a>
+                <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-danger">
+                    <i class="fa-solid fa-ban"></i> Cancel Reservation
+                </a>
+            </div>
+        {% elif booking.status == "Confirmed" and not booking.pending_cancel %}
+            <div class="mb-3">
+                <a href="{% url 'request_date_change' booking.id %}" class="btn btn-primary">
+                    <i class="fa-solid fa-calendar-plus"></i> Request Date Change
+                </a>
+                <a href="{% url 'request_cancellation' booking.id %}" class="btn btn-danger">
+                    <i class="fa-solid fa-trash-alt"></i> Request Cancellation
+                </a>
+            </div>
+        {% endif %}
+        
+        <a href="{% url 'my_bookings' %}" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Back to My Bookings
         </a>
-        <a href="{% url 'edit_booking' booking.id %}" class="btn btn-primary" style="padding: 6px; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px; margin-top: 10px;">
-            Change Dates
-        </a>
-        <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-danger" style="padding: 6px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px; margin-top: 10px; margin-left: 10px;">
-            Cancel Reservation
-        </a>
-    {% endif %}
-
-    <p style="margin-top: 10px;">
-        <a href="{% url 'my_bookings' %}" class="btn btn-secondary" style="padding: 6px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 3px;">
-            Back to My Bookings
-        </a>
-    </p>
+    </div>
 </div>
 {% endblock %}
