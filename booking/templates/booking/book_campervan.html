@@ -55,6 +55,20 @@
             const endDateInput = document.getElementById('end_date');
             const totalPriceDisplay = document.getElementById('total_price');
             const pricePerDay = parseFloat('{{ campervan.price_per_day }}');
+
+            // Flatpickr minDate must be today or later
+            flatpickr(startDateInput, { 
+                altInput: true, 
+                altFormat: "F j, Y", 
+                dateFormat: "Y-m-d", 
+                minDate: "today" 
+            });
+            flatpickr(endDateInput, { 
+                altInput: true, 
+                altFormat: "F j, Y", 
+                dateFormat: "Y-m-d", 
+                minDate: "today" 
+            });
             
             // Function to calculate the final booking price
             function calculateTotalPrice() {

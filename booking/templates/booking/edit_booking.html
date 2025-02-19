@@ -25,6 +25,21 @@
 
 <!-- JS form validation -->
 <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Initialize Flatpickr on the date inputs with minDate set to today
+    flatpickr("#start_date", {
+        minDate: "today",
+        altInput: true,
+        altFormat: "F j, Y",
+        dateFormat: "Y-m-d"
+    });
+    flatpickr("#end_date", {
+        minDate: "today",
+        altInput: true,
+        altFormat: "F j, Y",
+        dateFormat: "Y-m-d"
+    });
+
     // Prevent form submission with invalid fields via immidiate respond
     (function () {
       'use strict'
@@ -37,8 +52,9 @@
               event.stopPropagation()
             }
             form.classList.add('was-validated')
-          }, false)
-        })
-    })()
+          }, false);
+        });
+    })();
+  });
 </script>
 {% endblock %}
