@@ -42,6 +42,22 @@ def book_campervan(request, campervan_id):
                 'end_date': end_date_str,
             })
 
+        # Dissallow bookings in the past
+        if start_date_dt < date.today():
+            return render(request, 'booking/book_campervan.html', {
+                'campervan': campervan,
+                'error': 'Start date cannot be in the past.',
+                'start_date': start_date_str,
+                'end_date': end_date_str,
+            })
+        if end_date_dt < date.today():
+            return render(request, 'booking/book_campervan.html', {
+                'campervan': campervan,
+                'error': 'End date cannot be in the past.',
+                'start_date': start_date_str,
+                'end_date': end_date_str,
+            })
+
         # Ensure end_date > start_date
         if end_date_dt <= start_date_dt:
             return render(request, 'booking/book_campervan.html', {
@@ -296,9 +312,9 @@ def request_cancellation(request, booking_id):
     return redirect('my_bookings')
 
 
-#####################
+#######################################
 # Views responsible for booking changes
-#####################
+#######################################
 
 @login_required
 def edit_booking(request, booking_id):
@@ -320,6 +336,14 @@ def edit_booking(request, booking_id):
             new_end_dt = datetime.strptime(new_end, "%Y-%m-%d").date()
         except ValueError:
             messages.error(request, "Invalid date format.", extra_tags="my_bookings")
+            return redirect('edit_booking', booking_id=booking_id)
+        
+        # Prevent past dates
+        if new_start_dt < date.today():
+            messages.error(request, "Invalid input. The start date can't be in the past.", extra_tags="my_bookings")
+            return redirect('edit_booking', booking_id=booking_id)
+        if new_end_dt < date.today():
+            messages.error(request, "Invalid input. The end date can't be in the past.", extra_tags="my_bookings")
             return redirect('edit_booking', booking_id=booking_id)
 
         if new_end_dt <= new_start_dt:
@@ -371,6 +395,14 @@ def request_date_change(request, booking_id):
             new_end_dt = datetime.strptime(new_end, "%Y-%m-%d").date()
         except ValueError:
             messages.error(request, "Invalid date format.", extra_tags="my_bookings")
+            return redirect('request_date_change', booking_id=booking_id)
+        
+        # Prohibit date requests in the past
+        if new_start_dt < date.today():
+            messages.error(request, "Invalid input. Start date can't be in the past.", extra_tags="my_bookings")
+            return redirect('request_date_change', booking_id=booking_id)
+        if new_end_dt < date.today():
+            messages.error(request, "Invalid input. End date can't be in the past.", extra_tags="my_bookings")
             return redirect('request_date_change', booking_id=booking_id)
 
         if new_end_dt <= new_start_dt:
