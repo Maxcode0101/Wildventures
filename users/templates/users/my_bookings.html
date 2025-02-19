@@ -3,18 +3,6 @@
 {% block content %}
     <h1>My Bookings</h1>
     
-    {% if messages %}
-    <div style="margin-bottom: 20px;">
-        {% for message in messages %}
-            {% if 'my_bookings' in message.tags %}
-                <p class="{% if 'error' in message.tags %}error-message{% else %}success-message{% endif %}">
-                    {{ message }}
-                </p>
-            {% endif %}
-        {% endfor %}
-    </div>
-    {% endif %}
-
     {% if bookings %}
         <div style="margin-top: 20px;">
             {% for booking in bookings %}
