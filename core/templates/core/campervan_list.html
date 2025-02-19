@@ -2,111 +2,125 @@
 {% load static %}
 
 {% block content %}
-<h1>Campervan Listings</h1>
+<div class="container my-4">
+  <h1 class="mb-4">Campervan Listings</h1>
 
-<!-- Search and Filters -->
-<form method="get" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+  <!-- Search and Filters -->
+  <form method="get" class="row g-3 align-items-end mb-4">
     <!-- Search Bar -->
-    <div style="flex: 1;">
-        <input type="text" name="q" placeholder="Search by name or description" value="{{ query }}" style="padding: 10px; width: 100%;">
+    <div class="col-md-4">
+      <input type="text" name="q" class="form-control" placeholder="Search by name or description" value="{{ query }}">
     </div>
     <!-- Brand Filter -->
-    <div>
-        <label for="brand">Brand:</label>
-        <select name="brand" id="brand">
-            <option value="">All Brands</option>
-            {% for b in brands %}
-                <option value="{{ b }}" {% if b == selected_brand %}selected{% endif %}>{{ b }}</option>
-            {% endfor %}
-        </select>
+    <div class="col-md-2">
+      <label for="brand" class="form-label">Brand:</label>
+      <select name="brand" id="brand" class="form-select">
+        <option value="">All Brands</option>
+        {% for b in brands %}
+          <option value="{{ b }}" {% if b == selected_brand %}selected{% endif %}>{{ b }}</option>
+        {% endfor %}
+      </select>
     </div>
     <!-- Model Filter -->
-    <div>
-        <label for="model">Model:</label>
-        <select name="model" id="model">
-            <option value="">All Models</option>
-            {% for m in models %}
-                <option value="{{ m }}" {% if m == selected_model %}selected{% endif %}>{{ m }}</option>
-            {% endfor %}
-        </select>
+    <div class="col-md-2">
+      <label for="model" class="form-label">Model:</label>
+      <select name="model" id="model" class="form-select">
+        <option value="">All Models</option>
+        {% for m in models %}
+          <option value="{{ m }}" {% if m == selected_model %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
     </div>
     <!-- Capacity Filter -->
-    <div>
-        <label for="capacity">Capacity:</label>
-        <select name="capacity" id="capacity">
-            <option value="">All Capacities</option>
-            {% for c in capacity_range %}
-                <option value="{{ c }}" {% if c|stringformat:"s" == selected_capacity %}selected{% endif %}>{{ c }}</option>
-            {% endfor %}
-        </select>
+    <div class="col-md-2">
+      <label for="capacity" class="form-label">Capacity:</label>
+      <select name="capacity" id="capacity" class="form-select">
+        <option value="">All Capacities</option>
+        {% for c in capacity_range %}
+          <option value="{{ c }}" {% if c|stringformat:"s" == selected_capacity %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
     </div>
     <!-- Max Price Filter -->
-    <div>
-        <label for="max_price">Max Price:</label>
-        <input type="number" name="max_price" placeholder="Max Price" value="{{ max_price }}" style="padding: 5px;">
+    <div class="col-md-2">
+      <label for="max_price" class="form-label">Max Price:</label>
+      <input type="number" name="max_price" id="max_price" class="form-control" placeholder="Max Price" value="{{ max_price }}">
     </div>
-    <!-- Global Availability Filter -->
-    <div>
-        <label for="start_date">Start Date:</label>
-        <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+    <!-- Global Availability Filters -->
+    <div class="col-md-3">
+      <label for="start_date" class="form-label">Start Date:</label>
+      <input type="date" id="start_date" name="start_date" class="form-control" value="{{ start_date }}">
     </div>
-    <div>
-        <label for="end_date">End Date:</label>
-        <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+    <div class="col-md-3">
+      <label for="end_date" class="form-label">End Date:</label>
+      <input type="date" id="end_date" name="end_date" class="form-control" value="{{ end_date }}">
     </div>
-    <button type="submit" style="padding: 10px 20px;">Filter</button>
-</form>
+    <div class="col-md-3">
+      <button type="submit" class="btn btn-primary w-100">Filter</button>
+    </div>
+  </form>
 
-<!-- Campervan Listings -->
-{% for campervan in campervans %}
-    <div style="border: 1px solid #ddd; padding: 16px; margin-bottom: 16px;">
-        <h2>{{ campervan.name }}</h2>
-        <p><strong>Brand:</strong> {{ campervan.brand }}</p>
-        <p><strong>Model:</strong> {{ campervan.model }}</p>
-        <p><strong>Description:</strong> {{ campervan.description }}</p>
-        <p><strong>Price per Day:</strong> ${{ campervan.price_per_day }}</p>
-        <p><strong>Capacity:</strong> {{ campervan.capacity }} people</p>
+  <!-- Campervan Listings -->
+  {% for campervan in campervans %}
+    <div class="card mb-4">
+      <div class="card-body">
+        <h2 class="card-title">{{ campervan.name }}</h2>
+        <p class="card-text"><strong>Brand:</strong> {{ campervan.brand }}</p>
+        <p class="card-text"><strong>Model:</strong> {{ campervan.model }}</p>
+        <p class="card-text"><strong>Description:</strong> {{ campervan.description }}</p>
+        <p class="card-text"><strong>Price per Day:</strong> ${{ campervan.price_per_day }}</p>
+        <p class="card-text"><strong>Capacity:</strong> {{ campervan.capacity }} people</p>
         {% if campervan.image %}
-            <img src="{{ campervan.image.url }}" alt="{{ campervan.name }}" class="img-fluid" width="300">
+          <img src="{{ campervan.image.url }}" alt="{{ campervan.name }}" class="img-fluid mb-3" style="max-width: 300px;">
         {% endif %}
         <!-- Date Selection for Individual Campervan Availability -->
-        <div style="margin-top: 20px;">
-            <label for="start-date-{{ campervan.id }}">Start Date:</label>
-            <input type="text" id="start-date-{{ campervan.id }}" class="start-date" placeholder="Start Date" style="padding: 8px;">
-            <label for="end-date-{{ campervan.id }}">End Date:</label>
-            <input type="text" id="end-date-{{ campervan.id }}" class="end-date" placeholder="End Date" style="padding: 8px;">
-            <button class="check-availability" data-campervan-id="{{ campervan.id }}" style="padding: 8px; margin-top: 10px;">Check Availability</button>
+        <div class="mb-3">
+          <div class="row">
+            <div class="col-md-6">
+              <label for="start-date-{{ campervan.id }}" class="form-label">Start Date:</label>
+              <input type="text" id="start-date-{{ campervan.id }}" class="form-control start-date" placeholder="Start Date">
+            </div>
+            <div class="col-md-6">
+              <label for="end-date-{{ campervan.id }}" class="form-label">End Date:</label>
+              <input type="text" id="end-date-{{ campervan.id }}" class="form-control end-date" placeholder="End Date">
+            </div>
+          </div>
+          <button class="btn btn-secondary mt-2 check-availability" data-campervan-id="{{ campervan.id }}">Check Availability</button>
         </div>
         <!-- Availability Response -->
-        <div id="availability-response-{{ campervan.id }}" style="margin-top: 10px; color: green;"></div>
+        <div id="availability-response-{{ campervan.id }}" class="mb-2" style="color: green;"></div>
         <!-- "Book Now" Button -->
         {% if campervan.id %}
-            <a href="{% url 'book_campervan' campervan.id %}" class="btn btn-primary book-now" data-campervan-id="{{ campervan.id }}" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none;">Book Now</a>
+          <a href="{% url 'book_campervan' campervan.id %}" class="btn btn-primary book-now" data-campervan-id="{{ campervan.id }}">Book Now</a>
         {% else %}
-            <p style="color: red;">Invalid campervan ID. Unable to book.</p>
+          <p class="text-danger">Invalid campervan ID. Unable to book.</p>
         {% endif %}
+      </div>
     </div>
-{% empty %}
+  {% empty %}
     <p>No campervans match your search criteria. Try adjusting your search or filters.</p>
-{% endfor %}
+  {% endfor %}
 
-<!-- Pagination Controls -->
-<div class="pagination">
-    {% if campervans.has_previous %}
-        <a href="?page=1">First</a>
-        <a href="?page={{ campervans.previous_page_number }}">Previous</a>
-    {% endif %}
-    <span>Page {{ campervans.number }} of {{ campervans.paginator.num_pages }}</span>
-    {% if campervans.has_next %}
-        <a href="?page={{ campervans.next_page_number }}">Next</a>
-        <a href="?page={{ campervans.paginator.num_pages }}">Last</a>
-    {% endif %}
+  <!-- Pagination Controls -->
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+      {% if campervans.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ campervans.previous_page_number }}">Previous</a></li>
+      {% endif %}
+      <li class="page-item disabled"><span class="page-link">Page {{ campervans.number }} of {{ campervans.paginator.num_pages }}</span></li>
+      {% if campervans.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ campervans.next_page_number }}">Next</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ campervans.paginator.num_pages }}">Last</a></li>
+      {% endif %}
+    </ul>
+  </nav>
 </div>
 
-<!-- Dynamic Dropdowns Script -->
+<!-- Dynamic Dropdowns and Availability Check Script -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Initialize Flatpickr for global and individual date inputs.
+    // Initialize Flatpickr for global and individual date inputs with minDate set to today.
     flatpickr('#start_date', { altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d", minDate: "today" });
     flatpickr('#end_date', { altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d", minDate: "today" });
     document.querySelectorAll('.start-date').forEach(function (el) {
@@ -196,7 +210,7 @@ document.addEventListener("DOMContentLoaded", function () {
         updateDropdown(modelSelect, lists.fullModels, modelSelect.value, "All Models");
     });
 
-    // When brand changes, update the model dropdown (do not force reset of the brand selection).
+    // When brand changes, update the model dropdown.
     brandSelect.addEventListener("change", function () {
         var currentModel = modelSelect.value;
         var options = (this.value && brandModels[this.value]) ? brandModels[this.value] : allModels;
@@ -204,7 +218,7 @@ document.addEventListener("DOMContentLoaded", function () {
         rebuildCapacityDropdown();
     });
 
-    // When model changes, update the brand dropdown (do not force reset of the model selection).
+    // When model changes, update the brand dropdown.
     modelSelect.addEventListener("change", function () {
         var currentBrand = brandSelect.value;
         var options = (this.value && modelBrands[this.value]) ? modelBrands[this.value] : allBrands;
