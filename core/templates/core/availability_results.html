@@ -1,43 +1,55 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Available Campervans</h2>
+<div class="container mt-4">
+  <h2 class="mb-4">Available Campervans</h2>
 
-<div id="availability-results">
-    {% if campervans %}
-        {% for campervan in campervans %}
-        <div class="campervan">
-            <h3>{{ campervan.name }}</h3>
-            <p>Description: {{ campervan.description }}</p>
-            <p>Capacity: {{ campervan.capacity }}</p>
-            <p>Price: ${{ campervan.price_per_day }} per day</p>
-            <p>Location: {{ campervan.location }}</p>
-            <button 
-                class="book-now" 
-                data-start-date="{{ request.GET.start_date }}" 
-                data-end-date="{{ request.GET.end_date }}" 
-                data-campervan-id="{{ campervan.id }}"
-            >
-                Book Now
-            </button>
+  {% if campervans %}
+    <div class="row">
+      {% for campervan in campervans %}
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card h-100 shadow-sm">
+            {% if campervan.image %}
+              <img src="{{ campervan.image.url }}" class="card-img-top" alt="{{ campervan.name }}">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ campervan.name }}</h5>
+              <p class="card-text">{{ campervan.description }}</p>
+              <p class="card-text"><strong>Capacity:</strong> {{ campervan.capacity }}</p>
+              <p class="card-text"><strong>Price:</strong> ${{ campervan.price_per_day }} per day</p>
+              <p class="card-text"><strong>Location:</strong> {{ campervan.location }}</p>
+            </div>
+            <div class="card-footer bg-transparent border-top-0">
+              <button class="btn btn-primary book-now" 
+                      data-start-date="{{ request.GET.start_date }}" 
+                      data-end-date="{{ request.GET.end_date }}" 
+                      data-campervan-id="{{ campervan.id }}">
+                <i class="fas fa-calendar-check"></i> Book Now
+              </button>
+            </div>
+          </div>
         </div>
-        {% endfor %}
-    {% else %}
-        <p>No campervans available for the selected dates.</p>
-    {% endif %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info" role="alert">
+      No campervans available for the selected dates.
+    </div>
+  {% endif %}
 </div>
 
 <script>
-    // Pass dates via "Book Now" button clicks over to booking process
-    document.querySelectorAll('.book-now').forEach(button => {
-        button.addEventListener('click', () => {
-            const startDate = button.dataset.startDate;
-            const endDate = button.dataset.endDate;
-            const campervanId = button.dataset.campervanId;
-
-            // Redirect to the booking page with pre-filled data
-            window.location.href = `/booking/create?campervan=${campervanId}&start_date=${startDate}&end_date=${endDate}`;
+ // Pass dates via "Book Now" button clicks over to booking process
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('.book-now').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const startDate = this.dataset.startDate;
+            const endDate = this.dataset.endDate;
+            const campervanId = this.dataset.campervanId;
+            // Redirect to the booking page with pre-filled data using Django's URL reversing
+            window.location.href = `{% url 'book_campervan' 0 %}`.replace("0", campervanId) + `?start_date=${startDate}&end_date=${endDate}`;
         });
     });
+});
 </script>
 {% endblock %}
