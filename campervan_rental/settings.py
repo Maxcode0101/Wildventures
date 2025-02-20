@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'cloudinary_storage',
     'django.contrib.staticfiles',
     'cloudinary',
+    "widget_tweaks",
     'django.contrib.sites',
     'allauth',
     'allauth.account',

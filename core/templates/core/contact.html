@@ -1,67 +1,70 @@
 {% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
 
 {% block title %}Contact Us{% endblock %}
 
 {% block content %}
 <div class="container mt-4" style="max-width: 600px;">
-    <h1>Contact Us</h1>
+  <h1 class="mb-4">Contact Us</h1>
 
-    {% if messages %}
-    <div style="margin-bottom: 20px;">
-        {% for message in messages %}
-            <p class="{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
-                {{ message }}
-            </p>
-        {% endfor %}
+  {% if messages %}
+    <div class="mb-3">
+      {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
     </div>
-    {% endif %}
+  {% endif %}
 
-    <p>In case you have any kind of questions or you need our assistance, feel free to reach out to our service team.</p>
+  <p>In case you have any kind of questions or you need our assistance, feel free to reach out to our service team using the form below.</p>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
-        {{ form.non_field_errors }}
-        
-        <div style="margin-bottom: 10px;">
-            <label for="id_name">Your Name</label><br>
-            {{ form.name }}
-            {% if form.name.errors %}
-                <div class="error">{{ form.name.errors|striptags }}</div>
-            {% endif %}
-        </div>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    
+    <div class="mb-3">
+      <label for="id_name" class="form-label">Your Name</label>
+      {{ form.name|add_class:"form-control" }}
+      {% if form.name.errors %}
+        <div class="text-danger">{{ form.name.errors|striptags }}</div>
+      {% endif %}
+    </div>
 
-        <div style="margin-bottom: 10px;">
-            <label for="id_email">Your Email</label><br>
-            {{ form.email }}
-            {% if form.email.errors %}
-                <div class="error">{{ form.email.errors|striptags }}</div>
-            {% endif %}
-        </div>
+    <div class="mb-3">
+      <label for="id_email" class="form-label">Your Email</label>
+      {{ form.email|add_class:"form-control" }}
+      {% if form.email.errors %}
+        <div class="text-danger">{{ form.email.errors|striptags }}</div>
+      {% endif %}
+    </div>
 
-        <div style="margin-bottom: 10px;">
-            <label for="id_subject">Subject</label><br>
-            {{ form.subject }}
-            {% if form.subject.errors %}
-                <div class="error">{{ form.subject.errors|striptags }}</div>
-            {% endif %}
-        </div>
+    <div class="mb-3">
+      <label for="id_subject" class="form-label">Subject</label>
+      {{ form.subject|add_class:"form-control" }}
+      {% if form.subject.errors %}
+        <div class="text-danger">{{ form.subject.errors|striptags }}</div>
+      {% endif %}
+    </div>
 
-        <div style="margin-bottom: 10px;">
-            <label for="id_message">Message</label><br>
-            {{ form.message }}
-            {% if form.message.errors %}
-                <div class="error">{{ form.message.errors|striptags }}</div>
-            {% endif %}
-        </div>
+    <div class="mb-3">
+        <label for="id_message" class="form-label">Message</label>
+        {{ form.message|add_class:"form-control" }}
+        {% if form.message.errors %}
+          <div class="text-danger">{{ form.message.errors|striptags }}</div>
+        {% endif %}
+      </div>
 
-        <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer;">
-            Send
-        </button>
-    </form>
+    <button type="submit" class="btn btn-primary">
+      <i class="fas fa-paper-plane"></i> Send
+    </button>
+  </form>
 
-    <p style="margin-top: 20px;">
-        Or if you prefer, email us directly at <a href="mailto:support@campervanrentals.com">support@campervanrentals.com</a>
-        or call +49 (176) 123-4567.
-    </p>
+  <p class="mt-4">
+    Or email us directly at <a href="mailto:support@wildventures.com">support@wildventures.com</a> 
+    
+    or call <strong>+49 (176) 123-4567</strong>.
+  </p>
 </div>
 {% endblock %}
