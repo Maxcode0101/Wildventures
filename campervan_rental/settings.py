@@ -34,8 +34,8 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = os.environ.get("DEBUG", False)
 USE_X_FORWARDED_HOST = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-CSRF_TRUSTED_ORIGINS = ["https://localhost"]
+ALLOWED_HOSTS = []
+CSRF_TRUSTED_ORIGINS = []
 host = os.environ.get("HOST")
 if host:
     ALLOWED_HOSTS.append(host)
