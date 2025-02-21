@@ -214,6 +214,11 @@ def create_checkout_session(request, booking_id):
     if booking.status != 'Pending':
         return redirect('booking_details', booking_id=booking.id)
     
+    # Additional safeguard: Prevent payment if the booking's start date is in the past or today.
+    if booking.start_date <= date.today():
+        messages.error(request, "You can't process payment for a booking that is ongoing or in the past.", extra_tags="my_bookings")
+        return redirect('booking_details', booking_id=booking.id)
+    
     stripe.api_key = settings.STRIPE_SECRET_KEY
     amount_in_cents = int(booking.total_price * 100)
 
