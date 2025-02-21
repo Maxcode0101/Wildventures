@@ -3,6 +3,18 @@
 {% block content %}
     <h1>My Bookings</h1>
     
+    {% if messages %}
+    <div style="margin-bottom: 20px;">
+        {% for message in messages %}
+            {% if 'my_bookings' in message.tags %}
+                <p class="{% if 'error' in message.tags %}error-message{% else %}success-message{% endif %}">
+                    {{ message }}
+                </p>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
     {% if bookings %}
         <div style="margin-top: 20px;">
             {% for booking in bookings %}
@@ -12,56 +24,61 @@
                     <p><strong>End Date:</strong> {{ booking.end_date }}</p>
                     <p><strong>Total Price:</strong> ${{ booking.total_price }}</p>
                     <p><strong>Status:</strong> {{ booking.status }}</p>
-
-                    {# Reservation specific actions #}
-                    {% if booking.status == "Pending" %}
-                        <p style="color: blue;">Your reservation has been received. Please complete your payment within 3 days to confirm your booking.</p>
-                        <a href="{% url 'create_checkout_session' booking.id %}" 
-                           style="padding: 6px; background-color: #ff9900; color: white; text-decoration: none; border-radius: 3px;">
-                           Pay Now
-                        </a>
+                    
+                    {% comment %}
+                    Determine if the booking is in the future (allowing actions) or ongoing/past.
+                    {% endcomment %}
+                    {% if booking.start_date > today %}
+                        {# Future booking – show all applicable action buttons #}
+                        {% if booking.status == "Pending" %}
+                            <p style="color: blue;">Your reservation has been received. Please complete your payment within 3 days to confirm your booking.</p>
+                            <a href="{% url 'create_checkout_session' booking.id %}" 
+                               style="padding: 6px; background-color: #ff9900; color: white; text-decoration: none; border-radius: 3px;">
+                               Pay Now
+                            </a>
+                        {% endif %}
+                    
+                        {% if booking.status == "Pending" and not booking.pending_cancel %}
+                            <a href="{% url 'edit_booking' booking.id %}" 
+                               onclick="return confirm('Are you sure you want to change the dates for this booking?')"
+                               style="padding: 6px; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px;">
+                               Change Dates
+                            </a>
+                        {% elif booking.status == "Confirmed" and not booking.pending_cancel %}
+                            <a href="{% url 'request_date_change' booking.id %}" 
+                               onclick="return confirm('Are you sure you want to request a date change for this booking?')"
+                               style="padding: 6px; background-color: #007bff; color: white; text-decoration: none; border-radius: 3px;">
+                               Request Date Change
+                            </a>
+                        {% endif %}
+                    
+                        {% if booking.status == "Pending" %}
+                            <a href="{% url 'cancel_booking' booking.id %}" 
+                               onclick="return confirm('Are you sure you want to cancel this reservation?')"
+                               style="padding: 6px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px; margin-left: 8px;">
+                               Cancel Reservation
+                            </a>
+                        {% elif booking.status == "Confirmed" and not booking.pending_cancel %}
+                            <a href="{% url 'request_cancellation' booking.id %}" 
+                               onclick="return confirm('Are you sure you want to request cancellation for this booking?')"
+                               style="padding: 6px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px; margin-left: 8px;">
+                               Request Cancellation
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        {# Ongoing or past booking – no action buttons, display info message #}
+                        <p class="text-muted">Ongoing or past booking – if you need assistance please visit our <a href="{% url 'contact' %}">contact page</a>.</p>
                     {% endif %}
-
-                    {# Date Change Actions: Only shown if no pending cancellation exists #}
-                    {% if booking.status == "Pending" and not booking.pending_cancel %}
-                        <a href="{% url 'edit_booking' booking.id %}" 
-                           onclick="return confirm('Are you sure you want to change the dates for this booking?')"
-                           style="padding: 6px; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px;">
-                           Change Dates
-                        </a>
-                    {% elif booking.status == "Confirmed" and not booking.pending_cancel %}
-                        <a href="{% url 'request_date_change' booking.id %}" 
-                           onclick="return confirm('Are you sure you want to request a date change for this booking?')"
-                           style="padding: 6px; background-color: #007bff; color: white; text-decoration: none; border-radius: 3px;">
-                           Request Date Change
-                        </a>
-                    {% endif %}
-
-                    {# Cancellation Actions #}
-                    {% if booking.status == "Pending" %}
-                        <a href="{% url 'cancel_booking' booking.id %}" 
-                           onclick="return confirm('Are you sure you want to cancel this reservation?')"
-                           style="padding: 6px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px; margin-left: 8px;">
-                           Cancel Reservation
-                        </a>
-                    {% elif booking.status == "Confirmed" and not booking.pending_cancel %}
-                        <a href="{% url 'request_cancellation' booking.id %}" 
-                           onclick="return confirm('Are you sure you want to request cancellation for this booking?')"
-                           style="padding: 6px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px; margin-left: 8px;">
-                           Request Cancellation
-                        </a>
-                    {% endif %}
-
+                    
                     <br><br>
-
-                    {# Display Date Change Requests only if no pending cancellation exists #}
+                    
+                    {# Display Date Change Requests if available and no pending cancellation exists #}
                     {% if booking.change_requests.all and not booking.pending_cancel %}
                         <h4>Date Change Requests</h4>
                         <ul>
                             {% for req in booking.change_requests.all %}
                                 <li>
-                                    Requested: {{ req.requested_start_date }} → {{ req.requested_end_date }} 
-                                    ({{ req.status }})
+                                    Requested: {{ req.requested_start_date }} → {{ req.requested_end_date }} ({{ req.status }})
                                 </li>
                             {% endfor %}
                         </ul>
@@ -78,7 +95,7 @@
                             {% endfor %}
                         </ul>
                     {% endif %}
-
+                    
                     <p style="margin-top: 10px;">
                         <a href="{% url 'booking_details' booking.id %}" 
                            style="padding: 6px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 3px;">
@@ -89,8 +106,6 @@
             {% endfor %}
         </div>
     {% else %}
-        <p>You have no bookings yet. 
-           <a href="{% url 'campervan_list' %}" style="color: #007bff; text-decoration: underline;">Browse campervans</a> to get started!
-        </p>
+        <p>You have no bookings yet. <a href="{% url 'campervan_list' %}" style="color: #007bff; text-decoration: underline;">Browse campervans</a> to get started!</p>
     {% endif %}
 {% endblock %}

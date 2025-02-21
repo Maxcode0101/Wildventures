@@ -123,7 +123,10 @@ def booking_details(request, booking_id):
     Display more detailed info about a specific booking.
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
-    return render(request, 'booking/booking_details.html', {'booking': booking})
+    return render(request, 'booking/booking_details.html', {
+        'booking': booking,
+        'today': date.today(),
+    })
 
 
 def check_availability(request):
@@ -172,6 +175,7 @@ def cancel_booking(request, booking_id):
     """
     Cancel "Pending" bookings (unpaid reservations) with confirmation on the site.
     Cancellations of "Confirmed" bookings need to be approved by staff.
+    Prohibit cancellations of bookings which have already started or ended.
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
@@ -179,14 +183,14 @@ def cancel_booking(request, booking_id):
         messages.error(request, "This booking is already cancelled.", extra_tags="my_bookings")
         return redirect('my_bookings')
 
-    # Prohibit cancellations of bookings from the past.
-    if booking.end_date < date.today():
-        messages.error(request, "This booking has already ended and cannot be cancelled.", extra_tags="my_bookings")
+    # Prohibit cancellations of bookings which started already or from the past.
+    if booking.start_date <= date.today():
+        messages.error(request, "This booking has already ended or is ongoing, and can't be cancelled.", extra_tags="my_bookings")
         return redirect('my_bookings')
 
     # Prohibit self-service cancellations if booking status is Confirmed.
     if booking.status == 'Confirmed':
-        messages.error(request, "Cancellation request was sent to admin for approval")
+        messages.error(request, "Cancellation request was sent to admin for approval", extra_tags="my_bookings")
         return redirect('my_bookings')
 
     booking.status = 'Cancelled'
@@ -296,7 +300,16 @@ def stripe_webhook(request):
 
 @login_required
 def request_cancellation(request, booking_id):
+    """
+    Allow a user to request cancellation for a confirmed booking.
+    Prohibit cancellation requests if the booking has already started or is in the past.
+    """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    # Block cancellation requests for ongoing or past bookings.
+    if booking.start_date <= date.today():
+        messages.error(request, "You can't cancel bookings that are ongoing or in the past. Please visit our contact page for assistance.", extra_tags="my_bookings")
+        return redirect('my_bookings')
 
     if booking.status != 'Confirmed':
         messages.error(request, "Cancellation requests can only be made for confirmed bookings.")
@@ -322,6 +335,11 @@ def edit_booking(request, booking_id):
     Allows user to change bookings with status "Pending".
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    
+    # Block changes if the booking is ongoing or in the past.
+    if booking.start_date <= date.today():
+        messages.error(request, "You can't change dates for an ongoing or past booking. Please visit the contact page for assistance.", extra_tags="my_bookings")
+        return redirect('my_bookings')
 
     if booking.status != 'Pending':
         messages.error(request, "Self service is only available for pending bookings, please contact customer service.", extra_tags="my_bookings")
@@ -377,10 +395,15 @@ def edit_booking(request, booking_id):
 @login_required
 def request_date_change(request, booking_id):
     """
-    User can suggest a date change for confirmed booking. 
-    Needs admin approval.
+    User can suggest a date change for a confirmed booking.
+    Prevents requests if the booking is ongoing or in the past.
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+
+    # Block date change requests if booking has started or is in the past.
+    if booking.start_date <= date.today():
+        messages.error(request, "You can't request a date change for an ongoing or past booking. Please visit our contact page for assistance.", extra_tags="my_bookings")
+        return redirect('my_bookings')
 
     if booking.status != 'Confirmed':
         messages.error(request, "Date change requests are only available for confirmed bookings - use self service for pending bookings instead.", extra_tags="my_bookings")
@@ -396,17 +419,14 @@ def request_date_change(request, booking_id):
         except ValueError:
             messages.error(request, "Invalid date format.", extra_tags="my_bookings")
             return redirect('request_date_change', booking_id=booking_id)
-        
-        # Prohibit date requests in the past
-        if new_start_dt < date.today():
-            messages.error(request, "Invalid input. Start date can't be in the past.", extra_tags="my_bookings")
-            return redirect('request_date_change', booking_id=booking_id)
-        if new_end_dt < date.today():
-            messages.error(request, "Invalid input. End date can't be in the past.", extra_tags="my_bookings")
-            return redirect('request_date_change', booking_id=booking_id)
 
         if new_end_dt <= new_start_dt:
             messages.error(request, "End date must be after start date.", extra_tags="my_bookings")
+            return redirect('request_date_change', booking_id=booking_id)
+
+        # Additional check: prevent setting new dates that are in the past.
+        if new_start_dt < date.today():
+            messages.error(request, "New start date cannot be in the past.", extra_tags="my_bookings")
             return redirect('request_date_change', booking_id=booking_id)
 
         bcr = BookingChangeRequest.objects.create(
@@ -415,7 +435,7 @@ def request_date_change(request, booking_id):
             requested_end_date=new_end_dt
         )
 
-        messages.success(request, "Your date change request has been submitted for approval.", extra_tags="my_bookings")
+        messages.success(request, "Your request has been submitted to our team for approval", extra_tags="my_bookings")
         send_date_change_request_received_email(booking, bcr)
         send_date_change_request_notification_to_admin(booking, bcr)
         return redirect('my_bookings')

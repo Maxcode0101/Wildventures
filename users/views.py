@@ -1,9 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.timezone import now
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from booking.models import Booking 
+from booking.models import Booking, BookingCancellationRequest
 from datetime import date
 
 # User Profile View - Only for Logged-in Users
@@ -43,5 +43,9 @@ def my_bookings(request):
     for booking in bookings:
         booking.pending_cancel = booking.cancellation_requests.filter(status="Pending").exists()
 
-    return render(request, 'users/my_bookings.html', {'bookings': bookings})
+    context = {
+        'bookings': bookings,
+        'today': date.today(),
+    }
+    return render(request, 'users/my_bookings.html', context)
     
