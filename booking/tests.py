@@ -522,3 +522,56 @@ class EdgeCaseTest(TestCase):
         self.assertEqual(response2.status_code, 200)
         booking2 = self.campervan.bookings.get(user=self.user2)
         self.assertEqual(booking2.status, "Pending")
+        
+        
+class OngoingBookingTest(TestCase):
+    def setUp(self):
+        # Create test user and log them in
+        self.user = User.objects.create_user(username="ongoinguser", password="password123")
+        self.client.login(username="ongoinguser", password="password123")
+        # Create test campervan
+        self.campervan = Campervan.objects.create(
+            name="Ongoing Campervan",
+            description="Campervan for ongoing booking testing.",
+            price_per_day=100.00,
+            image="test_image.jpg",
+            capacity=4,
+            location="Test Location",
+            brand="Test Brand",
+            model="Test Model",
+            availability_status=True,
+        )
+        # Create an ongoing booking (start date in the past, end date in the future)
+        self.booking = Booking.objects.create(
+            user=self.user,
+            campervan=self.campervan,
+            start_date=date.today() - timedelta(days=1),
+            end_date=date.today() + timedelta(days=1),
+            total_price=200.00,
+            status="Pending",
+        )
+
+    def test_cancel_ongoing_booking(self):
+        """Test that a user cannot cancel an ongoing booking."""
+        url = reverse("cancel_booking", args=[self.booking.id])
+        response = self.client.post(url, follow=True)
+        self.booking.refresh_from_db()
+        # The booking should remain unchanged (still Pending) because it is ongoing.
+        self.assertEqual(self.booking.status, "Pending")
+        messages = list(response.wsgi_request._messages)
+        self.assertTrue(any("cannot be cancelled" in str(message).lower() or "ongoing" in str(message).lower() for message in messages))
+
+    def test_request_date_change_ongoing_booking(self):
+        """Test that a user cannot request a date change for an ongoing booking."""
+        url = reverse("request_date_change", args=[self.booking.id])
+        new_start = date.today() + timedelta(days=1)
+        new_end = date.today() + timedelta(days=3)
+        response = self.client.post(url, {
+            "start_date": new_start.strftime("%Y-%m-%d"),
+            "end_date": new_end.strftime("%Y-%m-%d")
+        }, follow=True)
+        self.booking.refresh_from_db()
+        # No new BookingChangeRequest should have been created for an ongoing booking.
+        self.assertFalse(self.booking.change_requests.exists())
+        messages = list(response.wsgi_request._messages)
+        self.assertTrue(any("ongoing or past booking" in str(message).lower() for message in messages))
