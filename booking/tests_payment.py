@@ -124,3 +124,42 @@ class StripePaymentTest(TestCase):
         url = reverse('stripe_webhook')
         response = self.client.post(url, data="{}", content_type="application/json", HTTP_STRIPE_SIGNATURE="test")
         self.assertEqual(response.status_code, 400)
+
+    @patch('booking.views.stripe.checkout.Session.create')
+    def test_create_checkout_session_block_for_past_booking(self, mock_stripe_session_create):
+        """
+        Ensure that a booking with a start date in the past is blocked from processing payment.
+        """
+        # Set booking start date in the past.
+        self.booking.start_date = date.today() - timedelta(days=2)
+        self.booking.end_date = date.today() + timedelta(days=2)
+        self.booking.save()
+        
+        url = reverse('create_checkout_session', args=[self.booking.id])
+        # Expect that the view prevents creating a checkout session (and thus no Stripe call)
+        response = self.client.get(url, follow=True)
+        
+        # The Stripe session creation should not be called
+        mock_stripe_session_create.assert_not_called()
+        # Expect redirection to booking details page with an error message
+        self.assertRedirects(response, reverse('booking_details', args=[self.booking.id]))
+        messages = list(response.wsgi_request._messages)
+        self.assertTrue(any("ongoing or in the past" in str(message).lower() for message in messages))
+    
+    @patch('booking.views.stripe.checkout.Session.create')
+    def test_create_checkout_session_block_for_ongoing_booking(self, mock_stripe_session_create):
+        """
+        Ensure that a booking with a start date equal to today (ongoing booking) is blocked from processing payment.
+        """
+        # Set booking start date to today.
+        self.booking.start_date = date.today()
+        self.booking.end_date = date.today() + timedelta(days=3)
+        self.booking.save()
+        
+        url = reverse('create_checkout_session', args=[self.booking.id])
+        response = self.client.get(url, follow=True)
+        
+        mock_stripe_session_create.assert_not_called()
+        self.assertRedirects(response, reverse('booking_details', args=[self.booking.id]))
+        messages = list(response.wsgi_request._messages)
+        self.assertTrue(any("ongoing or in the past" in str(message).lower() for message in messages))
