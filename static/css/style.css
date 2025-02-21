@@ -23,7 +23,7 @@ footer.fixed-footer {
     left: 0;
     width: 100%;
     z-index: 1030;
-    height: 70px;
+    min-height: 70px;
     line-height: 70px;
     background-color: #37422f;
     color: #fdfec1;
