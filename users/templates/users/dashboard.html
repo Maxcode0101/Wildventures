@@ -1,44 +1,49 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Welcome to Your Dashboard</h1>
-<p>Hello, {{ request.user.username }}! Here is your personalized dashboard.</p>
+<div class="container mt-4">
+  <h1 class="mb-3">Welcome to Your Dashboard</h1>
+  <p class="lead">Hello, {{ request.user.username }}! Here is your personalized dashboard.</p>
+  
+  <hr>
 
-<hr>
+  <!-- Upcoming Bookings Section -->
+  <h2 class="mt-4">Upcoming Bookings</h2>
+  {% if upcoming_bookings %}
+    <div class="list-group mb-3">
+      {% for booking in upcoming_bookings %}
+        <div class="list-group-item list-group-item-action">
+          <h5 class="mb-1">{{ booking.campervan.name }}</h5>
+          <p class="mb-1">From {{ booking.start_date }} to {{ booking.end_date }} for <strong>${{ booking.total_price }}</strong></p>
+          <small class="text-muted">Status: {{ booking.status }}</small>
+        </div>
+      {% endfor %}
+    </div>
+    <p>
+      <a href="{% url 'my_bookings' %}" class="btn btn-outline-primary">
+        <i class="fas fa-calendar-check"></i> Manage Your Bookings
+      </a>
+    </p>
+  {% else %}
+    <p>No upcoming bookings found. <a href="{% url 'campervan_list' %}" class="btn btn-primary"><i class="fas fa-car-side"></i> Book Now</a></p>
+  {% endif %}
 
-    <!-- Upcoming Bookings Section -->
-    <h2>Upcoming Bookings</h2>
-    {% if upcoming_bookings %}
-        <ul>
-            {% for booking in upcoming_bookings %}
-                <li>
-                    <strong>{{ booking.campervan.name }}</strong> 
-                    from {{ booking.start_date }} to {{ booking.end_date }}
-                    for ${{ booking.total_price }}
-                </li>
-            {% endfor %}
-        </ul>
-        <p><a href="{% url 'my_bookings' %}" style="color: #007BFF; text-decoration: underline;">Manage Your Bookings</a></p>
-    {% else %}
-        <p>No upcoming bookings found. <a href="{% url 'campervan_list' %}" style="color: #007BFF; text-decoration: underline;">Book Now</a></p>
+  <hr>
 
-    {% endif %}
-
-    <hr>
-
-    <!-- Past Bookings Section -->
-    <h2>Past Bookings</h2>
-    {% if past_bookings %}
-        <ul>
-            {% for booking in past_bookings %}
-                <li>
-                    <strong>{{ booking.campervan_name }}</strong> 
-                    from {{ booking.start_date }} to {{ booking.end_date }}
-                    for ${{ booking.total_price }}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No past bookings found.</p>
-    {% endif %}
+  <!-- Past Bookings Section -->
+  <h2 class="mt-4">Past Bookings</h2>
+  {% if past_bookings %}
+    <div class="list-group">
+      {% for booking in past_bookings %}
+        <div class="list-group-item">
+          <h5 class="mb-1">{{ booking.campervan_name }}</h5>
+          <p class="mb-1">From {{ booking.start_date }} to {{ booking.end_date }} for <strong>${{ booking.total_price }}</strong></p>
+          <small class="text-muted">Status: {{ booking.status }}</small>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No past bookings found.</p>
+  {% endif %}
+</div>
 {% endblock %}
