@@ -1,14 +1,24 @@
-{% extends "account/base_entrance.html" %}
-{% load i18n %}
-{% load allauth %}
-{% block head_title %}
-    {% trans "Verify Your Email Address" %}
-{% endblock head_title %}
+{% extends "base.html" %}
+{% load i18n crispy_forms_tags %}
+
+{% block title %}{% trans "Verification Email Sent" %}{% endblock %}
+
 {% block content %}
-    {% element h1 %}
-        {% trans "Verify Your Email Address" %}
-    {% endelement %}
-    {% element p %}
-        {% blocktrans %}We have sent an email to you for verification. Follow the link provided to finalize the signup process. If you do not see the verification email in your main inbox, check your spam folder. Please contact us if you do not receive the verification email within a few minutes.{% endblocktrans %}
-    {% endelement %}
-{% endblock content %}
+<div class="container mt-4" style="max-width: 500px;">
+  <div class="card">
+    <div class="card-header bg-info text-white">
+      <h2 class="card-title mb-0">
+        <i class="fas fa-envelope-open-text"></i> {% trans "Verification Email Sent" %}
+      </h2>
+    </div>
+    <div class="card-body">
+      <p>{% trans "We have sent an email to you for verification. Follow the link provided to finalize the signup process. If you do not see the verification email in your main inbox, check your spam folder. Please contact us if you do not receive the verification email within a few minutes." %}</p>
+    </div>
+    <div class="card-footer text-center">
+      <a href="{% url 'account_login' %}" class="btn btn-primary">
+        <i class="fas fa-sign-in-alt"></i> {% trans "Return to Login" %}
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

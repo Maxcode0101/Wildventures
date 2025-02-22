@@ -1,22 +1,26 @@
-{% extends "account/base_reauthenticate.html" %}
-{% load allauth %}
-{% load i18n %}
-{% block reauthenticate_content %}
-    {% element p %}
-        {% blocktranslate %}Enter your password:{% endblocktranslate %}
-    {% endelement %}
-    {% url 'account_reauthenticate' as action_url %}
-    {% element form form=form method="post" action=action_url %}
-        {% slot body %}
-            {% csrf_token %}
-            {% element fields form=form unlabeled=True %}
-            {% endelement %}
-            {{ redirect_field }}
-        {% endslot %}
-        {% slot actions %}
-            {% element button type="submit" tags="primary,reauthenticate" %}
-                {% trans "Confirm" %}
-            {% endelement %}
-        {% endslot %}
-    {% endelement %}
+{% extends "base.html" %}
+{% load i18n crispy_forms_tags %}
+
+{% block title %}{% trans "Reauthenticate" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 500px;">
+  <div class="card">
+    <div class="card-header bg-info text-white">
+      <h2 class="card-title mb-0">
+        <i class="fas fa-lock"></i> {% trans "Reauthenticate" %}
+      </h2>
+    </div>
+    <div class="card-body">
+      <p>{% trans "Please re-enter your password to confirm your identity." %}</p>
+      <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-info w-100 mt-3">
+          <i class="fas fa-check"></i> {% trans "Confirm" %}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}

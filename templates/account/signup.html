@@ -1,33 +1,28 @@
 {% extends "base.html" %}
+{% load i18n crispy_forms_tags %}
 
-{% load i18n %}
-
-{% block head_title %}{% trans "Sign Up" %}{% endblock %}
+{% block title %}{% trans "Sign Up" %}{% endblock %}
 
 {% block content %}
-
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 mt-3 offset-md-2">
-            <h3>{% trans "Sign Up" %}</h3>
-
-            <p>Welcome to Campervan Rentals. To make a booking, please log in. If
-                you
-                already have an account, then <a class="link" href="{% url 'account_login' %}">login</a>
-                first.</p>
-        </div>
+<div class="container mt-4" style="max-width: 500px;">
+  <div class="card">
+    <div class="card-header bg-success text-white">
+      <h2 class="card-title mb-0">
+        <i class="fas fa-user-plus"></i> {% trans "Sign Up" %}
+      </h2>
     </div>
-    <div class="row">
-        <div class="col-md-8 mt-3 offset-md-2">
-            <form class="login" method="POST" action="{% url 'account_signup' %}">
-                {% csrf_token %}
-                {{ form.as_p }}
-                {% if redirect_field_value %}
-                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
-                {% endif %}
-                <button class="btn btn-signup right" type="submit">{% trans "Sign Up" %}</button>
-            </form>
-        </div>
+    <div class="card-body">
+      <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-success w-100 mt-3">
+          <i class="fas fa-user-plus"></i> {% trans "Register" %}
+        </button>
+      </form>
     </div>
+    <div class="card-footer text-center">
+      <p>{% trans "Already have an account?" %} <a href="{% url 'account_login' %}">{% trans "Log In" %}</a></p>
+    </div>
+  </div>
 </div>
 {% endblock %}
