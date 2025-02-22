@@ -26,53 +26,51 @@
                     <p><strong>Status:</strong> {{ booking.status }}</p>
                     
                     {% comment %}
-                    Determine if the booking is in the future (allowing actions) or ongoing/past.
+                    If the booking starts in the future, show the action buttons.
+                    Otherwise, display an info message.
                     {% endcomment %}
                     {% if booking.start_date > today %}
-                        {# Future booking – show all applicable action buttons #}
                         {% if booking.status == "Pending" %}
                             <p style="color: blue;">Your reservation has been received. Please complete your payment within 3 days to confirm your booking.</p>
                             <a href="{% url 'create_checkout_session' booking.id %}" 
-                               style="padding: 6px; background-color: #ff9900; color: white; text-decoration: none; border-radius: 3px;">
-                               Pay Now
+                               style="padding: 6px 12px; background-color: #ff9900; color: white; text-decoration: none; border-radius: 3px; margin-right: 12px;">
+                               <i class="fas fa-credit-card"></i> Pay Now
                             </a>
                         {% endif %}
                     
                         {% if booking.status == "Pending" and not booking.pending_cancel %}
                             <a href="{% url 'edit_booking' booking.id %}" 
                                onclick="return confirm('Are you sure you want to change the dates for this booking?')"
-                               style="padding: 6px; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px;">
-                               Change Dates
+                               style="padding: 6px 12px; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px; margin-right: 12px;">
+                               <i class="fas fa-calendar-alt"></i> Change Dates
                             </a>
                         {% elif booking.status == "Confirmed" and not booking.pending_cancel %}
                             <a href="{% url 'request_date_change' booking.id %}" 
                                onclick="return confirm('Are you sure you want to request a date change for this booking?')"
-                               style="padding: 6px; background-color: #007bff; color: white; text-decoration: none; border-radius: 3px;">
-                               Request Date Change
+                               style="padding: 6px 12px; background-color: #007bff; color: white; text-decoration: none; border-radius: 3px; margin-right: 12px;">
+                               <i class="fas fa-exchange-alt"></i> Request Date Change
                             </a>
                         {% endif %}
                     
                         {% if booking.status == "Pending" %}
                             <a href="{% url 'cancel_booking' booking.id %}" 
                                onclick="return confirm('Are you sure you want to cancel this reservation?')"
-                               style="padding: 6px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px; margin-left: 8px;">
-                               Cancel Reservation
+                               style="padding: 6px 12px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px;">
+                               <i class="fas fa-times-circle"></i> Cancel Reservation
                             </a>
                         {% elif booking.status == "Confirmed" and not booking.pending_cancel %}
                             <a href="{% url 'request_cancellation' booking.id %}" 
                                onclick="return confirm('Are you sure you want to request cancellation for this booking?')"
-                               style="padding: 6px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px; margin-left: 8px;">
-                               Request Cancellation
+                               style="padding: 6px 12px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px;">
+                               <i class="fas fa-ban"></i> Request Cancellation
                             </a>
                         {% endif %}
                     {% else %}
-                        {# Ongoing or past booking – no action buttons, display info message #}
                         <p class="text-muted">Ongoing or past booking – if you need assistance please visit our <a href="{% url 'contact' %}">contact page</a>.</p>
                     {% endif %}
                     
                     <br><br>
                     
-                    {# Display Date Change Requests if available and no pending cancellation exists #}
                     {% if booking.change_requests.all and not booking.pending_cancel %}
                         <h4>Date Change Requests</h4>
                         <ul>
@@ -84,7 +82,6 @@
                         </ul>
                     {% endif %}
                     
-                    {# Always display Cancellation Requests if they exist #}
                     {% if booking.cancellation_requests.all %}
                         <h4>Cancellation Requests</h4>
                         <ul>
@@ -98,8 +95,8 @@
                     
                     <p style="margin-top: 10px;">
                         <a href="{% url 'booking_details' booking.id %}" 
-                           style="padding: 6px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 3px;">
-                           View Details
+                           style="padding: 6px 12px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 3px;">
+                           <i class="fas fa-info-circle"></i> View Details
                         </a>
                     </p>
                 </div>
