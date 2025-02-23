@@ -19,9 +19,9 @@
 <!-- JS form validation -->
 <script>
   document.addEventListener("DOMContentLoaded", function() {
-    // Initialize Flatpickr on the date inputs with minDate set to today
+    // Initialize Flatpickr on the date inputs with minDate set to +4 days from today
     flatpickr("#start_date", {
-        minDate: "today",
+        minDate: new Date().fp_incr(4), // disables dates less than 4 days from today
         altInput: true,
         altFormat: "F j, Y",
         dateFormat: "Y-m-d"

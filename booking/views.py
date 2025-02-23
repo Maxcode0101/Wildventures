@@ -66,6 +66,15 @@ def book_campervan(request, campervan_id):
                 'start_date': start_date_str,
                 'end_date': end_date_str,
             })
+            
+        # Prohibit bookings less than 4 days before departure
+        if start_date_dt < date.today() + timedelta(days=4):
+            return render(request, 'booking/book_campervan.html', {
+                'campervan': campervan,
+                'error': "The campervan is not available for the selected dates.",
+                'start_date': start_date_str,
+                'end_date': end_date_str,
+            })
 
         # Check for overlapping bookings
         overlapping = Booking.objects.filter(
@@ -368,6 +377,11 @@ def edit_booking(request, booking_id):
         if new_end_dt < date.today():
             messages.error(request, "Invalid input. The end date can't be in the past.", extra_tags="my_bookings")
             return redirect('edit_booking', booking_id=booking_id)
+        
+        # Prohibit bookings less than 4 days before departure
+        if new_start_dt < date.today() + timedelta(days=4):
+            messages.error(request, "The campervan is not available for the selected dates.", extra_tags="my_bookings")
+            return redirect('edit_booking', booking_id=booking_id)
 
         if new_end_dt <= new_start_dt:
             messages.error(request, "Invalid input. End date must be after start date.", extra_tags="my_bookings")
@@ -448,9 +462,9 @@ def request_date_change(request, booking_id):
     return render(request, 'booking/request_date_change.html', {'booking': booking})
 
 
-########################################
+###############################################
 # Views responsible for Admin / Staff functions
-########################################
+###############################################
 
 @staff_member_required
 def view_change_requests(request):

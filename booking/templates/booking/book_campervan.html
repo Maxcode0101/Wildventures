@@ -30,6 +30,24 @@ document.addEventListener('DOMContentLoaded', function () {
     const totalPriceDisplay = document.getElementById('total_price');
     const pricePerDay = parseFloat('{{ campervan.price_per_day }}');
     
+    // Calculate min date as today + 4 days
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const minDate = new Date(today);
+    minDate.setDate(minDate.getDate() + 4);
+    
+    // Helper function to format a date as "yyyy-mm-dd"
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = ("0" + (date.getMonth() + 1)).slice(-2);
+        const day = ("0" + date.getDate()).slice(-2);
+        return `${year}-${month}-${day}`;
+    }
+    
+    // Set the min attribute on both date inputs
+    startDateInput.setAttribute('min', formatDate(minDate));
+    endDateInput.setAttribute('min', formatDate(minDate));
+
     function calculateTotalPrice() {
         const startDate = new Date(startDateInput.value);
         const endDate = new Date(endDateInput.value);

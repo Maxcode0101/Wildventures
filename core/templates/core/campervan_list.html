@@ -120,11 +120,11 @@
 <!-- Dynamic Dropdowns and Availability Check Script -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Initialize Flatpickr for global and individual date inputs with minDate set to today.
-    flatpickr('#start_date', { altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d", minDate: "today" });
+    // Initialize Flatpickr for global and individual date inputs with minDate set to +4 days from today.
+    flatpickr('#start_date', { altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d", minDate: new Date().fp_incr(4) });
     flatpickr('#end_date', { altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d", minDate: "today" });
     document.querySelectorAll('.start-date').forEach(function (el) {
-        flatpickr(el, { altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d", minDate: "today" });
+        flatpickr(el, { altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d", minDate: new Date().fp_incr(4) });
     });
     document.querySelectorAll('.end-date').forEach(function (el) {
         flatpickr(el, { altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d", minDate: "today" });
