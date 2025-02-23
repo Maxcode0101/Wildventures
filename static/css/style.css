@@ -145,3 +145,14 @@ body {
     font-size: 3rem;
     margin-right: 10px;
 }
+
+/* Media queries */
+@media (max-width: 576px) {
+    footer.fixed-footer {
+      min-height: 50px;
+      line-height: 50px;
+    }
+    body {
+      padding-bottom: 100px;
+    }
+  }
