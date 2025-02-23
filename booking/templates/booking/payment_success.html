@@ -1,17 +1,13 @@
 {% extends "base.html" %}
-{% block messages %}{% endblock %}
-
 {% block content %}
-<div class="container mt-4">
-  <div class="card mx-auto" style="max-width: 600px;">
+<div class="container">
+  <div class="card payment-card mt-4">
     <div class="card-body text-center">
-      <h1 class="card-title text-success">
-        <i class="fas fa-check-circle"></i> Payment Successful!
+      <h1 class="card-title">
+        <i class="fas fa-check-circle payment-success-icon"></i> Payment Successful!
       </h1>
-      <p class="card-text">
-        Thank you for your payment. Your booking is now confirmed. We’ve received your payment details, and a booking confirmation email has been sent to you.
-      </p>
-      <hr>
+      <p class="card-text">Thank you for your payment. Your booking is being confirmed.</p>
+      <p class="card-text">We have received your payment details and you will receive a confirmation email shortly. If you have any questions, please <a href="{% url 'contact' %}">contact us</a>.</p>
       <a href="{% url 'dashboard' %}" class="btn btn-success">
         <i class="fas fa-tachometer-alt"></i> Go to My Dashboard
       </a>

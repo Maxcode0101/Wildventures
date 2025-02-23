@@ -1,18 +1,13 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="container mt-4">
-  <div class="card mx-auto" style="max-width: 600px;">
-    <div class="card-body">
-      <h1 class="card-title">Payment Canceled</h1>
-      <p class="card-text">
-        It looks like your payment process was canceled or interrupted. Your booking is still in <strong>Pending</strong> status.
-      </p>
-      <p class="card-text">
-        If you changed your mind or encountered a technical issue, feel free to retry the payment. Otherwise, 
-        <a href="{% url 'contact' %}" class="text-decoration-underline">contact us</a> if you need any help.
-      </p>
-      <hr>
+<div class="container">
+  <div class="card payment-card mt-4">
+    <div class="card-body text-center">
+      <h1 class="card-title">
+        <i class="fas fa-times-circle" style="color:red; font-size:3rem; margin-right:10px;"></i> Payment Canceled
+      </h1>
+      <p class="card-text">It looks like your payment process was canceled or interrupted. Your booking remains in <strong>Pending</strong> status.</p>
+      <p class="card-text">If you still want to book with us, just navigate back to your dashboard and start the payment process again. If you need assistance, please <a href="{% url 'contact' %}">contact us</a>.</p>
       <a href="{% url 'dashboard' %}" class="btn btn-primary">
         <i class="fas fa-tachometer-alt"></i> Go to My Dashboard
       </a>

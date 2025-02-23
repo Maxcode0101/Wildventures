@@ -6,18 +6,29 @@
     color: green;
 }
 
-/***********
-/* base.html
-***********/
-
-/* Bottom padding for body to ensure content doesn't get hidden by static footer */
+/* General Layout */
 body {
     padding-top: 70px;
     padding-bottom: 70px;
 }
 
+/* Navbar styles */
+.custom-navbar {
+    background-color: #37422f;
+}
+.custom-navbar .nav-link {
+    color: #fdfec1 !important;
+}
+.custom-navbar .nav-link:hover {
+    color: #fffdc1 !important;
+    text-decoration: underline;
+}
+.logo {
+    height: 40px;
+}
+
 /* Footer styles */
-footer.fixed-footer {
+.fixed-footer {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -27,38 +38,28 @@ footer.fixed-footer {
     line-height: 70px;
     background-color: #37422f;
     color: #fdfec1;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3); 
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
 }
-
-footer.fixed-footer a:hover {
+.fixed-footer a {
+    color: #fdfec1;
+    text-decoration: none;
+}
+.fixed-footer a:hover {
     color: #fffdc1 !important;
     text-decoration: underline;
 }
 
-/* Navbar styles */
-.navbar-dark .navbar-nav .nav-link {
-    color: #fdfec1 !important;
-}
-
-.navbar-dark .navbar-nav .nav-link:hover {
-    color: #fffdc1 !important;
-    text-decoration: underline;
-}
-
-/********************
-/* About Us styles 
-********************/
-
-/* Hero section styles */
+/* Hero Section for About Us */
 .hero-section {
     position: relative;
     background-size: cover;
     background-position: center;
     height: 475px;
 }
-
-/* Overlay for hero section */
-.hero-section .hero-overlay {
+.hero-about {
+    background-image: url('/static/media/hero_about.jpg');
+}
+.hero-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -69,10 +70,78 @@ footer.fixed-footer a:hover {
     justify-content: center;
     align-items: center;
 }
-
-/* Hero heading styling */
 .hero-section h1 {
     color: #fdfec1;
     font-size: 48px;
     text-align: center;
+}
+
+
+
+/* FAQ styling */
+
+
+/* FAQ Accordion Header Styling */
+.faq-header {
+    background-color: #fbfd4d !important;
+    color: #37422f !important;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  /* Add a hover effect */
+  .faq-header:hover {
+    background-color: #f0f70d !important;
+    color: #37422f !important;
+  }
+  
+  /* FAQ Accordion Body */
+  .faq-body {
+    font-size: 1rem;
+    color: #333;
+  }
+
+/* My Bookings (cards in one column) */
+.my-booking-card {
+    margin-bottom: 20px;
+}
+.my-booking-actions a {
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+
+/* Profile page */
+.profile-list {
+    list-style: none;
+    padding: 0;
+}
+.profile-list li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+.profile-list li:last-child {
+    border-bottom: none;
+}
+
+/* Button spacing utility */
+.btn-spacing {
+    margin-bottom: 10px;
+}
+
+/* Add a small margin between buttons in a group */
+.btn-spacing:not(:last-child) {
+    margin-right: 5px;
+}
+
+/* Payment pages */
+.payment-card {
+    margin-top: 20px;
+}
+.payment-card .card-title {
+    font-size: 2rem;
+}
+.payment-success-icon {
+    color: green;
+    font-size: 3rem;
+    margin-right: 10px;
 }

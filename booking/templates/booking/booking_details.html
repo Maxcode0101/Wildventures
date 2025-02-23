@@ -1,41 +1,64 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Booking Details</h1>
-<div style="border: 1px solid #ddd; padding: 16px;">
-    <h2>{{ booking.campervan.name }}</h2>
-    <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
-    <p><strong>End Date:</strong> {{ booking.end_date }}</p>
-    <p><strong>Total Price:</strong> ${{ booking.total_price }}</p>
-    <p><strong>Status:</strong> {{ booking.status }}</p>
-    
-    {% if booking.start_date > today %}
-        {# For future bookings, show appropriate action buttons #}
-        {% if booking.status == "Pending" %}
-            <a href="{% url 'create_checkout_session' booking.id %}" class="btn btn-success" style="padding: 6px; background-color: #ff9900; color: white; text-decoration: none; border-radius: 3px;">
-                Pay Now
+<div class="container">
+    <h1 class="mb-4">Booking Details</h1>
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">{{ booking.campervan.name }}</h2>
+            <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
+            <p><strong>End Date:</strong> {{ booking.end_date }}</p>
+            <p><strong>Total Price:</strong> ${{ booking.total_price }}</p>
+            <p><strong>Status:</strong> {{ booking.status }}</p>
+            {% if booking.start_date > today %}
+                {% if booking.status == "Pending" %}
+                    <p class="text-primary">Your reservation has been received. Please complete your payment within 3 days to confirm your booking.</p>
+                    <a href="{% url 'create_checkout_session' booking.id %}" class="btn btn-warning">
+                        <i class="fas fa-credit-card"></i> Pay Now
+                    </a>
+                {% endif %}
+                {% if booking.status == "Pending" and not booking.pending_cancel %}
+                    <a href="{% url 'edit_booking' booking.id %}" class="btn btn-success" onclick="return confirm('Are you sure you want to change the dates for this booking?')">
+                        <i class="fas fa-calendar-alt"></i> Change Dates
+                    </a>
+                {% elif booking.status == "Confirmed" and not booking.pending_cancel %}
+                    <a href="{% url 'request_date_change' booking.id %}" class="btn btn-primary" onclick="return confirm('Are you sure you want to request a date change for this booking?')">
+                        <i class="fas fa-calendar-check"></i> Request Date Change
+                    </a>
+                {% endif %}
+                {% if booking.status == "Pending" %}
+                    <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this reservation?')" style="margin-left: 8px;">
+                        <i class="fas fa-times-circle"></i> Cancel Reservation
+                    </a>
+                {% elif booking.status == "Confirmed" and not booking.pending_cancel %}
+                    <a href="{% url 'request_cancellation' booking.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to request cancellation for this booking?')" style="margin-left: 8px;">
+                        <i class="fas fa-times-circle"></i> Request Cancellation
+                    </a>
+                {% endif %}
+            {% else %}
+                <p class="text-muted">Ongoing or past booking – if you need assistance please visit our <a href="{% url 'contact' %}">contact page</a>.</p>
+            {% endif %}
+            <div class="mt-3">
+                {% if booking.change_requests.all and not booking.pending_cancel %}
+                    <h4>Date Change Requests</h4>
+                    <ul>
+                        {% for req in booking.change_requests.all %}
+                            <li>Requested: {{ req.requested_start_date }} → {{ req.requested_end_date }} ({{ req.status }})</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% if booking.cancellation_requests.all %}
+                    <h4>Cancellation Requests</h4>
+                    <ul>
+                        {% for cancel_req in booking.cancellation_requests.all %}
+                            <li>Requested Cancellation – Status: {{ cancel_req.status }} – Submitted on: {{ cancel_req.created_at|date:"Y-m-d" }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            <a href="{% url 'my_bookings' %}" class="btn btn-secondary mt-3">
+                <i class="fas fa-arrow-left"></i> Back to My Bookings
             </a>
-            <a href="{% url 'edit_booking' booking.id %}" class="btn btn-primary" style="padding: 6px; background-color: #28a745; color: white; text-decoration: none; border-radius: 3px; margin-top: 10px;">
-                Change Dates
-            </a>
-            <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-danger" style="padding: 6px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px; margin-top: 10px; margin-left: 10px;">
-                Cancel Reservation
-            </a>
-        {% elif booking.status == "Confirmed" %}
-            <a href="{% url 'request_date_change' booking.id %}" class="btn btn-primary" style="padding: 6px; background-color: #007bff; color: white; text-decoration: none; border-radius: 3px;">
-                Request Date Change
-            </a>
-            <a href="{% url 'request_cancellation' booking.id %}" class="btn btn-danger" style="padding: 6px; background-color: #dc3545; color: white; text-decoration: none; border-radius: 3px; margin-left: 10px;">
-                Request Cancellation
-            </a>
-        {% endif %}
-    {% else %}
-         <p class="text-muted">Ongoing or past booking – if you need assistance please visit our <a href="{% url 'contact' %}">contact page</a>.</p>
-    {% endif %}
-    
-    <p style="margin-top: 10px;">
-        <a href="{% url 'my_bookings' %}" class="btn btn-secondary" style="padding: 6px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 3px;">
-            Back to My Bookings
-        </a>
-    </p>
+        </div>
+    </div>
 </div>
 {% endblock %}

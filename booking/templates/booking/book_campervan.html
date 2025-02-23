@@ -1,110 +1,62 @@
 {% extends "base.html" %}
-
 {% block content %}
-    <h1><i class="fa-solid fa-calendar-plus"></i> Book Campervan: {{ campervan.name }}</h1>
-
+<div class="container">
+    <h1 class="mb-4">Book Campervan: {{ campervan.name }}</h1>
     {% if error %}
-        <div class="error" style="color: red; font-weight: bold;">
-            {{ error }}
-        </div>
+        <div class="alert alert-danger font-weight-bold">{{ error }}</div>
     {% endif %}
-
-    <form method="post" id="booking-form" style="margin-top: 20px;">
+    <form method="post" id="booking-form" class="mt-3">
         {% csrf_token %}
-        <div>
-            <label for="start_date"><i class="fa-solid fa-play"></i> Start Date:</label>
-            <input
-                type="date"
-                id="start_date"
-                name="start_date"
-                value="{{ request.GET.start_date }}"
-                required
-                style="padding: 10px; width: 200px;"
-            >
+        <div class="mb-3">
+            <label for="start_date" class="form-label">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" value="{{ request.GET.start_date }}" required class="form-control" style="max-width:200px;">
         </div>
-    
-        <div style="margin-top: 10px;">
-            <label for="end_date"><i class="fa-solid fa-stop"></i> End Date:</label>
-            <input
-                type="date"
-                id="end_date"
-                name="end_date"
-                value="{{ request.GET.end_date }}"
-                required
-                style="padding: 10px; width: 200px;"
-            >
+        <div class="mb-3">
+            <label for="end_date" class="form-label">End Date:</label>
+            <input type="date" id="end_date" name="end_date" value="{{ request.GET.end_date }}" required class="form-control" style="max-width:200px;">
         </div>
-    
-        <div style="margin-top: 10px;">
+        <div class="mb-3">
             <p><strong>Total Price:</strong> $<span id="total_price">0.00</span></p>
         </div>
-    
-        <button type="submit" style="padding: 10px 20px; margin-top: 10px;">
-            <i class="fa-solid fa-check"></i> Confirm Booking
-        </button>
+        <button type="submit" class="btn btn-primary mt-2">Confirm Booking</button>
     </form>
+    <a href="{% url 'campervan_list' %}" class="d-block mt-3">Back to Listings</a>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('booking-form');
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    const totalPriceDisplay = document.getElementById('total_price');
+    const pricePerDay = parseFloat('{{ campervan.price_per_day }}');
     
-    <a href="{% url 'campervan_list' %}" style="display: block; margin-top: 20px;">
-        <i class="fa-solid fa-arrow-left"></i> Back to Listings
-    </a>
+    function calculateTotalPrice() {
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+        if (isNaN(startDate) || isNaN(endDate) || endDate <= startDate) {
+            totalPriceDisplay.textContent = "0.00";
+            return;
+        }
+        const timeDifference = endDate - startDate;
+        const days = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+        const totalPrice = days * pricePerDay;
+        totalPriceDisplay.textContent = totalPrice.toFixed(2);
+    }
     
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('booking-form');
-            const startDateInput = document.getElementById('start_date');
-            const endDateInput = document.getElementById('end_date');
-            const totalPriceDisplay = document.getElementById('total_price');
-            const pricePerDay = parseFloat('{{ campervan.price_per_day }}');
-
-            // Flatpickr minDate must be today or later
-            flatpickr(startDateInput, { 
-                altInput: true, 
-                altFormat: "F j, Y", 
-                dateFormat: "Y-m-d", 
-                minDate: "today" 
-            });
-            flatpickr(endDateInput, { 
-                altInput: true, 
-                altFormat: "F j, Y", 
-                dateFormat: "Y-m-d", 
-                minDate: "today" 
-            });
-            
-            // Function to calculate the final booking price
-            function calculateTotalPrice() {
-                const startDate = new Date(startDateInput.value);
-                const endDate = new Date(endDateInput.value);
+    startDateInput.addEventListener('change', calculateTotalPrice);
+    endDateInput.addEventListener('change', calculateTotalPrice);
+    if (startDateInput.value && endDateInput.value) {
+        calculateTotalPrice();
+    }
     
-                if (isNaN(startDate) || isNaN(endDate) || endDate <= startDate) {
-                    totalPriceDisplay.textContent = "0.00";
-                    return;
-                }
-    
-                const timeDifference = endDate - startDate;
-                const days = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
-                const totalPrice = days * pricePerDay;
-                totalPriceDisplay.textContent = totalPrice.toFixed(2);
-            }
-            
-            // Recalculation via event listener
-            startDateInput.addEventListener('change', calculateTotalPrice);
-            endDateInput.addEventListener('change', calculateTotalPrice);
-            
-            // Prefilled dates trigger calculation of date range and price
-            if (startDateInput.value && endDateInput.value) {
-                calculateTotalPrice();
-            }
-            
-            // Prevention of end date =< start date inputs
-            form.addEventListener('submit', function (e) {
-                const startDate = new Date(startDateInput.value);
-                const endDate = new Date(endDateInput.value);
-    
-                if (endDate <= startDate) {
-                    e.preventDefault();
-                    alert('End date must be after the start date.');
-                }
-            });
-        });
-    </script>
+    form.addEventListener('submit', function (e) {
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+        if (endDate <= startDate) {
+            e.preventDefault();
+            alert('End date must be after the start date.');
+        }
+    });
+});
+</script>
 {% endblock %}

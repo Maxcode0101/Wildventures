@@ -1,25 +1,18 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Edit Booking (Pending)</h2>
+<div class="container mt-4" style="max-width: 600px;">
+    <h2>Edit Booking (Pending)</h2>
     <form method="post" class="needs-validation" novalidate>
         {% csrf_token %}
         <div class="mb-3">
             <label for="start_date" class="form-label">Start Date:</label>
-            <input type="date" id="start_date" name="start_date" class="form-control" value="{{ booking.start_date|date:"Y-m-d" }}" required>
-            <div class="invalid-feedback">
-                Please choose a valid start date.
-            </div>
+            <input type="date" id="start_date" name="start_date" value="{{ booking.start_date|date:"Y-m-d" }}" required class="form-control">
         </div>
         <div class="mb-3">
             <label for="end_date" class="form-label">End Date:</label>
-            <input type="date" id="end_date" name="end_date" class="form-control" value="{{ booking.end_date|date:"Y-m-d" }}" required>
-            <div class="invalid-feedback">
-                Please choose a valid end date.
-            </div>
+            <input type="date" id="end_date" name="end_date" value="{{ booking.end_date|date:"Y-m-d" }}" required class="form-control">
         </div>
-        <button type="submit" class="btn btn-primary">Update Booking</button>
+        <button type="submit" class="btn btn-primary">Update</button>
     </form>
 </div>
 
