@@ -1,12 +1,10 @@
 # **Wildventures**: campervan_rentals
 
-Wildventures represents a campervan rental business. The web based booking application allows users to gather informations about the available campervans, create an account, create a booking, and then manage, edit or delete their bookings. This site was developed using Python (Django), HTML, CSS and stores data in a PostgreSQL database.
-
 ### Entity relationship diagram
 
 This diagram shows how the users and staff users interact with the database.
 
-![Entity relationship Diagram](static/media/ERD.png)
+![Entity relationship Diagram](static/media/ERD Wildventures Django Project.png)
 
 ## Development
 
@@ -22,15 +20,10 @@ This project was developed using the Agile methodology. All epics and user stori
 [![GitHub last commit](https://img.shields.io/github/last-commit/Maxcode0101/campervan_rental)](https://www.github.com/Maxcode0101/campervan_rental/commits/main)
 [![GitHub repo size](https://img.shields.io/github/repo-size/Maxcode0101/campervan_rental)](https://www.github.com/Maxcode0101/campervan_rental)
 
-⚠️ INSTRUCTIONS ⚠️
 
-In this section, include a few paragraphs providing an overview of your project. Essentially, this part is your "sales pitch". Describe what the project hopes to accomplish, who it is intended to target, and how it will be useful to the target audience.
+Wildventures represents a campervan rental business. The intention is to target adventure seekers and outdoorlovers who are into camping and roadtrips. The web based booking application allows users to gather informations about the available campervans, create an account, create a booking, and then manage, edit or delete their bookings. This site was developed using Python (Django), HTML, CSS and stores data in a PostgreSQL database.
 
-⚠️ --- END --- ⚠️
 
-🛑 NOTES 🛑
-
-Do not add a **Table of Contents** to your Markdown files. GitHub has these built-in automatically using the headers/hashtags.
 
 Don't add screenshots for the README/TESTING into your `assets` or `static` folders. Create a new folder at the root-level called `documentation`. Consider creating sub-directories within `documentation` to handle things like `wireframes`, `features`, `validation`, `responsiveness`, etc.
 
@@ -62,40 +55,42 @@ source: [campervan_rental amiresponsive](https://ui.dev/amiresponsive?url=https:
 - Offer users and guests an intuitive platform to explore, engage, and contribute to blog discussions.
 
 ##### Primary User Needs
-- Blog owners need seamless tools for publishing and managing posts and comments.
-- Registered users need the ability to engage with blog content through comments and account features.
-- Guests need the ability to browse and enjoy blog content without registration.
+- Travellers need a reliable campervan that fits their needs (for instance, 4x4 drive, certain capacity etc.)
+- Registered users need the ability to create, update, manage and delete a booking.
+- Guests need the ability to browse and filter different campervans, gather information about the business and the rental conditions, and contact the service team.
 
 ##### Business Goals
-- Foster a dynamic blogging platform with active user participation.
-- Build a sense of community through discussions and user engagement.
-- Ensure easy blog content management for owners.
+- Rent out campervans for profit
+- Give users the possibility to easily find a vehicle that fits their needs by dynamic filtering
+- Make sure that users are having easy access to all of the informations regarding the rental process
+- Providing a easy to handle booking management system
 
 #### 2. Scope Plane
 ##### Features
 - A full list of [Features](#features) can be viewed in detail below.
 
 ##### Content Requirements
-- Blog post management (create, update, delete, and preview).
+- Booking management system (create, update, delete, and preview).
 - Comment moderation and management tools.
-- User account features (register, log in, edit/delete comments).
-- Notification system for comment approval status.
+- User account features (register, log in, log out, change Email/Password).
+- Notification system for booking/payment and change- or cancel booking confirmations.
 - 404 error page for lost users.
 
 #### 3. Structure Plane
 ##### Information Architecture
 - **Navigation Menu**:
-  - Links to Home, Blog Posts, Login/Register, and Dashboard (for blog owners).
+  - Links to Home/About Us, Contact Page, FAQ's, Our Campervans, User Dashboard, Manage my Bookings, User Profile, Login/Register
+  
 - **Hierarchy**:
-  - Blog content displayed prominently for easy browsing.
-  - Clear call-to-action buttons for account creation and engagement (e.g., commenting).
+  - Campervan list displayed prominently for easy browsing.
+  - Clear call-to-action buttons for all functionalities regarding account- and booking management.
 
 ##### User Flow
-1. Guest users browse blog content → read posts and see commenter names.
-2. Guest users register for an account → log in to leave comments.
-3. Registered users leave comments → receive a pending approval notification.
-4. Blog owners create, update, and manage posts → moderate comments.
-5. Blog owners approve or reject comments → manage user interactions.
+1. Guest users browse and filter campervans.
+2. Guest users register for an account → sign up / log in to create a reservation. → Receive a approval notification.
+3. Registered users can change dates or cancel their pending booking (reservation) → receive a approval notification.
+4. Registered users pay for their reservation → receive a approval notification.
+5. Registered users request a date change or cancelation of their aproved booking → receive a approval or notification.
 
 #### 4. Skeleton Plane
 ##### Wireframe Suggestions
@@ -139,34 +134,25 @@ Explain any fonts and icon libraries used, like **Google Fonts**, **Font Awesome
 
 ## User Stories
 
-⚠️ INSTRUCTIONS ⚠️
+### Agile Methodology
 
-In this section, list all of your possible user stories for the project. Samples have been provided below using the example walkthrough project for your inspiration. Make sure to adjust to match your own project features!
+This project was developed using the Agile methodology. All user stories implementation progress was tracked through Github projects Kanban Board which can be found [here](https://github.com/users/Maxcode0101/projects/5). The MoSCoW method has been used to prioritize the project steps.
 
-⚠️ --- END --- ⚠️
+![KanbanBoard](documentation/readme/KanbanPP4.webp)
 
 | Target | Expectation | Outcome |
 | --- | --- | --- |
-| As a blog owner | I would like to create new blog posts with a title, featured image, and content | so that I can share my experiences with my audience. |
-| As a blog owner | I would like to update existing blog posts | so that I can correct or add new information to my previous stories. |
-| As a blog owner | I would like to delete blog posts | so that I can remove outdated or irrelevant content from my blog. |
-| As a blog owner | I would like to retrieve a list of all my published blog posts | so that I can manage them from a central dashboard. |
-| As a blog owner | I would like to preview a post as draft before publishing it | so that I can ensure formatting and content appear correctly. |
-| As a blog owner | I would like to review comments before they are published | so that I can filter out spam or inappropriate content. |
-| As a blog owner | I would like to approve or reject comments from users | so that I can maintain control over the discussion on my posts. |
-| As a blog owner | I would like to view a list of all comments (both approved and pending) | so that I can manage user engagement effectively. |
-| As a blog owner | I would like to edit or delete user comments | so that I can clean up or remove inappropriate responses after they've been posted. |
-| As a registered user | I would like to log in to the site | so that I can leave comments on blog posts. |
-| As a registered user | I would like to register for an account | so that I can become part of the community and engage with the blog. |
-| As a registered user | I would like to leave a comment on a blog post | so that I can share my thoughts or ask questions about the owner's experiences. |
-| As a registered user | I would like my comment to show my name and the timestamp | so that others can see who I am and when I left the comment. |
-| As a registered user | I would like to receive a notification or message saying my comment is pending approval | so that I understand it hasn't been posted immediately. |
-| As a registered user | I would like to edit or delete my own comments | so that I can fix mistakes or retract my statement. |
-| As a guest user | I would like to read blog posts without registering | so that I can enjoy the content without needing to log in. |
-| As a guest user | I would like to browse past posts | so that I can explore the blog's full content history. |
-| As a guest user | I would like to register for an account | so that I can participate in the community by leaving comments on posts. |
-| As a guest user | I would like to see the names of other commenters on posts | so that I can get a sense of community interaction before registering. |
-| As a user | I would like to see a 404 error page if I get lost | so that it's obvious that I've stumbled upon a page that doesn't exist. |
+| As a prospective customer | I want to register for an account and log in | So that I can manage my bookings and receive notifications. |
+| As a customer | I want to view a list of available campervans and filter them by brand, model, capacity, price, and availability dates | So that I can easily find a vehicle that meets my needs. |
+| As a customer | I want to select a campervan and book it for a specific date range (with a minimum of 4 days from today) | So that I can reserve the vehicle for my trip. |
+| As a customer | I want to view all my bookings in a dashboard | So that I can track their status (Pending, Confirmed, Ongoing, Past) and manage them. |
+| As a customer | I want to update the dates for my pending booking via self-service | So that I can adjust my reservation if needed before payment. |
+| As a customer | I want to request a date change for a confirmed booking | So that I can propose changes that require admin approval. |
+| As a customer | I want to cancel a booking (only if it’s pending and in the future) | So that I can change my plans if necessary. |
+| As an admin | I want to review and manage cancellation and date change requests | So that I can approve or reject them according to business rules. |
+| As a user | I want a visually appealing and responsive website | So that my experience is seamless whether on mobile or desktop. |
+| As a business owner | I want that reservations that are not getting paid by the customer within 3 days are automatically getting cancelled | so that the admin or staff doesn't have to manually cancel the unpaid reservations. |
+| As a customer | I want to read customer reviews of past guests | so that I can have an impression of the quality of the offered campervans and service. |
 
 ## Wireframes
 
@@ -206,12 +192,14 @@ In this section, you should go over the different parts of your project, and des
 | Register | Authentication is handled by allauth, allowing users to register accounts. | ![screenshot](documentation/features/register.png) |
 | Login | Authentication is handled by allauth, allowing users to log in to their existing accounts. | ![screenshot](documentation/features/login.png) |
 | Logout | Authentication is handled by allauth, allowing users to log out of their accounts. | ![screenshot](documentation/features/logout.png) |
-| Blog List | The homepage displays basic information about blog posts, including image, title, author, date, and a brief excerpt. | ![screenshot](documentation/features/blog-list.png) |
-| View Post | Users can view the full blog post details, including any comments. | ![screenshot](documentation/features/view-post.png) |
-| Pagination | Blog posts are displayed in pages, with six posts per page. This provides better navigation for users through the post list. | ![screenshot](documentation/features/pagination.png) |
-| Add Comments | Authenticated visitors can comment on blog posts; comments require approval before being published. | ![screenshot](documentation/features/add-comment.png) |
-| Edit Comments | Authenticated visitors can edit their own comments. | ![screenshot](documentation/features/edit-comment.png) |
-| Delete Comments | Authenticated visitors can delete their own comments. | ![screenshot](documentation/features/delete-comment.png) |
+| About Us | The homepage displays basic information about the companies aim, including a hero image, title, and link to the contact page. | ![screenshot](documentation/features/blog-list.png) |
+| FAQ's | Users can view frequently asked Questions and answers to it. | ![screenshot](documentation/features/view-post.png) |
+| Contact Page | The Contact page displays the emailadresse and phone number of the service team, along with the option for visitors to fill out a contact form. | ![screenshot](documentation/features/about.png) |
+| Our Campervans Page | The Our Campervans page displays pictures and descriptions of all our vehicles, along with the option for visitors use different filters to browse through them and check if they're available. | ![screenshot](documentation/features/about.png) |
+| Pagination | The campervan list is displayed in pages, with six vehicles per page. This provides better navigation for users through the campervan list. | ![screenshot](documentation/features/pagination.png) |
+| Dashboard | Authenticated visitors can see their upcoming and past bookings and see a link to the "My Bookings" section. | ![screenshot](documentation/features/add-comment.png) |
+| My Bookings Page | Authenticated visitors can watch details about, manage, update and cancel their bookings. Pending bookings can be changed (dates) or canceled via self service, while confirmed (paid) bookings can be only changed or canceled via admin aproval | ![screenshot](documentation/features/edit-comment.png) |
+| Profile Page | Authenticated visitors can view their profile details (Username and Emailaddress). | ![screenshot](documentation/features/delete-comment.png) |
 | Comment Approvals | Admins can approve or disapprove comments submitted by users before they are visible on the blog post. | ![screenshot](documentation/features/comment-approval.png) |
 | Create Post | Site owners can create/publish blog posts, including setting a featured image using Cloudinary, all from the Django admin dashboard. | ![screenshot](documentation/features/create-post.png) |
 | Update Post | Site owners can update/manage blog posts from the Django admin dashboard. | ![screenshot](documentation/features/update-post.png) |
@@ -224,30 +212,20 @@ In this section, you should go over the different parts of your project, and des
 
 ### Future Features
 
-⚠️ INSTRUCTIONS ⚠️
+- **Enhanced user profile page**: Further user data for profile page (like birthdate, and issuing date of drivers license)
 
-Do you have additional ideas that you'd like to include on your project in the future? Fantastic, list them here! It's always great to have plans for future improvements. Consider adding any helpful links or notes to help remind you in the future, if you revisit the project in a couple years.
+- **Review section**: Guest can leave reviews, which are getting displayed in an exclusive section
 
-A few examples are listed below to align with possible ways to improve on the sample walkthrough project, to give you some inspiration.
+- **Automated cancel reservation logic**: Automated flow which is deleting unpaid bookings after 3 days (72 hours) after the reservation had been made (Celery).
 
-⚠️ --- END ---⚠️
+- **Campervan sharing plattform**: Giving other campervan owners the possibility to host their campervans on the site to make profit (a service charge per booking will apply)
 
-- **Post Categories/Tags**: Allow users to categorize and tag blog posts, making it easier for visitors to filter content based on their interests.
-- **Post Search Functionality**: Add a search bar for users to quickly find posts by keywords or phrases.
-- **Post Likes/Dislikes or Upvotes**: Implement a "like" or "upvote" system for blog posts to encourage user engagement and give feedback to the author.
-- **User Profiles**: Create personalized user profiles where authenticated users can view their comments, liked posts, and account information.
-- **Comment Replies & Threads**: Enable users to reply to comments, creating nested comment threads for better discussions.
-- **Post Sharing**: Add social media sharing buttons (e.g., Twitter, Facebook, LinkedIn) for users to share blog posts.
-- **Notifications**: Implement a notification system that alerts users when their comments are approved, when new comments are made on a post they've commented on, or when new posts are published.
-- **Email Subscriptions**: Allow users to subscribe to receive email notifications for new posts, updates, or newsletters.
-- **Post Analytics**: Provide post authors with analytics such as views, time spent reading, and engagement rates.
-- **Multilingual Support**: Add the ability to write and view blog posts in multiple languages, broadening the audience.
-- **Related Posts Recommendations**: Show related posts at the bottom of a blog post to encourage further reading and keep users engaged.
-- **Content Flagging/Reporting**: Allow users to flag or report inappropriate content (comments or posts) for moderation.
+- **Email Subscriptions**: Allow users to subscribe to receive email notifications for new campervans beeing added, updates to rental terms, sharing routes and other travel infos or newsletters.
+
 - **SEO Optimization**: Implement features for SEO, such as meta tags, custom URLs, and keywords for better search engine ranking.
-- **User Dashboard**: Provide users with a dashboard to track their activity, such as comments made, likes received, and blog posts they’ve interacted with.
-- **Admin Dashboard Analytics**: Provide site admins with an analytics dashboard showing user activity, popular posts, most commented articles, etc.
-- **Custom Themes for Users**: Allow users to customize the visual theme of the site (colors, fonts, etc.) to suit their preferences.
+
+- **Admin Dashboard Analytics**: Provide site admins with an analytics dashboard showing user activity, most clicked campervans etc.
+
 
 ## Tools & Technologies
 
@@ -429,12 +407,6 @@ Deployment steps are as follows, after account setup:
 > [!IMPORTANT]
 > This is a sample only; you would replace the values with your own if cloning/forking my repository.
 
-🛑 !!! ATTENTION Maxcode0101 !!! 🛑
-
-⚠️ DO NOT update the environment variables to your own! These should never be public; only use the demo values below! ⚠️
-
-🛑 --- END --- 🛑
-
 | Key | Value |
 | --- | --- |
 | `CLOUDINARY_URL` | user-inserts-own-cloudinary-url |
@@ -542,12 +514,6 @@ You will need to create a new file called `env.py` at the root-level, and includ
 > [!IMPORTANT]
 > This is a sample only; you would replace the values with your own if cloning/forking my repository.
 
-🛑 !!! ATTENTION Maxcode0101 !!! 🛑
-
-⚠️ DO NOT update the environment variables to your own! These should never be public; only use the demo values below! ⚠️
-
-🛑 --- END --- 🛑
-
 Sample `env.py` file:
 
 ```python
@@ -606,29 +572,11 @@ By forking the GitHub Repository, you make a copy of the original repository on 
 
 ### Local VS Deployment
 
-⚠️ INSTRUCTIONS ⚠️
-
-Use this space to discuss any differences between the local version you've developed, and the live deployment site. Generally, there shouldn't be [m]any major differences, so if you honestly cannot find any differences, feel free to use the following example:
-
-⚠️ --- END --- ⚠️
-
 There are no remaining major differences between the local version when compared to the deployed version online.
 
 ## Credits
 
-⚠️ INSTRUCTIONS ⚠️
-
-In the following sections, you need to reference where you got your content, media, and any extra help. It is common practice to use code from other repositories and tutorials (which is totally acceptable), however, it is important to be very specific about these sources to avoid potential plagiarism.
-
-⚠️ --- END ---⚠️
-
 ### Content
-
-⚠️ INSTRUCTIONS ⚠️
-
-Use this space to provide attribution links for any borrowed code snippets, elements, and resources. Ideally, you should provide an actual link to every resource used, not just a generic link to the main site. If you've used multiple components from the same source (such as Bootstrap), then you only need to list it once, but if it's multiple Codepen samples, then you should list each example individually. If you've used AI for some assistance (such as ChatGPT or Perplexity), be sure to mention that as well. A few examples have been provided below to give you some ideas.
-
-⚠️ --- END ---⚠️
 
 | Source | Notes |
 | --- | --- |
@@ -638,60 +586,24 @@ Use this space to provide attribution links for any borrowed code snippets, elem
 | [Bootstrap](https://getbootstrap.com) | Various components / responsive front-end framework |
 | [Cloudinary API](https://cloudinary.com) | Cloud storage for static/media files |
 | [Whitenoise](https://whitenoise.readthedocs.io) | Static file service |
-| [Python Tutor](https://pythontutor.com) | Additional Python help |
 | [ChatGPT](https://chatgpt.com) | Help with code logic and explanations |
 
 ### Media
 
-⚠️ INSTRUCTIONS ⚠️
-
-Use this space to provide attribution links to any media files borrowed from elsewhere (images, videos, audio, etc.). If you're the owner (or a close acquaintance) of some/all media files, then make sure to specify this information. Let the assessors know that you have explicit rights to use the media files within your project. Ideally, you should provide an actual link to every media file used, not just a generic link to the main site, unless it's AI-generated artwork.
-
-Looking for some media files? Here are some popular sites to use. The list of examples below is by no means exhaustive. Within the Code Institute Slack community, you can find more "free media" links by sending yourself (or Slackbot) the following command: `!freemedia`.
-
 - Images
-    - [Pexels](https://www.pexels.com)
-    - [Unsplash](https://unsplash.com)
-    - [Pixabay](https://pixabay.com)
-    - [Lorem Picsum](https://picsum.photos) (placeholder images)
-    - [Wallhere](https://wallhere.com) (wallpaper / backgrounds)
-    - [This Person Does Not Exist](https://thispersondoesnotexist.com) (reload to get a new person)
-- Audio
-    - [Audio Micro](https://www.audiomicro.com/free-sound-effects)
-- Video
-    - [Videvo](https://www.videvo.net)
-- Image Compression
-    - [TinyPNG](https://tinypng.com) (for images <5MB)
-    - [CompressPNG](https://compresspng.com) (for images >5MB)
-
-A few examples have been provided below to give you some ideas on how to do your own Media credits.
-
-⚠️ --- END ---⚠️
+    - [I'm the owner, havig exclusive rights for some media files used in this      project] (Hero Image, Wildventures company logo, campervan pictures of: Overlander, Economist and Retro Camper)
+    - [Pexels](https://www.pexels.com) -> Has been used to find the pictures for all the remaining campervans
+    
 
 | Source | Notes |
 | --- | --- |
 | [favicon.io](https://favicon.io) | Generating the favicon |
-| [I Think Therefore I Blog](https://codeinstitute.net) | Sample images provided from the walkthrough projects |
 | [Font Awesome](https://fontawesome.com) | Icons used throughout the site |
 | [Pexels](https://images.pexels.com/photos/416160/pexels-photo-416160.jpeg) | Hero image |
-| [Wallhere](https://c.wallhere.com/images/9c/c8/da4b4009f070c8e1dfee43d25f99-2318808.jpg!d) | Background wallpaper |
-| [Pixabay](https://cdn.pixabay.com/photo/2017/09/04/16/58/passport-2714675_1280.jpg) | Background wallpaper |
-| [DALL-E 3](https://openai.com/index/dall-e-3) | AI generated artwork |
-| [TinyPNG](https://tinypng.com) | Compressing images < 5MB |
-| [CompressPNG](https://compresspng.com) | Compressing images > 5MB |
 | [CloudConvert](https://cloudconvert.com/webp-converter) | Converting images to `.webp` |
 
 ### Acknowledgements
 
-⚠️ INSTRUCTIONS ⚠️
-
-Use this space to provide attribution and acknowledgement to any supports that helped, encouraged, or supported you throughout the development stages of this project. It's always lovely to appreciate those that help us grow and improve our developer skills. A few examples have been provided below to give you some ideas.
-
-⚠️ --- END ---⚠️
-
 - I would like to thank my Code Institute mentor, [Tim Nelson](https://www.github.com/TravelTimN) for the support throughout the development of this project.
 - I would like to thank the [Code Institute](https://codeinstitute.net) Tutor Team for their assistance with troubleshooting and debugging some project issues.
 - I would like to thank the [Code Institute Slack community](https://code-institute-room.slack.com) for the moral support; it kept me going during periods of self doubt and impostor syndrome.
-- I would like to thank my partner, for believing in me, and allowing me to make this transition into software development.
-- I would like to thank my employer, for supporting me in my career development change towards becoming a software developer.
-
