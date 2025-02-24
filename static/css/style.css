@@ -56,8 +56,9 @@ body {
     background-position: center;
     height: 475px;
 }
+
 .hero-about {
-    background-image: url('/static/media/hero_about.jpg');
+    background-image: url('../media/hero_about.jpg');
 }
 
 .hero-overlay {
