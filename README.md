@@ -12,15 +12,7 @@
 Wildventures represents a campervan rental business. The intention is to target adventure seekers and outdoorlovers who are into camping and roadtrips. The web based booking application allows users to gather informations about the available campervans, create an account, create a booking, and then manage, edit or delete their bookings. This site was developed using Python (Django), HTML, CSS and stores data in a PostgreSQL database.
 
 **Site Mockups**
-*([amiresponsive](https://ui.dev/amiresponsive?url=https://campervan-rental-923a0b226ad3.herokuapp.com), [techsini](https://techsini.com/multi-mockup), etc.)*
-Having issues generating site mockups? This is likely due to security policies with your deployed site.
-If you open up your DevTools, there may be an error referencing `X-Frame-Options`.
-
-For Chrome users, head over to http://bit.ly/3iRPn4u and install the extension within your browser. Once installed, navigate back to the mockup site of your choice. You should find your site rendering in the various devices now.
-
-Alternatively, open your project in Gitpod and run the server. Once the site is running, click the `Ports` tab from your Gitpod Terminal. Click the padlock on the appropriate port for your project (`Flask: 5000`, `Django: 8000`). This will make your local page public temporarily. Now, copy the URL of your live-preview page into the responsive tool above. You should find your site rendering in the various devices.
-
-🛑 --- END ---- 🛑
+*([amiresponsive](https://ui.dev/amiresponsive?url=https://campervan-rental-923a0b226ad3.herokuapp.com)
 
 ![screenshot](documentation/mockup.png)
 
@@ -122,36 +114,7 @@ This project was developed using the Agile methodology. All user stories impleme
 | As a business owner | I want that reservations that are not getting paid by the customer within 3 days are automatically getting cancelled | so that the admin or staff doesn't have to manually cancel the unpaid reservations. |
 | As a customer | I want to read customer reviews of past guests | so that I can have an impression of the quality of the offered campervans and service. |
 
-## Wireframes
-
-⚠️ INSTRUCTIONS ⚠️
-
-If you've created wireframes or mock-ups, use this section to display screenshots of your wireframes. The example table below uses sample pages from the walkthrough project to give you some inspiration for your own project, so please adjust accordingly.
-
-⚠️ --- END --- ⚠️
-
-To follow best practice, wireframes were developed for mobile, tablet, and desktop sizes.
-I've used [Balsamiq](https://balsamiq.com/wireframes) to design my site wireframes.
-
-| Page | Mobile | Tablet | Desktop |
-| --- | --- | --- | --- |
-| Register | ![screenshot](documentation/wireframes/mobile-register.png) | ![screenshot](documentation/wireframes/tablet-register.png) | ![screenshot](documentation/wireframes/desktop-register.png) |
-| Login | ![screenshot](documentation/wireframes/mobile-login.png) | ![screenshot](documentation/wireframes/tablet-login.png) | ![screenshot](documentation/wireframes/desktop-login.png) |
-| Home | ![screenshot](documentation/wireframes/mobile-home.png) | ![screenshot](documentation/wireframes/tablet-home.png) | ![screenshot](documentation/wireframes/desktop-home.png) |
-| Add Blog | ![screenshot](documentation/wireframes/mobile-add-blog.png) | ![screenshot](documentation/wireframes/tablet-add-blog.png) | ![screenshot](documentation/wireframes/desktop-add-blog.png) |
-| Edit Blog | ![screenshot](documentation/wireframes/mobile-edit-blog.png) | ![screenshot](documentation/wireframes/tablet-edit-blog.png) | ![screenshot](documentation/wireframes/desktop-edit-blog.png) |
-| Blog Post | ![screenshot](documentation/wireframes/mobile-blog-post.png) | ![screenshot](documentation/wireframes/tablet-blog-post.png) | ![screenshot](documentation/wireframes/desktop-blog-post.png) |
-| 404 | ![screenshot](documentation/wireframes/mobile-404.png) | ![screenshot](documentation/wireframes/tablet-404.png) | ![screenshot](documentation/wireframes/desktop-404.png) |
-
 ## Features
-
-⚠️ INSTRUCTIONS ⚠️
-
-In this section, you should go over the different parts of your project, and describe each feature. You should explain what value each of the features provides for the user, focusing on your target audience, what they want to achieve, and how your project can help them achieve these things.
-
-**IMPORTANT**: Remember to always include a screenshot of each individual feature!
-
-⚠️ --- END --- ⚠️
 
 ### Existing Features
 
@@ -217,16 +180,6 @@ In this section, you should go over the different parts of your project, and des
 | [![badge](https://img.shields.io/badge/Font_Awesome-grey?logo=fontawesome&logoColor=528DD7)](https://fontawesome.com) | Icons. |
 | [![badge](https://img.shields.io/badge/ChatGPT-grey?logo=openai&logoColor=75A99C)](https://chat.openai.com) | Help debug, troubleshoot, and explain things. |
 
-⚠️ NOTE ⚠️
-
-Want to add more?
-
-- Tutorial: https://shields.io/badges/static-badge
-- Icons/Logos: https://simpleicons.org
-  - FYI: not all logos are available to use
-
-🛑 --- END --- 🛑
-
 ## Database Design
 
 ### Data Model
@@ -244,15 +197,9 @@ I have used Lucidchart to create an ERD.
 
 ### GitHub Projects
 
-⚠️ TIP ⚠️
-
-Consider adding screenshots of your Projects Board(s), Issues (open and closed), and Milestone tasks.
-
-⚠️ --- END ---⚠️
-
 [GitHub Projects](https://www.github.com/Maxcode0101/campervan_rental/projects) served as an Agile tool for this project. Through it, EPICs, User Stories, issues/bugs, and Milestone tasks were planned, then subsequently tracked on a regular basis using the Kanban project board.
 
-![screenshot](documentation/gh-projects.png)
+![screenshot](documentation/readme/KanbanPP4.webp)
 
 ### GitHub Issues
 
@@ -260,8 +207,8 @@ Consider adding screenshots of your Projects Board(s), Issues (open and closed),
 
 | Link | Screenshot |
 | --- | --- |
-| [![GitHub issues](https://img.shields.io/github/issues/Maxcode0101/campervan_rental)](https://www.github.com/Maxcode0101/campervan_rental/issues) | ![screenshot](documentation/gh-issues-open.png) |
-| [![GitHub closed issues](https://img.shields.io/github/issues-closed/Maxcode0101/campervan_rental)](https://www.github.com/Maxcode0101/campervan_rental/issues?q=is%3Aissue+is%3Aclosed) | ![screenshot](documentation/gh-issues-closed.png) |
+| [![GitHub issues](https://img.shields.io/github/issues/Maxcode0101/campervan_rental)](https://www.github.com/Maxcode0101/campervan_rental/issues) | ![screenshot](documentation/readme/gh-issues-open.png) |
+| [![GitHub closed issues](https://img.shields.io/github/issues-closed/Maxcode0101/campervan_rental)](https://www.github.com/Maxcode0101/campervan_rental/issues?q=is%3Aissue+is%3Aclosed) | ![screenshot](documentation/readme/gh-issues-closed.png) |
 
 ### MoSCoW Prioritization
 

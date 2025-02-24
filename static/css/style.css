@@ -58,7 +58,7 @@ body {
 }
 
 .hero-about {
-    background-image: url('../media/hero_about.jpg');
+    background-image: url("/static/media/hero_about.jpg");
 }
 
 .hero-overlay {
