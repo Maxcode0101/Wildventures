@@ -1,11 +1,5 @@
 # **Wildventures**: campervan_rentals
 
-### Entity relationship diagram
-
-This diagram shows how the users and staff users interact with the database.
-
-![Entity relationship Diagram](static/media/ERD Wildventures Django Project.png)
-
 ## Development
 
 ### Agile Methodology
@@ -103,33 +97,17 @@ source: [campervan_rental amiresponsive](https://ui.dev/amiresponsive?url=https:
 
 ### Colour Scheme
 
-⚠️INSTRUCTIONS ⚠️
+I used [coolors.co](https://coolors.co/fbfd4d-544c49-37422f-b2b04c-fdfec1) to generate my color palette.
 
-Explain your colors and color scheme. Consider adding a link and screenshot for your color scheme using [coolors](https://coolors.co/generate).
+- `#FBFD4D` main branding / logo.
+- `#37422F` primary highlights.
+- `#FDFEC1` secondary text.
+- `#544C49` secondary highlights.
 
-When you add a color to the palette, the URL is dynamically updated, making it easier for you to return back to your color palette later if needed. See example below:
-
-⚠️ --- END --- ⚠️
-
-I used [coolors.co](https://coolors.co/080708-3772ff-df2935-fdca40-e6e8e6) to generate my color palette.
-
-- `#000000` primary text.
-- `#3772FF` primary highlights.
-- `#DF2935` secondary text.
-- `#FDCA40` secondary highlights.
-
-![screenshot](documentation/coolors.png)
+![screenshot](documentation/readme/coolors.png)
 
 ### Typography
 
-⚠️ INSTRUCTIONS ⚠️
-
-Explain any fonts and icon libraries used, like **Google Fonts**, **Font Awesome**, etc. Consider adding a link to each font used, the Font Awesome site (if used), or similar icon library.
-
-⚠️ --- END --- ⚠️
-
-- [Montserrat](https://fonts.google.com/specimen/Montserrat) was used for the primary headers and titles.
-- [Lato](https://fonts.google.com/specimen/Lato) was used for all other secondary text.
 - [Font Awesome](https://fontawesome.com) icons were used throughout the site, such as the social media icons in the footer.
 
 ## User Stories
@@ -263,95 +241,14 @@ Want to add more?
 
 ### Data Model
 
-Entity Relationship Diagrams (ERD) help to visualize database architecture before creating models. Understanding the relationships between different tables can save time later in the project.
+#### Entity relationship diagram
 
-![screenshot](documentation/erd.png)
+This diagram shows how the users and staff users interact with the database.
 
-⚠️ INSTRUCTIONS ⚠️
+![screenshot](documentation/readme/ERD%20Wildventures%20Django%20Project.png)
 
-Using your defined models, create an ERD with the relationships identified. A couple of recommendations for building your own free ERDs:
-- [Lucidchart](https://www.lucidchart.com/pages/ER-diagram-symbols-and-meaning)
-- [Draw.io](https://draw.io)
-
-Looking for an interactive version of your ERD? Consider using a [`Mermaid flowchart`](https://mermaid.live). To simplify the process, you can ask ChatGPT (or similar) the following prompt:
-
-> ChatGPT Prompt:
-> "Generate a Markdown syntax Mermaid ERD using my Django models"
-> [paste-your-django-models-into-ChatGPT]
-
-The "I Think Therefore I Blog" sample ERD in Markdown syntax using Mermaid can be seen below as an example.
-
-**NOTE**: A Markdown Preview tool doesn't show the interactive ERD; you must first commit/push the code to your GitHub repository in order to see it live in action.
-
-⚠️ --- END --- ⚠️
-
-I have used `Mermaid` to generate an interactive ERD of my project.
-
-```mermaid
-erDiagram
-    USER ||--o{ POST : "authors"
-    USER ||--o{ COMMENT : "commenters"
-    POST ||--o{ COMMENT : "has"
-    POST {
-        string title
-        string slug
-        cloudinary featured_image
-        text content
-        text excerpt
-        datetime created_on
-        datetime updated_on
-        int status
-    }
-    COMMENT {
-        text body
-        datetime created_on
-        bool approved
-    }
-    ABOUT {
-        string title
-        cloudinary profile_image
-        text content
-        datetime updated_on
-    }
-    COLLABORATEREQUEST {
-        string name
-        string email
-        text message
-        bool read
-    }
-```
-
-source: [Mermaid](https://mermaid.live/edit#pako:eNqNUstuwjAQ_BVrz6EiVIiSG21zg9LyuFSRkImXxGpsR45TkQb-vU4C5REq4Yut2dnZnfWWECqG4AHqV04jTUUgiT3LuT8ju12no0ryPp0viEcCoLmJlc4CaHNeppOJ_9bQQiUESoMnZq1wgxnTS0rZvKuTGc1lRAw3CbbQLMmjExgmKmdcUl2QDVKTa2QrLmh0lmdwa0iobFPSXKG4DVGnZyijBg0XSEJt1ayWkjeCecpaQS6N7dB2kDXYvrmOjsurymvFijvLrpVKCE1Trb6RXYiPnqfLOwZ3NiMrsuEJ3jeif_3-eRuPbQuz0cKf-R9L_-YnSiraf4iC8uSqvMAsu2iq9m3ncfQMDgjUNpPZla0LBWBitPJQ7ROj-qtaqIpnl1XNCxmCZ3SODjQGDksO3oYmmUVTKsErYQue-zR8cN2B2-t3h73BY2_Qd6AAr7t34Ecpm-HW7M_63UhqlUfxQWr_C_zI_7I)
-
-⚠️ RECOMMENDED ⚠️
-
-Alternatively, or in addition to, a more comprehensive ERD can be auto-generated once you're at the end of your development stages, just before you submit. Follow the steps below to obtain a thorough ERD that you can include. Feel free to leave the steps below in the README for future use to yourself.
-
-⚠️ --- END --- ⚠️
-
-I have used `pygraphviz` and `django-extensions` to auto-generate an ERD.
-
-The steps taken were as follows:
-- In the terminal: `sudo apt update`
-- then: `sudo apt-get install python3-dev graphviz libgraphviz-dev pkg-config`
-- then type `Y` to proceed
-- then: `pip3 install django-extensions pygraphviz`
-- in my `settings.py` file, I added the following to my `INSTALLED_APPS`:
-```python
-INSTALLED_APPS = [
-    ...
-    'django_extensions',
-    ...
-]
-```
-- back in the terminal: `python3 manage.py graph_models -a -o erd.png`
-- drag the new `erd.png` file into my `documentation/` folder
-- removed `'django_extensions',` from my `INSTALLED_APPS`
-- finally, in the terminal: `pip3 uninstall django-extensions pygraphviz -y`
-
-![screenshot](documentation/advanced-erd.png)
-
-source: [medium.com](https://medium.com/@yathomasi1/1-using-django-extensions-to-visualize-the-database-diagram-in-django-application-c5fa7e710e16)
+I have used Lucidchart to create an ERD.
+- [Lucidchart](https://www.lucidchart.com
 
 ## Agile Development Process
 
