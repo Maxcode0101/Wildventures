@@ -1,8 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block title %}About Us{% endblock %}
+
 {% block content %}
 <!-- Hero Section -->
-<div class="hero-section hero-about">
+<div class="hero-section" style="background-image: url('{% static 'media/hero_about.jpg' %}');">
   <div class="hero-overlay">
     <h1><i class="fa-solid fa-info-circle"></i> About Us</h1>
   </div>
