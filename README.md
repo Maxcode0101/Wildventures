@@ -2,12 +2,6 @@
 
 ## Development
 
-### Agile Methodology
-
-This project was developed using the Agile methodology. All epics and user stories implementation progress was tracked through Github projects Kanban Board which can be found [here](https://github.com/users/Maxcode0101/projects/5).
-
-![KanbanBoard](static/media/KanbanPP4.webp)
-
 # [campervan_rental](https://campervan-rental-923a0b226ad3.herokuapp.com)
 
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/t/Maxcode0101/campervan_rental)](https://www.github.com/Maxcode0101/campervan_rental/commits/main)
@@ -16,10 +10,6 @@ This project was developed using the Agile methodology. All epics and user stori
 
 
 Wildventures represents a campervan rental business. The intention is to target adventure seekers and outdoorlovers who are into camping and roadtrips. The web based booking application allows users to gather informations about the available campervans, create an account, create a booking, and then manage, edit or delete their bookings. This site was developed using Python (Django), HTML, CSS and stores data in a PostgreSQL database.
-
-
-
-Don't add screenshots for the README/TESTING into your `assets` or `static` folders. Create a new folder at the root-level called `documentation`. Consider creating sub-directories within `documentation` to handle things like `wireframes`, `features`, `validation`, `responsiveness`, etc.
 
 **Site Mockups**
 *([amiresponsive](https://ui.dev/amiresponsive?url=https://campervan-rental-923a0b226ad3.herokuapp.com), [techsini](https://techsini.com/multi-mockup), etc.)*
