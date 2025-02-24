@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Page Not Found{% endblock %}
+
+{% block content %}
+<div class="container text-center mt-5">
+  <h1 class="display-4">Oops, looks like a dead end 🚐💨</h1>
+  <p class="lead">The page you're looking for doesn't exist.</p>
+  <a href="{% url 'about' %}" class="btn btn-primary">
+    <i class="fa-solid fa-arrow-left"></i> Take me to the Home Page...
+  </a>
+</div>
+{% endblock %}

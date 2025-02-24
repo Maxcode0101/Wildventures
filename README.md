@@ -14,7 +14,7 @@ Wildventures represents a campervan rental business. The intention is to target 
 **Site Mockups**
 *([amiresponsive](https://ui.dev/amiresponsive?url=https://campervan-rental-923a0b226ad3.herokuapp.com)
 
-![screenshot](documentation/mockup.png)
+![screenshot](documentation/readme/mockup.png)
 
 source: [campervan_rental amiresponsive](https://ui.dev/amiresponsive?url=https://campervan-rental-923a0b226ad3.herokuapp.com)
 
@@ -70,7 +70,7 @@ source: [campervan_rental amiresponsive](https://ui.dev/amiresponsive?url=https:
 
 #### 4. Skeleton Plane
 ##### Wireframe Suggestions
-- A full list of [Wireframes](#wireframes) can be viewed in detail below.
+- Wireframes have not been used.
 
 #### 5. Surface Plane
 ##### Visual Design Elements
@@ -120,26 +120,20 @@ This project was developed using the Agile methodology. All user stories impleme
 
 | Feature | Notes | Screenshot |
 | --- | --- | --- |
-| Register | Authentication is handled by allauth, allowing users to register accounts. | ![screenshot](documentation/features/register.png) |
-| Login | Authentication is handled by allauth, allowing users to log in to their existing accounts. | ![screenshot](documentation/features/login.png) |
-| Logout | Authentication is handled by allauth, allowing users to log out of their accounts. | ![screenshot](documentation/features/logout.png) |
-| About Us | The homepage displays basic information about the companies aim, including a hero image, title, and link to the contact page. | ![screenshot](documentation/features/blog-list.png) |
-| FAQ's | Users can view frequently asked Questions and answers to it. | ![screenshot](documentation/features/view-post.png) |
-| Contact Page | The Contact page displays the emailadresse and phone number of the service team, along with the option for visitors to fill out a contact form. | ![screenshot](documentation/features/about.png) |
-| Our Campervans Page | The Our Campervans page displays pictures and descriptions of all our vehicles, along with the option for visitors use different filters to browse through them and check if they're available. | ![screenshot](documentation/features/about.png) |
-| Pagination | The campervan list is displayed in pages, with six vehicles per page. This provides better navigation for users through the campervan list. | ![screenshot](documentation/features/pagination.png) |
-| Dashboard | Authenticated visitors can see their upcoming and past bookings and see a link to the "My Bookings" section. | ![screenshot](documentation/features/add-comment.png) |
-| My Bookings Page | Authenticated visitors can watch details about, manage, update and cancel their bookings. Pending bookings can be changed (dates) or canceled via self service, while confirmed (paid) bookings can be only changed or canceled via admin aproval | ![screenshot](documentation/features/edit-comment.png) |
-| Profile Page | Authenticated visitors can view their profile details (Username and Emailaddress). | ![screenshot](documentation/features/delete-comment.png) |
-| Comment Approvals | Admins can approve or disapprove comments submitted by users before they are visible on the blog post. | ![screenshot](documentation/features/comment-approval.png) |
-| Create Post | Site owners can create/publish blog posts, including setting a featured image using Cloudinary, all from the Django admin dashboard. | ![screenshot](documentation/features/create-post.png) |
-| Update Post | Site owners can update/manage blog posts from the Django admin dashboard. | ![screenshot](documentation/features/update-post.png) |
-| Delete Post | Site owners can delete blog posts from the Django admin dashboard. | ![screenshot](documentation/features/delete-post.png) |
-| About Page | The About page displays the latest information about the site author, along with the option for visitors to send collaboration requests. | ![screenshot](documentation/features/about.png) |
-| Collaboration Requests | Visitors can submit collaboration requests from the *About* page, which are later reviewed by the admin. | ![screenshot](documentation/features/collaboration.png) |
-| User Feedback | Clear and obvious Django messages are used to provide feedback to user actions. | ![screenshot](documentation/features/messages.png) |
-| Heroku Deployment | The site is fully deployed to Heroku, making it accessible online and easy to manage. | ![screenshot](documentation/features/heroku.png) |
-| 404 | The 404 error page will indicate when a user has navigated to a page that doesn't exist, replacing the default Heroku 404 page with one that ties into the site's look and feel. | ![screenshot](documentation/features/404.png) |
+| Register | Authentication is handled by allauth, allowing users to register accounts. | ![screenshot](documentation/readme/features/register.png) |
+| Login | Authentication is handled by allauth, allowing users to log in to their existing accounts. | ![screenshot](documentation/readme/features/login.png) |
+| Logout | Authentication is handled by allauth, allowing users to log out of their accounts. | ![screenshot](documentation/readme/features/logout.png) |
+| About Us | The homepage displays basic information about the companies aim, including a hero image, title, and link to the contact page. | ![screenshot](documentation/readme/features/about_us.png) |
+| FAQ's | Users can view frequently asked Questions and answers to it. | ![screenshot](documentation/readme/features/faq.png) |
+| Contact Page | The Contact page displays the emailadresse and phone number of the service team, along with the option for visitors to fill out a contact form. | ![screenshot](documentation/readme/features/contact.png) |
+| Our Campervans Page | The Our Campervans page displays pictures and descriptions of all our vehicles, along with the option for visitors use different filters to browse through them and check if they're available. | ![screenshot](documentation/readme/features/campervans.png) |
+| Pagination | The campervan list is displayed in pages, with six vehicles per page. This provides better navigation for users through the campervan list. | ![screenshot](documentation/readme/features/pagination.png) |
+| Dashboard | Authenticated visitors can see their upcoming and past bookings and see a link to the "My Bookings" section. | ![screenshot](documentation/readme/features/dashboard.png) |
+| My Bookings Page | Authenticated visitors can watch details about, manage, update and cancel their bookings. Pending bookings can be changed (dates) or canceled via self service, while confirmed (paid) bookings can be only changed or canceled via admin aproval | ![screenshot](documentation/readme/features/my_bookings.png) |
+| Checkout Page | Authenticated visitors can pay for their reservations in order to have a confirmed booking. | ![screenshot](documentation/readme/features/checkout.png) |
+| Profile Page | Authenticated visitors can view their profile details (Username and Emailaddress). | ![screenshot](documentation/readme/features/profile.png) |
+| Heroku Deployment | The site is fully deployed to Heroku, making it accessible online and easy to manage. | ![screenshot](documentation/readme/features/heroku.png) |
+| 404 | The 404 error page will indicate when a user has navigated to a page that doesn't exist, replacing the default Heroku 404 page with one that ties into the site's look and feel. | ![screenshot](documentation/readme/features/404.png) |
 
 ### Future Features
 
