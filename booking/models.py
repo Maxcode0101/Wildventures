@@ -28,7 +28,7 @@ class Booking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Booking by {self.user} for {self.campervan} from {self.start_date} to {self.end_date}" #noqa
+        return f"Booking by {self.user} for {self.campervan} from {self.start_date} to {self.end_date}"   #noqa
 
 
 # User requests changes related to a booking
@@ -72,7 +72,7 @@ class BookingCancellationRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Cancellation Request for Booking {self.booking.id} ({self.status})" #noqa
+        return f"Cancellation Request for Booking {self.booking.id} ({self.status})"   #noqa
 
     # Ensures that status updates beeing saved
     def save(self, *args, **kwargs):
