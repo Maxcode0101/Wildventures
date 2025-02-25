@@ -147,7 +147,8 @@ def campervan_list(request):
         )
         model_brands_mapping[model] = model_brands
 
-    # Build full dataset for client‑side filtering (for capacity and for rebuilding full lists)
+    # Build full dataset for client‑side filtering
+    # (for capacity and for rebuilding full lists)
     campers_data = list(
         Campervan.objects.all().values("brand", "model", "capacity")
     )

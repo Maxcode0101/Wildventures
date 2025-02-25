@@ -70,7 +70,7 @@ class CancelBookingTest(TestCase):
         response = self.client.post(url, follow=True)
 
         self.booking.refresh_from_db()
-        # Booking should remain Pending because it cannot be cancelled in the past.
+        # Booking should remain Pending as it can't be cancelled in the past.
         self.assertEqual(self.booking.status, "Pending")
         messages = list(response.wsgi_request._messages)
         self.assertTrue(
@@ -80,7 +80,8 @@ class CancelBookingTest(TestCase):
         )
 
     def test_cancel_already_canceled_booking(self):
-        """Test that a user cannot cancel a booking that is already canceled."""
+        """Test that a user can't' cancel a booking
+        that is already canceled."""
         self.booking.status = "Cancelled"
         self.booking.save()
 
@@ -129,7 +130,7 @@ class DateChangeTest(TestCase):
         )
 
     def test_edit_booking_success(self):
-        """Test that a pending booking can be updated with new valid dates via self service."""
+        """Test that a booking can be updated via self service."""
         new_start = date.today() + timedelta(days=11)
         new_end = date.today() + timedelta(days=16)
         response = self.client.post(
@@ -150,7 +151,7 @@ class DateChangeTest(TestCase):
         self.assertRedirects(response, reverse("my_bookings"))
 
     def test_edit_booking_invalid_dates(self):
-        """Test that a pending booking cannot be updated if the end date is before the start date."""
+        """Test that booking can't be updated if end date < start date."""
         new_start = date.today() + timedelta(days=16)
         new_end = date.today() + timedelta(days=11)
         response = self.client.post(
@@ -173,7 +174,9 @@ class DateChangeTest(TestCase):
         )
 
     def test_edit_booking_overlapping(self):
-        """Test that a pending booking cannot be updated if the new dates overlap with another active booking."""
+        """Test that a pending booking can't
+        be updated if the new dates overlap
+        with another active booking."""
         # Create another booking that overlaps with the proposed new dates.
         other_booking = Booking.objects.create(
             user=self.user,
@@ -201,7 +204,8 @@ class DateChangeTest(TestCase):
         )
 
     def test_request_date_change_for_confirmed_booking(self):
-        """Test that a user can request a date change for a confirmed booking."""
+        """Test that a user can request
+        a date change for a confirmed booking."""
         self.booking.status = "Confirmed"
         self.booking.save()
         new_start = date.today() + timedelta(days=20)
@@ -273,7 +277,9 @@ class AdminActionTest(TestCase):
         )
 
     def test_approve_date_change_request(self):
-        """Test that an admin can approve a date change request and update the booking accordingly."""
+        """Test that an admin can approve a
+        date change request and update
+        the booking accordingly."""
         url = reverse("approve_change_request", args=[self.bcr.id])
         response = self.client.get(url)
         self.booking.refresh_from_db()
@@ -294,14 +300,16 @@ class AdminActionTest(TestCase):
         self.assertRedirects(response, reverse("view_change_requests"))
 
     def test_approve_cancellation_request(self):
-        """Test that an admin can approve a cancellation request and that the booking becomes cancelled."""
+        """Test that an admin can approve a cancellation request
+        and that the booking becomes cancelled."""
         self.cancellation_request.status = "Approved"
         self.cancellation_request.save()
         self.booking.refresh_from_db()
         self.assertEqual(self.booking.status, "Cancelled")
 
     def test_reject_cancellation_request(self):
-        """Test that an admin can reject a cancellation request and that the booking remains confirmed."""
+        """Test that an admin can reject a cancellation request
+        and that the booking remains confirmed."""
         self.cancellation_request.status = "Rejected"
         self.cancellation_request.save()
         self.booking.refresh_from_db()
@@ -345,7 +353,7 @@ def send_cancellation_email(booking):
     subject = "Booking Cancellation"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"Your booking for {booking.campervan.name} from {booking.start_date} to {booking.end_date} for ${booking.total_price:.2f} has been cancelled.\n"
+        f"Your booking for {booking.campervan.name} from {booking.start_date} to {booking.end_date} for ${booking.total_price:.2f} has been cancelled.\n"  # noqa
         f"Thank you for your visit, we hope to see you soon again.\n\n"
         f"Best regards\n\n"
         f"Your Wildventures Team"
@@ -392,10 +400,10 @@ def send_date_change_request_received_email(booking, bcr):
     subject = "Date change request received"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"We have received your date-change request for Booking #{booking.id}.\n"
+        f"We have received your date-change request for Booking #{booking.id}.\n"  # noqa
         f"Requested Start: {bcr.requested_start_date}\n"
         f"Requested End: {bcr.requested_end_date}\n\n"
-        f"Our team will review your request and notify you once it's approved or rejected."
+        f"Our team will review your request and notify you once it's approved or rejected."  # noqa
     )
 
     send_mail(
@@ -420,7 +428,7 @@ def send_date_change_request_notification_to_admin(booking, bcr):
     )
     message = (
         f"Hello Admin, \n\n"
-        f"User {booking.user.username} is requesting a date change for Booking #{booking.id}.\n"
+        f"User {booking.user.username} is requesting a date change for Booking #{booking.id}.\n"  # noqa
         f"Requested Start: {bcr.requested_start_date}\n"
         f"Requested End: {bcr.requested_end_date}\n\n"
         f"Please review this request in the admin panel."
@@ -440,7 +448,7 @@ def send_change_approval_email(booking, bcr):
     subject = "Your Date Change Request Was Approved"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"Your date change request for Booking #{booking.id} has been approved.\n"
+        f"Your date change request for Booking #{booking.id} has been approved.\n"  # noqa
         f"Here are your updated booking details:\n"
         f"Campervan: {booking.campervan.name}\n"
         f"New Start Date: {booking.start_date.strftime('%Y-%m-%d')}\n"
@@ -465,13 +473,13 @@ def send_change_rejection_email(booking, bcr):
     subject = "Your Date Change Request Was Rejected"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"Your date change request for Booking #{booking.id} has been rejected.\n"
+        f"Your date change request for Booking #{booking.id} has been rejected.\n"  # noqa
         f"Your booking remains as follows:\n"
         f"Campervan: {booking.campervan.name}\n"
         f"Start Date: {booking.start_date.strftime('%Y-%m-%d')}\n"
         f"End Date: {booking.end_date.strftime('%Y-%m-%d')}\n"
         f"Total Price: ${booking.total_price:.2f}\n\n"
-        f"In case you need further assistance, please contact our service team."
+        f"In case you need further assistance, please contact our service team."  # noqa
         f"Best regards,\n"
         f"Your Wildventures Team"
     )
@@ -487,12 +495,13 @@ def send_change_rejection_email(booking, bcr):
 
 def send_cancellation_approval_email(booking, cancellation_request):
     """
-    Email confirmation for the user if cancellation request has been approved by admin
+    Email confirmation for the user if cancellation request
+    has been approved by admin
     """
     subject = "Your cancelation request has been approved"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"your cancellation request for Booking #{booking.id} has been approved.\n"
+        f"your cancellation request for Booking #{booking.id} has been approved.\n"  # noqa
         f"Your booking is now cancelled.\n\n"
         f"Thank you for your visit. We hope to see you soon again\n\n"
         f"Best regards,\n\n"
@@ -510,14 +519,15 @@ def send_cancellation_approval_email(booking, cancellation_request):
 
 def send_cancellation_rejection_email(booking, cancellation_request):
     """
-    Email confirmation for the user if cancellation request has been rejected by admin
+    Email confirmation for the user if cancellation request
+    has been rejected by admin
     """
     subject = "Your cancelation request has been rejected"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"Your cancellation request for Booking #{booking.id} has been rejected.\n"
+        f"Your cancellation request for Booking #{booking.id} has been rejected.\n"  # noqa
         f"Your booking remains confirmed.\n\n"
-        f"In case you need further assistance, please contact our service team.\n\n"
+        f"In case you need further assistance, please contact our service team.\n\n"  # noqa
         f"Best regards,\n\n"
         f"Your Wildventures Team"
     )
@@ -541,7 +551,7 @@ def send_cancellation_request_notification_to_admin(
     if admin_email:
         subject = f"Cancellation Request for Booking #{booking.id}"
         message = (
-            f"User {booking.user.username} is requesting cancellation for Booking #{booking.id}.\n"
+            f"User {booking.user.username} is requesting cancellation for Booking #{booking.id}.\n"  # noqa
             "Please review this request in the admin dashboard."
         )
         send_mail(
@@ -583,7 +593,7 @@ class EdgeCaseTest(TestCase):
 
     def test_invalid_date_format_on_booking_creation(self):
         """
-        Test that attempting to book with an invalid date format returns an error.
+        Test that attempting to book with an invalid date format returns an error.  # noqa
         """
         # Log in as user1.
         self.client.login(username="user1", password="pass123")
@@ -602,7 +612,8 @@ class EdgeCaseTest(TestCase):
 
     def test_overlapping_bookings_across_multiple_users(self):
         """
-        Test that if one user has an active booking, another user cannot create an overlapping booking.
+        Test that if one user has an active booking,
+        another user cannot create an overlapping booking.
         """
         # Log in as user1 and create a booking.
         self.client.login(username="user1", password="pass123")
@@ -642,7 +653,8 @@ class EdgeCaseTest(TestCase):
 
     def test_non_overlapping_bookings_across_multiple_users(self):
         """
-        Test that two users can book the same campervan if their dates do not overlap.
+        Test that two users can book the same campervan
+        if their dates do not overlap.
         """
         # Log in as user1 and create a booking.
         self.client.login(username="user1", password="pass123")
@@ -674,7 +686,8 @@ class EdgeCaseTest(TestCase):
             },
             follow=True,
         )
-        # Verify that booking creation succeeded by checking for a redirect to the confirmation page.
+        # Verify that booking creation succeeded
+        # by checking for a redirect to the confirmation page.
         self.assertEqual(response2.status_code, 200)
         booking2 = self.campervan.bookings.get(user=self.user2)
         self.assertEqual(booking2.status, "Pending")
@@ -699,7 +712,8 @@ class OngoingBookingTest(TestCase):
             model="Test Model",
             availability_status=True,
         )
-        # Create an ongoing booking (start date in the past, end date in the future)
+        # Create an ongoing booking
+        # (start date in the past, end date in the future)
         self.booking = Booking.objects.create(
             user=self.user,
             campervan=self.campervan,
@@ -714,7 +728,8 @@ class OngoingBookingTest(TestCase):
         url = reverse("cancel_booking", args=[self.booking.id])
         response = self.client.post(url, follow=True)
         self.booking.refresh_from_db()
-        # The booking should remain unchanged (still Pending) because it is ongoing.
+        # The booking should remain unchanged
+        # (still Pending) because it is ongoing.
         self.assertEqual(self.booking.status, "Pending")
         messages = list(response.wsgi_request._messages)
         self.assertTrue(
@@ -726,7 +741,7 @@ class OngoingBookingTest(TestCase):
         )
 
     def test_request_date_change_ongoing_booking(self):
-        """Test that a user cannot request a date change for an ongoing booking."""
+        """Test that a user can't request a date change for an ongoing booking."""  # noqa
         url = reverse("request_date_change", args=[self.booking.id])
         new_start = date.today() + timedelta(days=1)
         new_end = date.today() + timedelta(days=3)
@@ -739,7 +754,8 @@ class OngoingBookingTest(TestCase):
             follow=True,
         )
         self.booking.refresh_from_db()
-        # No new BookingChangeRequest should have been created for an ongoing booking.
+        # No new BookingChangeRequest should have been created
+        # for an ongoing booking.
         self.assertFalse(self.booking.change_requests.exists())
         messages = list(response.wsgi_request._messages)
         self.assertTrue(

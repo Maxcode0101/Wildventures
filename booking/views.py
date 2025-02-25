@@ -102,7 +102,7 @@ def book_campervan(request, campervan_id):
                 "booking/book_campervan.html",
                 {
                     "campervan": campervan,
-                    "error": "The campervan is not available for the selected dates.",
+                    "error": "The campervan is not available for the selected dates.",  #noqa
                     "start_date": start_date_str,
                     "end_date": end_date_str,
                 },
@@ -120,7 +120,7 @@ def book_campervan(request, campervan_id):
                 "booking/book_campervan.html",
                 {
                     "campervan": campervan,
-                    "error": "The campervan is not available for the selected dates.",
+                    "error": "The campervan is not available for the selected dates.",  #noqa
                     "start_date": start_date_str,
                     "end_date": end_date_str,
                 },
@@ -232,9 +232,12 @@ def check_booking_status(request, booking_id):
 @login_required
 def cancel_booking(request, booking_id):
     """
-    Cancel "Pending" bookings (unpaid reservations) with confirmation on the site.
-    Cancellations of "Confirmed" bookings need to be approved by staff.
-    Prohibit cancellations of bookings which have already started or ended.
+    Cancel "Pending" bookings
+    (unpaid reservations) with confirmation on the site.
+    Cancellations of "Confirmed" bookings,
+    need to be approved by staff.
+    Prohibit cancellations of bookings,
+    which have already started or ended.
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
@@ -246,11 +249,12 @@ def cancel_booking(request, booking_id):
         )
         return redirect("my_bookings")
 
-    # Prohibit cancellations of bookings which started already or from the past.
+    # Prohibit cancellations of bookings
+    # which started already or from the past.
     if booking.start_date <= date.today():
         messages.error(
             request,
-            "This booking has already ended or is ongoing, and can't be cancelled.",
+            "This booking has already ended or is ongoing, and can't be cancelled.",  #noqa
             extra_tags="my_bookings",
         )
         return redirect("my_bookings")
@@ -286,15 +290,17 @@ def cancel_booking(request, booking_id):
 def create_checkout_session(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id, user=request.user)
 
-    # Disallow payment if the booking isn't pending (waiting for payment).
+    # Disallow payment if the booking isn't pending
+    # (waiting for payment).
     if booking.status != "Pending":
         return redirect("booking_details", booking_id=booking.id)
 
-    # Additional safeguard: Prevent payment if the booking's start date is in the past or today.
+    # Additional safeguard: Prevent payment
+    # if the booking's start date is in the past or today.
     if booking.start_date <= date.today():
         messages.error(
             request,
-            "You can't process payment for a booking that is ongoing or in the past.",
+            "You can't process payment for a booking that is ongoing or in the past.",   #noqa
             extra_tags="my_bookings",
         )
         return redirect("booking_details", booking_id=booking.id)
@@ -360,18 +366,21 @@ def stripe_webhook(request):
         logger.info("Session metadata: %s", metadata)
         logger.info("Payment status: %s", session.get("payment_status"))
 
-        # Try to retrieve the booking ID from metadata, or fallback to client_reference_id.
+        # Try to retrieve the booking ID from metadata,
+        # or fallback to client_reference_id.
         booking_id_str = metadata.get("booking_id") or session.get(
             "client_reference_id"
         )
         if booking_id_str:
             try:
                 booking = Booking.objects.get(pk=int(booking_id_str))
-                # Update booking status only if currently Pending (waiting for payment).
+                # Update booking status only if currently Pending
+                # (waiting for payment).
                 if booking.status == "Pending":
                     booking.status = "Confirmed"
                     booking.save()
-                    # Send final confirmation email after payment is received.
+                    # Send final confirmation email
+                    # after payment is received.
                     send_booking_confirmation_email(booking)
                     logger.info(
                         "Booking (id: %s) updated to Confirmed.",
@@ -399,7 +408,8 @@ def stripe_webhook(request):
 def request_cancellation(request, booking_id):
     """
     Allow a user to request cancellation for a confirmed booking.
-    Prohibit cancellation requests if the booking has already started or is in the past.
+    Prohibit cancellation requests if the booking has already started,
+    or is in the past.
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
@@ -407,7 +417,7 @@ def request_cancellation(request, booking_id):
     if booking.start_date <= date.today():
         messages.error(
             request,
-            "You can't cancel bookings that are ongoing or in the past. Please visit our contact page for assistance.",
+            "You can't cancel bookings that are ongoing or in the past. Please visit our contact page for assistance.",  #noqa
             extra_tags="my_bookings",
         )
         return redirect("my_bookings")
@@ -415,14 +425,15 @@ def request_cancellation(request, booking_id):
     if booking.status != "Confirmed":
         messages.error(
             request,
-            "Cancellation requests can only be made for confirmed bookings.",
+            "Cancellation requests can only be made for confirmed bookings.",  #noqa
         )
         return redirect("my_bookings")
 
     if booking.cancellation_requests.filter(status="Pending").exists():
         messages.info(
             request,
-            "Cancellation request for this booking has already been submitted. Our team will review your request shortly.",
+            "Cancellation request for this booking has already been submitted.\n"  # noqa
+            "Our team will review your request shortly.",
         )
         return redirect("my_bookings")
 
@@ -431,7 +442,8 @@ def request_cancellation(request, booking_id):
     )
     messages.success(
         request,
-        "We have received your cancellation request. Our team will contact you once it is approved or rejected.",
+        "We have received your cancellation request.\n"
+        "Our team will contact you once it is approved or rejected.",
         extra_tags="my_bookings",
     )
     send_cancellation_request_notification_to_admin(
@@ -456,7 +468,8 @@ def edit_booking(request, booking_id):
     if booking.start_date <= date.today():
         messages.error(
             request,
-            "You can't change dates for an ongoing or past booking. Please visit the contact page for assistance.",
+            "You can't change dates for an ongoing or past booking.\n"
+            "Please visit the contact page for assistance.",
             extra_tags="my_bookings",
         )
         return redirect("my_bookings")
@@ -464,7 +477,8 @@ def edit_booking(request, booking_id):
     if booking.status != "Pending":
         messages.error(
             request,
-            "Self service is only available for pending bookings, please contact customer service.",
+            "Self service is only available for pending bookings,\n"
+            "please contact the customer service.",
             extra_tags="my_bookings",
         )
         return redirect("my_bookings")
@@ -563,11 +577,13 @@ def request_date_change(request, booking_id):
     """
     booking = get_object_or_404(Booking, id=booking_id, user=request.user)
 
-    # Block date change requests if booking has started or is in the past.
+    # Block date change requests
+    # if booking has started or is in the past.
     if booking.start_date <= date.today():
         messages.error(
             request,
-            "You can't request a date change for an ongoing or past booking. Please visit our contact page for assistance.",
+            "You can't request a date change for an ongoing or past booking.\n"
+            "Please visit our contact page for assistance.",
             extra_tags="my_bookings",
         )
         return redirect("my_bookings")
@@ -575,7 +591,8 @@ def request_date_change(request, booking_id):
     if booking.status != "Confirmed":
         messages.error(
             request,
-            "Date change requests are only available for confirmed bookings - use self service for pending bookings instead.",
+            "Date change requests are only available for confirmed bookings.\n"
+            "Use self service for pending bookings instead.",
             extra_tags="my_bookings",
         )
         return redirect("my_bookings")
@@ -678,7 +695,7 @@ def approve_change_request(request, request_id):
     bcr.save()
 
     send_change_approval_email(booking, bcr)
-    messages.success(request, f"Booking change request #{bcr.id} approved!")
+    messages.success(request, f"Booking change request #{bcr.id} approved!")  # noqa
     return redirect("view_change_requests")
 
 
@@ -692,7 +709,7 @@ def reject_change_request(request, request_id):
 
     send_change_rejection_email(bcr.booking, bcr)
     messages.info(
-        request, f"Booking change request #{bcr.id} has been rejected."
+        request, f"Booking change request #{bcr.id} has been rejected."  # noqa
     )
     return redirect("view_change_requests")
 
@@ -704,13 +721,14 @@ def reject_change_request(request, request_id):
 
 def send_reservation_confirmation_email(booking):
     """
-    Sends reservation confirmation email on successful reservation (before payment).
+    Sends reservation confirmation email
+    on successful reservation (before payment).
     """
     subject = "Reservation Received"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"We have received your reservation for {booking.campervan.name} from {booking.start_date} to {booking.end_date}.\n"
-        f"Please complete your payment within the next 3 days to confirm your booking by clicking on the 'Pay Now' button in your 'My Bookings' section.\n\n"
+        f"We have received your reservation for {booking.campervan.name} from {booking.start_date} to {booking.end_date}.\n"   #noqa
+        f"Please complete your payment within the next 3 days to confirm your booking by clicking on the 'Pay Now' button in your 'My Bookings' section.\n\n"  # noqa
         f"Thank you for choosing us!\n\n"
         f"Best regards,\n\n"
         f"Your Wildventures Team"
@@ -731,7 +749,7 @@ def send_booking_confirmation_email(booking):
     subject = "Booking Confirmed"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"We have received your payment and your booking for {booking.campervan.name} is now confirmed.\n"
+        f"We have received your payment and your booking for {booking.campervan.name} is now confirmed.\n"  # noqa
         f"Start Date: {booking.start_date}\n"
         f"End Date: {booking.end_date}\n"
         f"Total Price: ${booking.total_price:.2f}\n\n"
@@ -755,7 +773,7 @@ def send_cancellation_email(booking):
     subject = "Booking Cancellation"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"Your booking for {booking.campervan.name} from {booking.start_date} to {booking.end_date} for ${booking.total_price:.2f} has been cancelled.\n"
+        f"Your booking for {booking.campervan.name} from {booking.start_date} to {booking.end_date} for ${booking.total_price:.2f} has been cancelled.\n"  # noqa
         f"Thank you for your visit, we hope to see you soon again.\n\n"
         f"Best regards,\n\n"
         f"Your Wildventures Team"
@@ -800,10 +818,10 @@ def send_date_change_request_received_email(booking, bcr):
     subject = "Date change request received"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"We have received your date-change request for Booking #{booking.id}.\n"
+        f"We have received your date-change request for Booking #{booking.id}.\n"   # noqa
         f"Requested Start: {bcr.requested_start_date}\n"
         f"Requested End: {bcr.requested_end_date}\n\n"
-        f"Our team will review your request and notify you once it's approved or rejected."
+        f"Our team will review your request and notify you once it's approved or rejected."   # noqa
     )
     send_mail(
         subject,
@@ -826,7 +844,7 @@ def send_date_change_request_notification_to_admin(booking, bcr):
     )
     message = (
         f"Hello Admin, \n\n"
-        f"User {booking.user.username} is requesting a date change for Booking #{booking.id}.\n"
+        f"User {booking.user.username} is requesting a date change for Booking #{booking.id}.\n"   # noqa
         f"Requested Start: {bcr.requested_start_date}\n"
         f"Requested End: {bcr.requested_end_date}\n\n"
         f"Please review this request in the admin panel."
@@ -847,7 +865,7 @@ def send_change_approval_email(booking, bcr):
     subject = "Your Date Change Request Was Approved"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"Your date change request for Booking #{booking.id} has been approved.\n"
+        f"Your date change request for Booking #{booking.id} has been approved.\n"  # noqa
         f"Here are your updated booking details:\n"
         f"Campervan: {booking.campervan.name}\n"
         f"New Start Date: {booking.start_date.strftime('%Y-%m-%d')}\n"
@@ -873,13 +891,13 @@ def send_change_rejection_email(booking, bcr):
     subject = "Your Date Change Request Was Rejected"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"Your date change request for Booking #{booking.id} has been rejected.\n"
+        f"Your date change request for Booking #{booking.id} has been rejected.\n"  # noqa
         f"Your booking remains as follows:\n"
         f"Campervan: {booking.campervan.name}\n"
         f"Start Date: {booking.start_date.strftime('%Y-%m-%d')}\n"
         f"End Date: {booking.end_date.strftime('%Y-%m-%d')}\n"
         f"Total Price: ${booking.total_price:.2f}\n\n"
-        f"In case you need further assistance, please contact our service team.\n"
+        f"In case you need further assistance, please contact our service team.\n"   # noqa
         f"Best regards,\n"
         f"Your Wildventures Team"
     )
@@ -894,12 +912,13 @@ def send_change_rejection_email(booking, bcr):
 
 def send_cancellation_approval_email(booking, cancellation_request):
     """
-    Email confirmation for the user if cancellation request has been approved by admin.
+    Email confirmation for the user
+    if cancellation request has been approved by admin.
     """
     subject = "Your cancellation request has been approved"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"Your cancellation request for Booking #{booking.id} has been approved.\n"
+        f"Your cancellation request for Booking #{booking.id} has been approved.\n"  # noqa
         f"Your booking is now cancelled.\n\n"
         f"Thank you for your visit. We hope to see you soon again.\n\n"
         f"Best regards,\n"
@@ -916,14 +935,15 @@ def send_cancellation_approval_email(booking, cancellation_request):
 
 def send_cancellation_rejection_email(booking, cancellation_request):
     """
-    Email confirmation for the user if cancellation request has been rejected by admin.
+    Email confirmation for the user
+    if cancellation request has been rejected by admin.
     """
     subject = "Your cancellation request has been rejected"
     message = (
         f"Dear {booking.user.username},\n\n"
-        f"Your cancellation request for Booking #{booking.id} has been rejected.\n"
+        f"Your cancellation request for Booking #{booking.id} has been rejected.\n"  # noqa
         f"Your booking remains confirmed.\n\n"
-        f"In case you need further assistance, please contact our service team.\n\n"
+        f"In case you need further assistance, please contact our service team.\n\n"  # noqa
         f"Best regards,\n"
         f"Your Wildventures Team"
     )
@@ -946,7 +966,7 @@ def send_cancellation_request_notification_to_admin(
     if admin_email:
         subject = f"Cancellation Request for Booking #{booking.id}"
         message = (
-            f"User {booking.user.username} is requesting cancellation for Booking #{booking.id}.\n"
+            f"User {booking.user.username} is requesting cancellation for Booking #{booking.id}.\n"  # noqa
             "Please review this request in the admin dashboard."
         )
         send_mail(

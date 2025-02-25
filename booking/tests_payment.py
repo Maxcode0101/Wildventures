@@ -54,7 +54,8 @@ class StripePaymentTest(TestCase):
         - The redirect URL starts with 'http://stripe.test/checkout'.
         - Passes metadata to Stripe containing the booking id.
         """
-        #  mock_stripe_session_create (Mock): Mock object for Stripe's session creation.
+        #  mock_stripe_session_create (Mock):
+        # Mock object for Stripe's session creation.
         mock_stripe_session_create.return_value = type(
             "obj",
             (object,),
@@ -70,7 +71,8 @@ class StripePaymentTest(TestCase):
             response["Location"].startswith("http://stripe.test/checkout")
         )
 
-        # Verify that the metadata passed to Stripe contains the correct booking id
+        # Verify that the metadata passed
+        # to Stripe contains the correct booking id
         _, kwargs = mock_stripe_session_create.call_args
         self.assertEqual(
             str(kwargs["metadata"]["booking_id"]), str(self.booking.id)
@@ -78,7 +80,8 @@ class StripePaymentTest(TestCase):
 
     def test_create_checkout_session_invalid_status(self):
         """
-        Ensure that the view redirects to the booking details page if the booking status is not pending.
+        Ensure that the view redirects to the booking details page
+        if the booking status is not pending.
         """
         self.booking.status = "Confirmed"
         self.booking.save()
@@ -92,9 +95,11 @@ class StripePaymentTest(TestCase):
     @patch("booking.views.send_mail")
     def test_stripe_webhook_updates_booking_status(self, mock_send_mail):
         """
-        Verify that the booking status is updated to 'Confirmed' when a checkout.session.completed event is received.
+        Verify that the booking status is updated to 'Confirmed'
+        when a checkout.session.completed event is received.
         """
-        # Simulate a Stripe event payload with the booking id in metadata.
+        # Simulate a Stripe event payload
+        # with the booking id in metadata.
         event_payload = {
             "id": "evt_test",
             "object": "event",
@@ -109,7 +114,8 @@ class StripePaymentTest(TestCase):
         payload = json.dumps(event_payload)
         sig_header = "test_sig"
 
-        # Mock the Stripe webhook event constructor to return the simulated event payload
+        # Mock the Stripe webhook event constructor
+        # to return the simulated event payload
         with patch(
             "booking.views.stripe.Webhook.construct_event"
         ) as mock_construct:
@@ -130,7 +136,8 @@ class StripePaymentTest(TestCase):
     @patch("booking.views.stripe.Webhook.construct_event")
     def test_stripe_webhook_invalid_payload(self, mock_construct):
         """
-        Ensure the webhook returns a 400 status code when given an invalid payload.
+        Ensure the webhook returns
+        a 400 status code when given an invalid payload.
         """
         mock_construct.side_effect = ValueError("Invalid payload")
         url = reverse("stripe_webhook")
@@ -145,7 +152,8 @@ class StripePaymentTest(TestCase):
     @patch("booking.views.stripe.Webhook.construct_event")
     def test_stripe_webhook_invalid_signature(self, mock_construct):
         """
-        Ensure the webhook returns a 400 status code when the signature verification fails.
+        Ensure the webhook returns a 400 status code
+        when the signature verification fails.
         """
         from stripe.error import SignatureVerificationError
 
@@ -166,7 +174,8 @@ class StripePaymentTest(TestCase):
         self, mock_stripe_session_create
     ):
         """
-        Ensure that a booking with a start date in the past is blocked from processing payment.
+        Ensure that a booking with a start date
+        in the past is blocked from processing payment.
         """
         # Set booking start date in the past.
         self.booking.start_date = date.today() - timedelta(days=2)
@@ -174,12 +183,14 @@ class StripePaymentTest(TestCase):
         self.booking.save()
 
         url = reverse("create_checkout_session", args=[self.booking.id])
-        # Expect that the view prevents creating a checkout session (and thus no Stripe call)
+        # Expect that the view prevents creating
+        # a checkout session (and thus no Stripe call)
         response = self.client.get(url, follow=True)
 
         # The Stripe session creation should not be called
         mock_stripe_session_create.assert_not_called()
-        # Expect redirection to booking details page with an error message
+        # Expect redirection to booking details page
+        # with an error message
         self.assertRedirects(
             response, reverse("booking_details", args=[self.booking.id])
         )
@@ -196,7 +207,8 @@ class StripePaymentTest(TestCase):
         self, mock_stripe_session_create
     ):
         """
-        Ensure that a booking with a start date equal to today (ongoing booking) is blocked from processing payment.
+        Ensure that a booking with a start date equal to today
+        (ongoing booking) is blocked from processing payment.
         """
         # Set booking start date to today.
         self.booking.start_date = date.today()
