@@ -47,7 +47,8 @@ def my_bookings(request):
         "-start_date"
     )
 
-    # Flag to hide cancellation request button if status of booking = "Rejected" or "Pending"
+    # Flag to hide cancellation request button
+    # if status of booking = "Rejected" or "Pending"
     for booking in bookings:
         booking.pending_cancel = booking.cancellation_requests.filter(
             status="Pending"
