@@ -185,7 +185,7 @@ This diagram shows how the users and staff users interact with the database.
 ![screenshot](documentation/readme/ERD%20Wildventures%20Django%20Project.png)
 
 I have used Lucidchart to create an ERD.
-- [Lucidchart](https://www.lucidchart.com
+- [Lucidchart](https://www.lucidchart.com)
 
 ## Agile Development Process
 
@@ -419,7 +419,7 @@ There are no remaining major differences between the local version when compared
 ### Media
 
 - Images
-    - [I'm the owner, having exclusive rights for some media files used in this      project] (Hero Image, Wildventures company logo, campervan pictures of: Overlander, Economist and Retro Camper)
+    - I'm the owner, having exclusive rights for some media files used in this      project -> Hero Image, Wildventures company logo, campervan pictures of: Overlander, Economist and Retro Camper
     - [Pexels](https://www.pexels.com) -> Has been used to find the pictures for all the remaining campervans
     
 
