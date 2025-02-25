@@ -27,8 +27,8 @@ source: [campervan_rental amiresponsive](https://ui.dev/amiresponsive?url=https:
 
 #### 1. Strategy Plane
 ##### Purpose
-- Provide blog owners with tools to create, manage, and moderate engaging blog content and user interactions.
-- Offer users and guests an intuitive platform to explore, engage, and contribute to blog discussions.
+- Provide travellers a tool to find the perfect campervan for their individual trip.
+- Offer users and guests an intuitive platform to explore the possibilities of travelling with a campervan.
 
 ##### Primary User Needs
 - Travellers need a reliable campervan that fits their needs (for instance, 4x4 drive, certain capacity etc.)
@@ -419,15 +419,14 @@ There are no remaining major differences between the local version when compared
 ### Media
 
 - Images
-    - [I'm the owner, havig exclusive rights for some media files used in this      project] (Hero Image, Wildventures company logo, campervan pictures of: Overlander, Economist and Retro Camper)
+    - [I'm the owner, having exclusive rights for some media files used in this      project] (Hero Image, Wildventures company logo, campervan pictures of: Overlander, Economist and Retro Camper)
     - [Pexels](https://www.pexels.com) -> Has been used to find the pictures for all the remaining campervans
     
 
 | Source | Notes |
 | --- | --- |
-| [favicon.io](https://favicon.io) | Generating the favicon |
 | [Font Awesome](https://fontawesome.com) | Icons used throughout the site |
-| [Pexels](https://images.pexels.com/photos/416160/pexels-photo-416160.jpeg) | Hero image |
+| [Pexels](https://images.pexels.com) |  Campervans (The Beast, Flower Power, Spaceship, Hero, Adventurer) |
 | [CloudConvert](https://cloudconvert.com/webp-converter) | Converting images to `.webp` |
 
 ### Acknowledgements
